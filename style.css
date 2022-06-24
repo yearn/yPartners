@@ -1,2 +1,102 @@
 /* This will load Tailwindcss + all the overwrite from Yearn lib */
-@import '@yearn-finance/web-lib/dist/style.css';
+@import '@yearn-finance/web-lib/dist/style.light.css';
+
+@font-face {
+    font-family: 'Aeonik';
+    src: url('/fonts/Aeonik-Regular.otf');
+    src: local('Aeonik'), url('/fonts/Aeonik-Regular.otf');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+@font-face {
+    font-family: 'Aeonik';
+    src: url('/fonts/Aeonik-Bold.otf');
+    src: local('Aeonik'), url('/fonts/Aeonik-Bold.otf');
+    font-weight: bold;
+    font-style: normal;
+    font-display: swap;
+}
+
+* {@apply font-aeonik;}
+body {@apply text-neutral-900;}
+.max-w-5xl {@apply max-w-[1120px];}
+
+:root,
+:root body[data-theme="light"] {
+	--default-rounded: 0rem;
+
+	/* 🔵 - Yearn Finance ******************************************************
+	**	These are the colors you will use the most and will make up the majority
+	**	of your UI. Use them for most of your text, backgrounds, and borders,
+	**	as well as for things like secondary buttons and links.
+	**************************************************************************/
+	--color-neutral-0: 0 0% 100%;
+	--color-neutral-100: 0 0% 96%;
+	--color-neutral-200: 0 0% 92%;
+	--color-neutral-300: 0 0% 88%;
+	--color-neutral-400: 0 0% 62%;
+	--color-neutral-500: 0 0% 50%;
+	--color-neutral-600: 0 0% 36%;
+	--color-neutral-700: 0 0% 26%;
+	--color-neutral-800: 0 0% 16%;
+	--color-neutral-900: 0 0% 5%;
+
+	/* 🔵 - Yearn Finance ******************************************************
+	**	These are the splashes of color that should appear the most in your UI,
+	**	and are the ones that determine the overall "look" of the site. Use
+	**	these for things like primary actions, links, navigation items, icons,
+	**	accent borders, or text you want to emphasize.
+	**************************************************************************/
+	--color-primary-100: 220 100% 94%;
+	--color-primary-200: 220 81% 88%;
+	--color-primary-500: 220 95% 50%;
+	--color-primary-600: 220 100% 44%;
+	--color-accent-500: 220 95% 50%;
+	--color-accent-600: 220 100% 44%;
+
+	/* 🔵 - Yearn Finance ******************************************************
+	**	These colors should be used fairly conservatively throughout your UI to
+	**	avoid overpowering your primary colors. Use them when you need an
+	**	element to stand out, or to reinforce things like error states or
+	**	positive trends with the appropriate semantic color.
+	**************************************************************************/
+	--color-yellow-900: 32 100% 45%;
+	--color-yellow-300: 32 100% 95%;
+	--color-yellow-200: 32 100% 90%;
+	--color-pink-900: 328 100% 45%;
+	--color-pink-300: 328 100% 95%;
+	--color-pink-200: 328 100% 90%;
+	--color-red-900: 0 100% 45%;
+	--color-red-300: 0 100% 95%;
+	--color-red-200: 0 100% 90%;
+
+	font-family: 'Aeonik', sans-serif;
+}
+
+:root,
+:root body[data-theme="light"] {
+	& .yearn--button {
+		@apply px-5 h-10;
+
+		&[data-variant="filled"] {
+			@apply text-neutral-0 bg-accent-500 font-normal;
+			&:disabled {@apply bg-neutral-200 text-neutral-400;}
+			&:not(:disabled):not([aria-busy="true"]):hover {@apply bg-accent-600;}
+		}
+	}
+
+	& .project--nav {
+		@apply text-neutral-500 transition-colors cursor-pointer border-b-2 border-transparent;
+		&:hover {@apply text-neutral-900}
+
+		&[aria-selected="true"] {
+			@apply text-neutral-900 border-neutral-900;
+		}
+	}
+
+
+
+
+
+}

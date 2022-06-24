@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
 const {join} = require('path');
+const defaultTheme = require('tailwindcss/defaultTheme');
 
 module.exports = {
 	presets: [
@@ -17,8 +18,26 @@ module.exports = {
 	],
 	theme: {
 		extend: {
+			fontFamily: {
+				aeonik: ['Aeonik', ...defaultTheme.fontFamily.sans],
+				mono: ['Aeonik Mono', ...defaultTheme.fontFamily.mono]
+			},
 			height: {
 				'inherit': 'inherit'
+			},
+			fontSize: {
+				'3xl': ['32px', '40px'],
+				'8xl': ['88px', '104px']
+			},
+			spacing: {
+				'50': '12.5rem',
+				'66': '16.5rem'
+			},
+			width: {
+				'5xl': '1120px'
+			},
+			maxWidth: {
+				'5xl': '1120px'
 			}
 		}
 	},

@@ -1,13 +1,12 @@
-import	React, {ReactElement}				from	'react';
-import	Head								from	'next/head';
-import	Link								from	'next/link';
-import	{AppProps}							from	'next/app';
-import	{DefaultSeo}						from	'next-seo';
-import	{Header}							from	'@yearn-finance/web-lib/layouts';
-import	{WithYearn, usePrices, useBalances}	from	'@yearn-finance/web-lib/contexts';
-import	{format}							from	'@yearn-finance/web-lib/utils';
-import	LogoYearn							from	'components/icons/LogoYearn';
-import	Footer								from	'components/StandardFooter';
+import	React, {ReactElement}		from	'react';
+import	Head						from	'next/head';
+import	Link						from	'next/link';
+import	{useRouter}					from	'next/router';
+import	{AppProps}					from	'next/app';
+import	{DefaultSeo}				from	'next-seo';
+import	{WithYearn}					from	'@yearn-finance/web-lib/contexts';
+import	{Button}					from	'@yearn-finance/web-lib';
+import	Footer						from	'components/StandardFooter';
 
 import	'../style.css';
 
@@ -63,41 +62,48 @@ function	AppHead(): ReactElement {
 }
 
 function	AppHeader(): ReactElement {
-	const	[shouldDisplayPrice, set_shouldDisplayPrice] = React.useState(true);
-	const	[tokenPrice, set_tokenPrice] = React.useState('0');
-	const	{prices} = usePrices();
-	const	{balancesOf} = useBalances();
-
-	React.useEffect((): void => {
-		set_tokenPrice(format.amount(Number(prices?.['yearn-finance']?.usd || 0), 2));
-	}, [prices]);
+	const	router = useRouter();
 
 	return (
-		<Header shouldUseNetworks={true}>
-			<div className={'justify-between pr-4 w-full flex-row-center'}>
-				<Link href={'/'}>
-					<div className={'flex flex-row items-center space-x-4 cursor-pointer'}>
-						<LogoYearn />
-						<h1>{process.env.WEBSITE_TITLE}</h1>
+		<header>
+			<div className={'flex flex-row justify-between items-center py-6 w-full'}>
+				<div className={'flex flex-row items-center space-x-6 md:space-x-10'}>
+					<div>
+						<Link href={'/'}>
+							<nav
+								aria-selected={router.pathname === '/'}
+								className={'project--nav'}>
+								{'Main'}
+							</nav>
+						</Link>
 					</div>
-				</Link>
-				<div className={'hidden flex-row items-center space-x-6 md:flex'}>
-					<div
-						className={'cursor-pointer'}
-						onClick={(): void => set_shouldDisplayPrice(!shouldDisplayPrice)}>
-						{shouldDisplayPrice ? (
-							<p className={'text-primary-600'}>
-								{`YFI $ ${tokenPrice}`}
-							</p>
-						) : (
-							<p className={'text-primary-600'}>
-								{`Balance: ${format.toNormalizedAmount(balancesOf?.['0x0bc529c00C6401aEF6D220BE8C6Ea1667F6Ad93e'])} YFI`}
-							</p>
-						)}
+					<div>
+						<Link href={'/'}>
+							<nav
+								aria-selected={router.pathname === '/team-up'}
+								className={'project--nav'}>
+								{'Team up'}
+							</nav>
+						</Link>
+					</div>
+					<div>
+						<Link href={'/'}>
+							<nav
+								aria-selected={router.pathname === '/learn-more'}
+								className={'project--nav'}>
+								{'Learn more'}
+							</nav>
+						</Link>
 					</div>
 				</div>
+				<div>
+					<Button variant={'filled'} className={'!h-[30px]'}>
+						{'Log in'}
+					</Button>
+				</div>
+
 			</div>
-		</Header>
+		</header>
 	);
 }
 
@@ -108,7 +114,7 @@ function	AppWrapper(props: AppProps): ReactElement {
 		<>
 			<AppHead />
 			<div id={'app'} className={'grid flex-col grid-cols-12 gap-x-4 mx-auto mb-0 max-w-6xl md:flex-row'}>
-				<div className={'flex flex-col col-span-12 px-4 w-full min-h-[100vh]'}>
+				<div className={'flex flex-col col-span-12 w-full min-h-[100vh]'}>
 					<AppHeader />
 					<Component
 						key={router.route}
@@ -127,6 +133,9 @@ function	MyApp(props: AppProps): ReactElement {
 	return (
 		<WithYearn
 			options={{
+				ui: {
+					shouldUseThemes: false
+				},
 				web3: {
 					shouldUseStrictChainMode: false,
 					defaultChainID: 1,
