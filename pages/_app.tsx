@@ -1,16 +1,16 @@
 import	React, {ReactElement, useRef}		from	'react';
-import	Head						from	'next/head';
-import	Link						from	'next/link';
-import	{useRouter}					from	'next/router';
+import	Head								from	'next/head';
+import	Link								from	'next/link';
+import	{useRouter}							from	'next/router';
 import	{SessionProvider, useSession, signIn, signOut}			from	'next-auth/react';
-import	{AppProps}					from	'next/app';
-import	{DefaultSeo}				from	'next-seo';
-import	{WithYearn, useWeb3}		from	'@yearn-finance/web-lib/contexts';
-import	{Button}					from	'@yearn-finance/web-lib/components';
-import	{truncateHex}				from	'@yearn-finance/web-lib/utils';
+import	{AppProps}							from	'next/app';
+import	{DefaultSeo}						from	'next-seo';
+import	{WithYearn, useWeb3}				from	'@yearn-finance/web-lib/contexts';
+import	{Button}							from	'@yearn-finance/web-lib/components';
+import	{truncateHex}						from	'@yearn-finance/web-lib/utils';
+import	{useClientEffect}					from	'@yearn-finance/web-lib/hooks';
 
 import	'../style.css';
-import {useClientEffect} from '@yearn-finance/web-lib';
 
 function	AppHead(): ReactElement {
 	return (
@@ -174,6 +174,7 @@ function	AppHeader(): ReactElement {
 
 function	AppWrapper(props: AppProps): ReactElement {
 	const	{Component, pageProps, router} = props;
+
 
 	return (
 		<>
