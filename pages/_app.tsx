@@ -6,7 +6,6 @@ import	{AppProps}					from	'next/app';
 import	{DefaultSeo}				from	'next-seo';
 import	{WithYearn}					from	'@yearn-finance/web-lib/contexts';
 import	{Button}					from	'@yearn-finance/web-lib';
-import	Footer						from	'components/StandardFooter';
 
 import	'../style.css';
 
