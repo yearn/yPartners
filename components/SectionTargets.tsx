@@ -44,8 +44,9 @@ function	Targets(): ReactElement {
 	return (
 		<section aria-label={'targets'} className={'flex flex-row items-center mb-28 space-x-8 md:mb-50'}>
 			<div>
-				<div>
-					<h2 className={'text-3xl font-bold'}>{'Built on Yearn'}</h2>
+				<div className={'flex flex-col space-y-4'}>
+					<h2 className={'text-3xl font-bold'}>{'Yearn Finance - Powerful & Secure Yield Optimizer'}</h2>
+					<p className={'text-xl'}>{'Permissionless DeFi base layer enabling infinite possibilities for buildooors.'}</p>
 				</div>
 				<div className={'grid grid-cols-1 gap-8 mt-8 w-full max-w-5xl md:grid-cols-3'}>
 					{targetList?.map((target: TPartnerList, i: number): ReactElement => (
