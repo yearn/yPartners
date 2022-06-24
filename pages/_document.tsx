@@ -16,7 +16,9 @@ class MyDocument extends Document {
 	render(): ReactElement {
 		return (
 			<Html lang={'en'}>
-				<Head />
+				<Head>
+					<link href={'/fonts/fonts.css'} rel={'stylesheet'} />
+				</Head>
 				<body className={'transition-colors duration-150 bg-neutral-100'} data-theme={'light'}>
 					<Main />
 					<NextScript />

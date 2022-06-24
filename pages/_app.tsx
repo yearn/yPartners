@@ -120,7 +120,6 @@ function	AppWrapper(props: AppProps): ReactElement {
 						key={router.route}
 						router={props.router}
 						{...pageProps} />
-					<Footer />
 				</div>
 			</div>
 		</>

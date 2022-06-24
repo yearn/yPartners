@@ -1,22 +1,6 @@
 /* This will load Tailwindcss + all the overwrite from Yearn lib */
 @import '@yearn-finance/web-lib/dist/style.light.css';
-
-@font-face {
-    font-family: 'Aeonik';
-    src: url('/fonts/Aeonik-Regular.otf');
-    src: local('Aeonik'), url('/fonts/Aeonik-Regular.otf');
-    font-weight: normal;
-    font-style: normal;
-    font-display: swap;
-}
-@font-face {
-    font-family: 'Aeonik';
-    src: url('/fonts/Aeonik-Bold.otf');
-    src: local('Aeonik'), url('/fonts/Aeonik-Bold.otf');
-    font-weight: bold;
-    font-style: normal;
-    font-display: swap;
-}
+@import	'./public/fonts/fonts.css';
 
 * {@apply font-aeonik;}
 body {@apply text-neutral-900;}

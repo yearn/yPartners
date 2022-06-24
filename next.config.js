@@ -15,10 +15,10 @@ module.exports = ({
 		** Stuff used for the SEO or some related elements, like the title, the
 		** github url etc.
 		**********************************************************************/
-		WEBSITE_URI: 'https://web.ycorpo.com/',
-		WEBSITE_NAME: 'yWeb',
-		WEBSITE_TITLE: 'yWeb',
-		WEBSITE_DESCRIPTION: 'Template used for Yearn\'s projects',
+		WEBSITE_URI: 'https://b2b-dashboard.yearn.farm/',
+		WEBSITE_NAME: 'Yearn Partners',
+		WEBSITE_TITLE: 'Yearn Partners',
+		WEBSITE_DESCRIPTION: 'Yearn is the permissionless DeFi base layer enabling infinite possibilities for buildooors',
 		PROJECT_GITHUB_URL: 'https://github.com/yearn/yearn-template',
 
 		/* 🔵 - Yearn Finance **************************************************
@@ -34,13 +34,11 @@ module.exports = ({
 		** USE_NETWORKS: indicate if the app should be able to change networks
 		**********************************************************************/
 		USE_WALLET: true,
-		USE_PRICES: true,
+		USE_PRICES: false,
 		USE_PRICE_TRI_CRYPTO: false,
-		USE_NETWORKS: true,
-		CG_IDS: ['yearn-finance'],
-		TOKENS: [
-			['0x0bc529c00C6401aEF6D220BE8C6Ea1667F6Ad93e', 18, 1]
-		],
+		USE_NETWORKS: false,
+		CG_IDS: [],
+		TOKENS: [],
 
 		/* 🔵 - Yearn Finance **************************************************
 		** Config over the RPC
