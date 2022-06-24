@@ -1,13 +1,16 @@
-import	React, {ReactElement}		from	'react';
+import	React, {ReactElement, useRef}		from	'react';
 import	Head						from	'next/head';
 import	Link						from	'next/link';
 import	{useRouter}					from	'next/router';
+import	{SessionProvider, useSession, signIn, signOut}			from	'next-auth/react';
 import	{AppProps}					from	'next/app';
 import	{DefaultSeo}				from	'next-seo';
-import	{WithYearn}					from	'@yearn-finance/web-lib/contexts';
-import	{Button}					from	'@yearn-finance/web-lib';
+import	{WithYearn, useWeb3}		from	'@yearn-finance/web-lib/contexts';
+import	{Button}					from	'@yearn-finance/web-lib/components';
+import	{truncateHex}				from	'@yearn-finance/web-lib/utils';
 
 import	'../style.css';
+import {useClientEffect} from '@yearn-finance/web-lib';
 
 function	AppHead(): ReactElement {
 	return (
@@ -62,6 +65,66 @@ function	AppHead(): ReactElement {
 
 function	AppHeader(): ReactElement {
 	const	router = useRouter();
+	const	{isActive, address, ens, openLoginModal, onDesactivate, onSwitchChain, provider} = useWeb3();
+	const	{data: session} = useSession();
+	const	[walletIdentity, set_walletIdentity] = React.useState('Log in');
+	const	hasPendingSignature = useRef(false);
+
+	const authenticate = React.useCallback(async (_ens: string): Promise<void> => {
+		if (hasPendingSignature.current) {
+			return;
+		}
+
+		hasPendingSignature.current = true;
+		const	signer = provider.getSigner();
+		const	signature = await signer.signMessage('YOU CAN\'T BUILD TRUSTLESS SYSTEMS WITHOUT TRUST.');
+		const	result = await signIn('web3', {redirect: false, address, signature});
+		hasPendingSignature.current = false;
+		if (result?.ok) {
+			set_walletIdentity(_ens ? _ens : truncateHex(address, 4));
+			if (router.query.callbackUrl) {
+				const	callbackUrl = (router.query.callbackUrl as string).replace(window.location.origin, '');
+				router.push(callbackUrl);
+			}
+		}
+		
+	}, [provider, address, router]);
+
+	useClientEffect((): void => {
+		if (!isActive && address) {
+			set_walletIdentity('Switch network');
+		} else if (address) {
+			console.log(session);
+			if (!session) {
+				authenticate(ens);
+			} else if (session) {
+				set_walletIdentity(ens ? ens : truncateHex(address, 4));
+			}
+		} else {
+			set_walletIdentity('Log in');
+		}
+	}, [ens, address, isActive, session, authenticate]);
+
+	useClientEffect((): void => {
+		if (session) {
+			console.log(`Hello ${session.user?.name}`);
+		}
+	}, [session]);
+
+
+	async function	onLogIn(): Promise<void> {
+		if (isActive) {
+			await onDesactivate();
+			if (session) {
+				await signOut({redirect: false});
+				router.push('/');
+			}
+		} else if (!isActive && address) {
+			onSwitchChain(1, true);
+		} else {
+			openLoginModal();
+		}
+	}
 
 	return (
 		<header>
@@ -86,7 +149,7 @@ function	AppHeader(): ReactElement {
 						</Link>
 					</div>
 					<div>
-						<Link href={'/'}>
+						<Link href={'/dashboard'}>
 							<nav
 								aria-selected={router.pathname === '/learn-more'}
 								className={'project--nav'}>
@@ -96,8 +159,11 @@ function	AppHeader(): ReactElement {
 					</div>
 				</div>
 				<div>
-					<Button variant={'filled'} className={'!h-[30px]'}>
-						{'Log in'}
+					<Button
+						variant={'filled'}
+						className={'!h-[30px]'}
+						onClick={onLogIn}>
+						{walletIdentity}
 					</Button>
 				</div>
 
@@ -127,7 +193,7 @@ function	AppWrapper(props: AppProps): ReactElement {
 
 function	MyApp(props: AppProps): ReactElement {
 	const	{Component, pageProps} = props;
-	
+
 	return (
 		<WithYearn
 			options={{
@@ -140,10 +206,12 @@ function	MyApp(props: AppProps): ReactElement {
 					supportedChainID: [1, 250, 42161, 1337, 31337]
 				}
 			}}>
-			<AppWrapper
-				Component={Component}
-				pageProps={pageProps}
-				router={props.router} />
+			<SessionProvider session={pageProps.session}>
+				<AppWrapper
+					Component={Component}
+					pageProps={pageProps}
+					router={props.router} />
+			</SessionProvider>
 		</WithYearn>
 	);
 }

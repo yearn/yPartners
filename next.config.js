@@ -54,6 +54,7 @@ module.exports = ({
 			42161: process.env.RPC_URL_ARBITRUM
 		},
 		ALCHEMY_KEY: process.env.ALCHEMY_KEY,
-		INFURA_KEY: process.env.INFURA_KEY
+		INFURA_KEY: process.env.INFURA_KEY,
+		NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET
 	}
 });
