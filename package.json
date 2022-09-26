@@ -20,7 +20,7 @@
 		"ethers": "^5.6.9",
 		"framer-motion": "^6.3.16",
 		"jsonwebtoken": "^8.5.1",
-		"next": "^12.1.6",
+		"next": "^12.3.1",
 		"next-auth": "^4.6.1",
 		"next-seo": "^5.4.0",
 		"postcss-nesting": "^10.1.9",
