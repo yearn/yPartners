@@ -1,10 +1,4 @@
-const dotenv = require('dotenv-webpack');
-
 module.exports = ({
-	experimental: {
-		concurrentFeatures: true
-	},
-	plugins: [new dotenv()],
 	images: {
 		domains: [
 			'rawcdn.githack.com'
