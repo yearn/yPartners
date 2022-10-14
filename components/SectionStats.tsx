@@ -1,13 +1,6 @@
 import	React, {ReactElement}	from	'react';
 import	{format}				from	'@yearn-finance/web-lib/utils';
 
-export type TWithCountUp = {
-	refName: string;
-	value: number;
-	format: (n: number) => string;
-	decimals?: number;
-	duration?: number;
-}
 function	SectionStats(): ReactElement {
 	const	formatNumber = React.useCallback((n: number): string => format.amount(n, 0, 2), []);
 	const	formatUSD = React.useCallback((n: number): string => `$${format.amount(n, 2, 2)}`, []);
