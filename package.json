@@ -16,7 +16,7 @@
 		"autoprefixer": "^10.4.7",
 		"axios": "^0.27.2",
 		"babel-loader": "^8.2.5",
-		"ethcall": "^4.7.2",
+		"ethcall": "^4.8.5",
 		"ethers": "^5.7.1",
 		"framer-motion": "^7.5.3",
 		"jsonwebtoken": "^8.5.1",
