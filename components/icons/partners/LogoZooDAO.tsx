@@ -2,8 +2,21 @@ import	React, {ReactElement}		from	'react';
 
 function	LogoZooDao(props: React.SVGProps<SVGSVGElement>): ReactElement {
 	return (
-		<svg {...props} width={'40'} height={'34'} viewBox={'0 0 40 34'} fill={'none'} xmlns={'http://www.w3.org/2000/svg'}>
-			<mask id={'mask0_1024_707'} style={{maskType: 'alpha'}} maskUnits={'userSpaceOnUse'} x={'0'} y={'0'} width={'40'} height={'34'}>
+		<svg
+			{...props}
+			width={'40'}
+			height={'34'}
+			viewBox={'0 0 40 34'}
+			fill={'none'}
+			xmlns={'http://www.w3.org/2000/svg'}>
+			<mask
+				id={'mask0_1024_707'}
+				style={{maskType: 'alpha'}}
+				maskUnits={'userSpaceOnUse'}
+				x={'0'}
+				y={'0'}
+				width={'40'}
+				height={'34'}>
 				<path d={'M0 0V9.63336H22.9133L0 24.3667V34H40V24.3667H17.0869L40 9.63336V0H0Z'} fill={'black'}/>
 			</mask>
 			<g mask={'url(#mask0_1024_707)'}>

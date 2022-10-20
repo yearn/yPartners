@@ -1,8 +1,6 @@
 module.exports = ({
 	images: {
-		domains: [
-			'rawcdn.githack.com'
-		]
+		domains: ['rawcdn.githack.com']
 	},
 	env: {
 		/* 🔵 - Yearn Finance **************************************************

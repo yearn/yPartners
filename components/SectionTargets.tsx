@@ -1,8 +1,9 @@
 import	React, {ReactElement}	from	'react';
 import	{motion}				from	'framer-motion';
-import	IconForProtocols		from	'components/icons/IconForProtocols';
 import	IconForDevelopers		from	'components/icons/IconForDevelopers';
 import	IconForInstitutions		from	'components/icons/IconForInstitutions';
+import	IconForProtocols		from	'components/icons/IconForProtocols';
+
 import	type {TPartnerList}		from	'types/types';
 
 const variants = {
@@ -18,19 +19,21 @@ const variants = {
 	initial: {y: 60, opacity: 0}
 };
 
-const	targets: TPartnerList[] = [{
-	name: 'For Protocols',
-	description: 'Integration platform for  effortless yield optimization',
-	logo: <IconForProtocols className={'text-900'} />
-}, {
-	name: 'For Developers',
-	description: 'Sandbox for novel and innovative DeFi applications',
-	logo: <IconForDevelopers className={'text-900'} />
-}, {
-	name: 'For Organizations & Institutions',
-	description: 'Infrastructure for accessing fixed yield in a compliant manner',
-	logo: <IconForInstitutions className={'text-900'} />
-}];
+const	targets: TPartnerList[] = [
+	{
+		name: 'For Protocols',
+		description: 'Integration platform for  effortless yield optimization',
+		logo: <IconForProtocols className={'text-900'} />
+	}, {
+		name: 'For Developers',
+		description: 'Sandbox for novel and innovative DeFi applications',
+		logo: <IconForDevelopers className={'text-900'} />
+	}, {
+		name: 'For Organizations & Institutions',
+		description: 'Infrastructure for accessing fixed yield in a compliant manner',
+		logo: <IconForInstitutions className={'text-900'} />
+	}
+];
 
 function	Targets(): ReactElement {
 	const	[targetList, set_targetList] = React.useState<TPartnerList[]>([]);
@@ -55,7 +58,7 @@ function	Targets(): ReactElement {
 							custom={i % 3}
 							initial={'initial'}
 							whileInView={'enter'}
-							className={'flex flex-col justify-between p-6 h-66 border-2 border-neutral-400'}
+							className={'flex flex-col justify-between p-6 border-2 border-neutral-400 h-66'}
 							variants={variants}>
 							<div className={'h-14'}>
 								{target.logo}
