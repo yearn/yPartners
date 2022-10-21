@@ -1,13 +1,13 @@
-import	React, {ReactElement}	from	'react';
+import	React, {ReactElement, useEffect, useState}	from	'react';
 import	{motion}				from	'framer-motion';
 import	IconForDevelopers		from	'components/icons/IconForDevelopers';
 import	IconForInstitutions		from	'components/icons/IconForInstitutions';
 import	IconForProtocols		from	'components/icons/IconForProtocols';
 
-import	type {TPartnerList}		from	'types/types';
+import	type {TFramerTransition, TPartnerList}		from	'types/types';
 
 const variants = {
-	enter: (i: number): any => ({
+	enter: (i: number): TFramerTransition => ({
 		y: 0,
 		opacity: 1,
 		transition: {
@@ -36,9 +36,9 @@ const	targets: TPartnerList[] = [
 ];
 
 function	Targets(): ReactElement {
-	const	[targetList, set_targetList] = React.useState<TPartnerList[]>([]);
+	const	[targetList, set_targetList] = useState<TPartnerList[]>([]);
 
-	React.useEffect((): void => {
+	useEffect((): void => {
 		const	_targetList: TPartnerList[] = [...targets];
 		_targetList.sort((): number => Math.random() - 0.5);
 		set_targetList(_targetList);

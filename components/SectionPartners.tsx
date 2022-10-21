@@ -1,4 +1,4 @@
-import	React, {ReactElement}	from	'react';
+import	React, {ReactElement, useEffect, useState}	from	'react';
 import	{motion}				from	'framer-motion';
 import	LogoAlchemix			from	'components/icons/partners/LogoAlchemix';
 import	LogoBrave				from	'components/icons/partners/LogoBrave';
@@ -10,10 +10,10 @@ import	LogoMIM					from	'components/icons/partners/LogoMIM';
 import	LogoQiDAO				from	'components/icons/partners/LogoQiDAO';
 import	LogoZooDao				from	'components/icons/partners/LogoZooDAO';
 
-import	type {TPartnerList}		from	'types/types';
+import	type {TFramerTransition, TPartnerList}		from	'types/types';
 
 const variants = {
-	enter: (i: number): any => ({
+	enter: (i: number): TFramerTransition => ({
 		y: 0,
 		opacity: 1,
 		transition: {
@@ -66,9 +66,9 @@ const	partners: TPartnerList[] = [
 ];
 
 function	Partners(): ReactElement {
-	const	[partnerList, set_partnerList] = React.useState<TPartnerList[]>([]);
+	const	[partnerList, set_partnerList] = useState<TPartnerList[]>([]);
 
-	React.useEffect((): void => {
+	useEffect((): void => {
 		const	_partnerList: TPartnerList[] = [...partners];
 		_partnerList.sort((): number => Math.random() - 0.5);
 		set_partnerList(_partnerList);

@@ -1,4 +1,4 @@
-import	React, {ReactElement, useRef}		from	'react';
+import	React, {ReactElement, useCallback, useRef, useState}		from	'react';
 import	{AppProps}							from	'next/app';
 import	Head								from	'next/head';
 import	Link								from	'next/link';
@@ -89,10 +89,10 @@ function	AppHeader(): ReactElement {
 	const	router = useRouter();
 	const	{isActive, address, ens, openLoginModal, onDesactivate, onSwitchChain, provider} = useWeb3();
 	const	{data: session} = useSession();
-	const	[walletIdentity, set_walletIdentity] = React.useState('Log in');
+	const	[walletIdentity, set_walletIdentity] = useState('Log in');
 	const	hasPendingSignature = useRef(false);
 
-	const authenticate = React.useCallback(async (_ens: string): Promise<void> => {
+	const authenticate = useCallback(async (_ens: string): Promise<void> => {
 		if (hasPendingSignature.current) {
 			return;
 		}
@@ -155,7 +155,6 @@ function	AppHeader(): ReactElement {
 					<div>
 						<Link href={'/'}>
 							<nav
-								aria-selected={router.pathname === '/'}
 								className={'project--nav'}>
 								{'Main'}
 							</nav>
@@ -164,7 +163,6 @@ function	AppHeader(): ReactElement {
 					<div>
 						<Link href={'/'}>
 							<nav
-								aria-selected={router.pathname === '/team-up'}
 								className={'project--nav'}>
 								{'Team up'}
 							</nav>
@@ -173,7 +171,6 @@ function	AppHeader(): ReactElement {
 					<div>
 						<Link href={'/dashboard'}>
 							<nav
-								aria-selected={router.pathname === '/learn-more'}
 								className={'project--nav'}>
 								{'Learn more'}
 							</nav>

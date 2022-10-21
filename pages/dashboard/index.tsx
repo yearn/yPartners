@@ -26,7 +26,8 @@ function	Index({session}: any): ReactElement {
 						src={'/b2bmeme.svg'}
 						loading={'eager'}
 						width={420}
-						height={445} />
+						height={445}
+						alt={''} />
 				</div>
 			</section>
 		</main>

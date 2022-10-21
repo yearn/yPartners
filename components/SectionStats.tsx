@@ -1,14 +1,14 @@
-import	React, {ReactElement}	from	'react';
+import	React, {ReactElement, useCallback, useState}	from	'react';
 import	{format}				from	'@yearn-finance/web-lib/utils';
 
 function	SectionStats(): ReactElement {
-	const	formatNumber = React.useCallback((n: number): string => format.amount(n, 0, 2), []);
-	const	formatUSD = React.useCallback((n: number): string => `$${format.amount(n, 2, 2)}`, []);
-	const	formatPercent = React.useCallback((n: number): string => `${format.amount(n, 0, 2)}%`, []);
-	const	[tvl] = React.useState(69125743.15);
-	const	[fees] = React.useState(420743.15);
-	const	[shares] = React.useState(15);
-	const	[partners] = React.useState(9);
+	const	formatNumber = useCallback((n: number): string => format.amount(n, 0, 2), []);
+	const	formatUSD = useCallback((n: number): string => `$${format.amount(n, 2, 2)}`, []);
+	const	formatPercent = useCallback((n: number): string => `${format.amount(n, 0, 2)}%`, []);
+	const	[tvl] = useState(69125743.15);
+	const	[fees] = useState(420743.15);
+	const	[shares] = useState(15);
+	const	[partners] = useState(9);
 
 	return (
 		<section aria-label={'stats'} className={'flex flex-row flex-wrap items-center mb-28 md:mb-50'}>
