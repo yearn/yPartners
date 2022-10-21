@@ -1,14 +1,14 @@
-import	React, {ReactElement, useRef}		from	'react';
+import	React, {ReactElement, useCallback, useRef, useState}		from	'react';
+import	{AppProps}							from	'next/app';
 import	Head								from	'next/head';
 import	Link								from	'next/link';
 import	{useRouter}							from	'next/router';
-import	{SessionProvider, useSession, signIn, signOut}			from	'next-auth/react';
-import	{AppProps}							from	'next/app';
+import	{SessionProvider, signIn, signOut, useSession}			from	'next-auth/react';
 import	{DefaultSeo}						from	'next-seo';
-import	{WithYearn, useWeb3}				from	'@yearn-finance/web-lib/contexts';
 import	{Button}							from	'@yearn-finance/web-lib/components';
-import	{truncateHex}						from	'@yearn-finance/web-lib/utils';
+import	{useWeb3, WithYearn}				from	'@yearn-finance/web-lib/contexts';
 import	{useClientEffect}					from	'@yearn-finance/web-lib/hooks';
+import	{truncateHex}						from	'@yearn-finance/web-lib/utils';
 
 import	'../style.css';
 
@@ -23,12 +23,34 @@ function	AppHead(): ReactElement {
 				<meta name={'msapplication-TileColor'} content={'#000000'} />
 				<meta name={'theme-color'} content={'#FF90A1'} />
 
-				<link rel={'shortcut icon'} type={'image/x-icon'} href={'/favicons/favicon.ico'} />
-				<link rel={'apple-touch-icon'} sizes={'180x180'} href={'/favicons/apple-touch-icon.png'} />
-				<link rel={'icon'} type={'image/png'} sizes={'32x32'} href={'/favicons/favicon-32x32.png'} />
-				<link rel={'icon'} type={'image/png'} sizes={'16x16'} href={'/favicons/favicon-16x16.png'} />
-				<link rel={'icon'} type={'image/png'} sizes={'192x192'} href={'/favicons/android-chrome-192x192.png'} />
-				<link rel={'icon'} type={'image/png'} sizes={'512x512'} href={'/favicons/android-chrome-512x512.png'} />
+				<link
+					rel={'shortcut icon'}
+					type={'image/x-icon'}
+					href={'/favicons/favicon.ico'} />
+				<link
+					rel={'apple-touch-icon'}
+					sizes={'180x180'}
+					href={'/favicons/apple-touch-icon.png'} />
+				<link
+					rel={'icon'}
+					type={'image/png'}
+					sizes={'32x32'}
+					href={'/favicons/favicon-32x32.png'} />
+				<link
+					rel={'icon'}
+					type={'image/png'}
+					sizes={'16x16'}
+					href={'/favicons/favicon-16x16.png'} />
+				<link
+					rel={'icon'}
+					type={'image/png'}
+					sizes={'192x192'}
+					href={'/favicons/android-chrome-192x192.png'} />
+				<link
+					rel={'icon'}
+					type={'image/png'}
+					sizes={'512x512'}
+					href={'/favicons/android-chrome-512x512.png'} />
 
 				<meta name={'robots'} content={'index,nofollow'} />
 				<meta name={'googlebot'} content={'index,nofollow'} />
@@ -67,10 +89,10 @@ function	AppHeader(): ReactElement {
 	const	router = useRouter();
 	const	{isActive, address, ens, openLoginModal, onDesactivate, onSwitchChain, provider} = useWeb3();
 	const	{data: session} = useSession();
-	const	[walletIdentity, set_walletIdentity] = React.useState('Log in');
+	const	[walletIdentity, set_walletIdentity] = useState('Log in');
 	const	hasPendingSignature = useRef(false);
 
-	const authenticate = React.useCallback(async (_ens: string): Promise<void> => {
+	const authenticate = useCallback(async (_ens: string): Promise<void> => {
 		if (hasPendingSignature.current) {
 			return;
 		}
@@ -133,7 +155,6 @@ function	AppHeader(): ReactElement {
 					<div>
 						<Link href={'/'}>
 							<nav
-								aria-selected={router.pathname === '/'}
 								className={'project--nav'}>
 								{'Main'}
 							</nav>
@@ -142,7 +163,6 @@ function	AppHeader(): ReactElement {
 					<div>
 						<Link href={'/'}>
 							<nav
-								aria-selected={router.pathname === '/team-up'}
 								className={'project--nav'}>
 								{'Team up'}
 							</nav>
@@ -151,7 +171,6 @@ function	AppHeader(): ReactElement {
 					<div>
 						<Link href={'/dashboard'}>
 							<nav
-								aria-selected={router.pathname === '/learn-more'}
 								className={'project--nav'}>
 								{'Learn more'}
 							</nav>

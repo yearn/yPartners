@@ -5,3 +5,13 @@ export type TPartnerList = {
 	description: string;
 	logo: ReactElement;
 }
+
+export type TFramerTransition = {
+	y: number,
+	opacity: number,
+	transition: {
+		delay: number,
+		duration: number,
+		ease: string
+	}
+}
