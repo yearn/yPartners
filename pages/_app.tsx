@@ -1,3 +1,4 @@
+/* eslint-disable jsx-a11y/role-supports-aria-props */
 import	React, {ReactElement, useCallback, useRef, useState}		from	'react';
 import	{AppProps}							from	'next/app';
 import	Head								from	'next/head';
@@ -155,6 +156,7 @@ function	AppHeader(): ReactElement {
 					<div>
 						<Link href={'/'}>
 							<nav
+								aria-selected={router.pathname === '/'}
 								className={'project--nav'}>
 								{'Main'}
 							</nav>
@@ -163,6 +165,7 @@ function	AppHeader(): ReactElement {
 					<div>
 						<Link href={'/'}>
 							<nav
+								aria-selected={router.pathname === '/team-up'}
 								className={'project--nav'}>
 								{'Team up'}
 							</nav>
@@ -171,6 +174,7 @@ function	AppHeader(): ReactElement {
 					<div>
 						<Link href={'/dashboard'}>
 							<nav
+								aria-selected={router.pathname === '/learn-more'}
 								className={'project--nav'}>
 								{'Learn more'}
 							</nav>
