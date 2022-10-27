@@ -1,14 +1,19 @@
 import	React, {ReactElement}		from	'react';
 
 function	LogoMIM(props: React.SVGProps<SVGSVGElement>): ReactElement {
+	const defaultProps = {
+		width: 40,
+		height: 40
+	};
+
+	props = {...defaultProps, ...props};
+
 	return (
 		<svg
-			{...props}
-			width={'40'}
-			height={'40'}
 			viewBox={'0 0 40 40'}
 			fill={'none'}
-			xmlns={'http://www.w3.org/2000/svg'}>
+			xmlns={'http://www.w3.org/2000/svg'}
+			{...props}>
 			<g clipPath={'url(#clip0_975_545)'}>
 				<path d={'M6.66667 16.6666H10V13.3333H6.66667V16.6666Z'} fill={'white'}/>
 				<path d={'M6.66667 23.3334H10V20H6.66667V23.3334Z'} fill={'white'}/>

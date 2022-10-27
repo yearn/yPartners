@@ -1,14 +1,19 @@
 import	React, {ReactElement}		from	'react';
 
 function	LogoElement(props: React.SVGProps<SVGSVGElement>): ReactElement {
+	const defaultProps = {
+		width: 40,
+		height: 38
+	};
+
+	props = {...defaultProps, ...props};
+
 	return (
 		<svg
-			{...props}
-			width={'40'}
-			height={'38'}
 			viewBox={'0 0 40 38'}
 			fill={'none'}
-			xmlns={'http://www.w3.org/2000/svg'}>
+			xmlns={'http://www.w3.org/2000/svg'}
+			{...props}>
 			<mask
 				id={'mask0_975_520'}
 				style={{maskType: 'alpha'}}
