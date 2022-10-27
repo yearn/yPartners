@@ -1,14 +1,19 @@
 import	React, {ReactElement}		from	'react';
 
 function	LogoGearbox(props: React.SVGProps<SVGSVGElement>): ReactElement {
+	const defaultProps = {
+		width: 40,
+		height: 50
+	};
+
+	props = {...defaultProps, ...props};
+
 	return (
 		<svg
-			{...props}
-			width={'40'}
-			height={'50'}
 			viewBox={'0 0 40 50'}
 			fill={'none'}
-			xmlns={'http://www.w3.org/2000/svg'}>
+			xmlns={'http://www.w3.org/2000/svg'}
+			{...props}>
 			<path
 				fillRule={'evenodd'}
 				clipRule={'evenodd'}

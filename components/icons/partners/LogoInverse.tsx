@@ -1,14 +1,19 @@
 import	React, {ReactElement}		from	'react';
 
 function	LogoInverse(props: React.SVGProps<SVGSVGElement>): ReactElement {
+	const defaultProps = {
+		width: 40,
+		height: 32
+	};
+
+	props = {...defaultProps, ...props};
+
 	return (
 		<svg
-			{...props}
-			width={'40'}
-			height={'32'}
 			viewBox={'0 0 40 32'}
 			fill={'none'}
-			xmlns={'http://www.w3.org/2000/svg'}>
+			xmlns={'http://www.w3.org/2000/svg'}
+			{...props}>
 			<path
 				fillRule={'evenodd'}
 				clipRule={'evenodd'}
