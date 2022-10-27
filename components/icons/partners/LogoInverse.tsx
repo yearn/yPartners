@@ -1,6 +1,6 @@
-import	React, {ReactElement}		from	'react';
+import	React, {ReactElement, SVGProps}		from	'react';
 
-function	LogoInverse(props: React.SVGProps<SVGSVGElement>): ReactElement {
+function	LogoInverse(props: SVGProps<SVGSVGElement>): ReactElement {
 	const defaultProps = {
 		width: 40,
 		height: 32

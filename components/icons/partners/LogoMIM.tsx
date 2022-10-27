@@ -1,6 +1,6 @@
-import	React, {ReactElement}		from	'react';
+import	React, {ReactElement, SVGProps}		from	'react';
 
-function	LogoMIM(props: React.SVGProps<SVGSVGElement>): ReactElement {
+function	LogoMIM(props: SVGProps<SVGSVGElement>): ReactElement {
 	const defaultProps = {
 		width: 40,
 		height: 40
