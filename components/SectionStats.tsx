@@ -3,7 +3,7 @@ import	{format}				from	'@yearn-finance/web-lib/utils';
 
 function	SectionStats(): ReactElement {
 	const	formatNumber = useCallback((n: number): string => format.amount(n, 0, 2), []);
-	const	formatUSD = useCallback((n: number): string => `$${format.amount(n, 2, 2)}`, []);
+	// const	formatUSD = useCallback((n: number): string => `$${format.amount(n, 2, 2)}`, []);
 	const	formatPercent = useCallback((n: number): string => `${format.amount(n, 0, 2)}%`, []);
 	const	[tvl] = useState(69125743.15);
 	const	[fees] = useState(420743.15);
@@ -15,13 +15,14 @@ function	SectionStats(): ReactElement {
 			<div className={'flex flex-col pr-5 mt-4 mr-4 space-y-2 md:mt-0 md:mr-8'}>
 				<p>{'TVL by all Partners'}</p>
 				<b className={'text-3xl tabular-nums'}>
-					{formatUSD(tvl)}
+					{/* {formatUSD(tvl)} - temp solution to format errors during hydration */}
+					{tvl}
 				</b>
 			</div>
 			<div className={'flex flex-col pr-5 mt-4 mr-4 space-y-2 md:mt-0 md:mr-8'}>
 				<p>{'Fees earned by Partners'}</p>
 				<b className={'text-3xl tabular-nums'}>
-					{formatUSD(fees)}
+					{fees}
 				</b>
 			</div>
 			<div className={'flex flex-col pr-5 mt-4 mr-8 space-y-2 md:mt-0'}>
