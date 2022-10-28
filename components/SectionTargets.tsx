@@ -58,7 +58,7 @@ function	Targets(): ReactElement {
 							custom={i % 3}
 							initial={'initial'}
 							whileInView={'enter'}
-							className={'flex flex-col justify-between p-6 border-2 border-neutral-400 h-66'}
+							className={'flex flex-col justify-between p-6 h-66 border-2 border-neutral-400'}
 							variants={variants}>
 							<div className={'h-14'}>
 								{target.logo}
