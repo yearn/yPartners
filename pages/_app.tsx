@@ -1,15 +1,15 @@
 /* eslint-disable jsx-a11y/role-supports-aria-props */
-import	React, {ReactElement, useCallback, useRef, useState}		from	'react';
+import	React, {ReactElement, useState}		from	'react';
 import	{AppProps}							from	'next/app';
 import	Head								from	'next/head';
 import	Link								from	'next/link';
 import	{useRouter}							from	'next/router';
-import	{SessionProvider, signIn, signOut, useSession}			from	'next-auth/react';
+import	{SessionProvider, useSession}			from	'next-auth/react';
 import	{DefaultSeo}						from	'next-seo';
 import	{Button}							from	'@yearn-finance/web-lib/components';
 import	{useWeb3, WithYearn}				from	'@yearn-finance/web-lib/contexts';
 import	{useClientEffect}					from	'@yearn-finance/web-lib/hooks';
-import	{truncateHex}						from	'@yearn-finance/web-lib/utils';
+import {PartnerContextApp} from 'contexts/usePartner';
 
 import	'../style.css';
 
@@ -88,45 +88,45 @@ function	AppHead(): ReactElement {
 
 function	AppHeader(): ReactElement {
 	const	router = useRouter();
-	const	{isActive, address, ens, openLoginModal, onDesactivate, onSwitchChain, provider} = useWeb3();
+	const	{isActive, address, openLoginModal, onSwitchChain} = useWeb3();
 	const	{data: session} = useSession();
-	const	[walletIdentity, set_walletIdentity] = useState('Log in');
-	const	hasPendingSignature = useRef(false);
+	const	[walletIdentity] = useState('Log in');
+	// const	hasPendingSignature = useRef(false);
 
-	const authenticate = useCallback(async (_ens: string): Promise<void> => {
-		if (hasPendingSignature.current) {
-			return;
-		}
+	// const authenticate = useCallback(async (_ens: string): Promise<void> => {
+	// 	if (hasPendingSignature.current) {
+	// 		return;
+	// 	}
 
-		hasPendingSignature.current = true;
-		const	signer = provider.getSigner();
-		const	signature = await signer.signMessage('YOU CAN\'T BUILD TRUSTLESS SYSTEMS WITHOUT TRUST.');
-		const	result = await signIn('web3', {redirect: false, address, signature});
-		hasPendingSignature.current = false;
-		if (result?.ok) {
-			set_walletIdentity(_ens ? _ens : truncateHex(address, 4));
-			if (router.query.callbackUrl) {
-				const	callbackUrl = (router.query.callbackUrl as string).replace(window.location.origin, '');
-				router.push(callbackUrl);
-			}
-		}
+	// 	hasPendingSignature.current = true;
+	// 	const	signer = provider.getSigner();
+	// 	const	signature = await signer.signMessage('YOU CAN\'T BUILD TRUSTLESS SYSTEMS WITHOUT TRUST.');
+	// 	const	result = await signIn('web3', {redirect: false, address, signature});
+	// 	hasPendingSignature.current = false;
+	// 	if (result?.ok) {
+	// 		set_walletIdentity(_ens ? _ens : truncateHex(address, 4));
+	// 		if (router.query.callbackUrl) {
+	// 			const	callbackUrl = (router.query.callbackUrl as string).replace(window.location.origin, '');
+	// 			router.push(callbackUrl);
+	// 		}
+	// 	}
 		
-	}, [provider, address, router]);
+	// }, [provider, address, router]);
 
-	useClientEffect((): void => {
-		if (!isActive && address) {
-			set_walletIdentity('Switch network');
-		} else if (address) {
-			console.log(session);
-			if (!session) {
-				authenticate(ens);
-			} else if (session) {
-				set_walletIdentity(ens ? ens : truncateHex(address, 4));
-			}
-		} else {
-			set_walletIdentity('Log in');
-		}
-	}, [ens, address, isActive, session, authenticate]);
+	// useClientEffect((): void => {
+	// 	if (!isActive && address) {
+	// 		set_walletIdentity('Switch network');
+	// 	} else if (address) {
+	// 		console.log(session);
+	// 		if (!session) {
+	// 			authenticate(ens);
+	// 		} else if (session) {
+	// 			set_walletIdentity(ens ? ens : truncateHex(address, 4));
+	// 		}
+	// 	} else {
+	// 		set_walletIdentity('Log in');
+	// 	}
+	// }, [ens, address, isActive, session, authenticate]);
 
 	useClientEffect((): void => {
 		if (session) {
@@ -137,11 +137,10 @@ function	AppHeader(): ReactElement {
 
 	async function	onLogIn(): Promise<void> {
 		if (isActive) {
-			await onDesactivate();
-			if (session) {
-				await signOut({redirect: false});
-				router.push('/');
-			}
+			// await onDesactivate();
+			// if (session) {
+			// 	await signOut({redirect: false});
+			// }
 		} else if (!isActive && address) {
 			onSwitchChain(1, true);
 		} else {
@@ -230,12 +229,14 @@ function	MyApp(props: AppProps): ReactElement {
 					supportedChainID: [1, 250, 42161, 1337, 31337]
 				}
 			}}>
-			<SessionProvider session={pageProps.session}>
-				<AppWrapper
-					Component={Component}
-					pageProps={pageProps}
-					router={props.router} />
-			</SessionProvider>
+			<PartnerContextApp>
+				<SessionProvider /*session={pageProps.session} */ >
+					<AppWrapper
+						Component={Component}
+						pageProps={pageProps}
+						router={props.router} />
+				</SessionProvider>
+			</PartnerContextApp>
 		</WithYearn>
 	);
 }
