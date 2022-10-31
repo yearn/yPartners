@@ -60,9 +60,9 @@ function	Index(): ReactElement {
 					<Card.Tabs
 						tabs={[
 							{label: 'Overview', children: <Overview/>},
-							{label: 'Vault 1', children: <p>{'Vault 1 placeholder'}</p>},
-							{label: 'Vault 2', children: <p>{'Vault 2 placeholder'}</p>},
-							{label: 'Vault 3', children: <p>{'Vault 3 placeholder'}</p>}
+							{label: 'Vault 1', children: <Overview/>},
+							{label: 'Vault 2', children: <Overview/>},
+							{label: 'Vault 3', children: <Overview/>}
 						]}
 					/>
 				</div>
