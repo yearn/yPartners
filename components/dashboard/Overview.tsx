@@ -114,9 +114,9 @@ function	Overview(): ReactElement {
 
 			<div className={'flex justify-center items-center ml-10 w-3/4' }>
 				<Chevron className={'cursor-pointer'}/>
-				<span className={'ml-10 text-neutral-500'}>{'April'}</span> 
-				<span className={'mx-10 font-semibold'}>{'May'}</span>
-				<span className={'mr-10 text-neutral-500'}>{'June'}</span>
+				<span className={'ml-10 text-neutral-500'}>{'May'}</span> 
+				<span className={'mx-10 font-semibold'}>{'June'}</span>
+				<span className={'mr-10 text-neutral-500'}>{'July'}</span>
 				<Chevron className={'rotate-180 cursor-pointer'} />
 			</div>
 
