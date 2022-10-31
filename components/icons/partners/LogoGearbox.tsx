@@ -1,6 +1,6 @@
-import	React, {ReactElement}		from	'react';
+import	React, {ReactElement, SVGProps}		from	'react';
 
-function	LogoGearbox(props: React.SVGProps<SVGSVGElement>): ReactElement {
+function	LogoGearbox(props: SVGProps<SVGSVGElement>): ReactElement {
 	const defaultProps = {
 		width: 40,
 		height: 50

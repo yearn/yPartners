@@ -1,6 +1,6 @@
-import	React, {ReactElement}		from	'react';
+import	React, {ReactElement, SVGProps}		from	'react';
 
-function	IconForProtocols(props: React.SVGProps<SVGSVGElement>): ReactElement {
+function	IconForProtocols(props: SVGProps<SVGSVGElement>): ReactElement {
 	const defaultProps = {
 		width: 32,
 		height: 32

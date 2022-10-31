@@ -1,15 +1,20 @@
-import	React, {ReactElement}		from	'react';
+import	React, {ReactElement, SVGProps}		from	'react';
 import	{motion}					from	'framer-motion';
 
-function	B2BMeme(props: React.SVGProps<SVGSVGElement>): ReactElement {
+function	B2BMeme(props: SVGProps<SVGSVGElement>): ReactElement {
+	const defaultProps = {
+		width: 420,
+		height: 445
+	};
+
+	props = {...defaultProps, ...props};
+
 	return (
 		<svg
-			{...props}
-			width={'420'}
-			height={'445'}
 			viewBox={'0 0 420 445'}
 			fill={'none'}
-			xmlns={'http://www.w3.org/2000/svg'}>
+			xmlns={'http://www.w3.org/2000/svg'}
+			{...props}>
 			<path
 				d={'M226.244 59.2936H207.567V2H418V59.2936H245.39H244.688L244.14 59.7321L235.817 66.3936L227.494 59.7321L226.946 59.2936H226.244Z'}
 				stroke={'#0C0C0C'}
