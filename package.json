@@ -29,7 +29,7 @@
 		"recharts": "^2.1.16",
 		"sass": "^1.53.0",
 		"sharp": "^0.30.7",
-		"tailwindcss": "^3.1.8"
+		"tailwindcss": "^3.2.1"
 	},
 	"devDependencies": {
 		"@types/node": "^18.0.0",
