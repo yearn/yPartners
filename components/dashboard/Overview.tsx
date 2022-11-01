@@ -116,7 +116,7 @@ function	Overview(): ReactElement {
 				<Chevron className={'cursor-pointer'}/>
 				<span className={'ml-10 text-neutral-500'}>{'May'}</span> 
 				<span className={'mx-10 font-semibold'}>{'June'}</span>
-				<span className={'mr-10 text-neutral-500'}>{'July'}</span>
+				<span className={'mr-10 text-neutral-500'}>{'July'}</span> 
 				<Chevron className={'rotate-180 cursor-pointer'} />
 			</div>
 
