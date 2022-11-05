@@ -4,6 +4,7 @@ import	{Chevron}					from	'@yearn-finance/web-lib/icons';
 import {Bar, BarChart, ResponsiveContainer, Tooltip, XAxis, YAxis} from 'recharts';
 
 import CustomTooltip from './CustomTooltip';
+import VaultDetails from './VaultDetails';
 
 type TChartData = {
 	name: string,
@@ -47,6 +48,8 @@ function	Overview(): ReactElement {
 					{'All time'}
 				</Button>
 			</div>
+
+			<VaultDetails/>
 
 			<h2 className={'mt-10 text-lg font-semibold'}>{'Fees Earned'}</h2>
 			<div className={'flex justify-start items-center mt-2 mb-4 h-[350px]'}>
