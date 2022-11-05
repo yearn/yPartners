@@ -1,18 +1,28 @@
 
-import	React, {ReactElement}		from	'react';
+import	React, {ReactElement, useEffect, useState}		from	'react';
 import	{Button, Card}					from	'@yearn-finance/web-lib/components';
 import Overview from 'components/dashboard/Overview';
 import {usePartner} from 'contexts/usePartner';
 
 function	Index(): ReactElement {
 	const	{partner, logo} = usePartner();
+	const [lastSync, set_lastSync] = useState('');
+
+	useEffect((): void => {
+		const currentDate = new Date().toLocaleString('default',
+			{month: 'long', day: '2-digit', year: 'numeric', hour: 'numeric', minute:'numeric'});
+
+		set_lastSync(currentDate);
+	}, []);
 
 	return (
 		<main>
 			<section aria-label={'hero'} className={'grid grid-cols-12 mt-[75px] mb-14'}>
 				<div className={'col-span-12 md:col-span-7'}>
 					<h1 className={'mb-2 text-6xl text-neutral-900 md:text-8xl'}>{partner}</h1>
-					<p className={'mb-10 w-3/4 text-neutral-500'}>{'Last updated October 31st 2022, 16:20'}</p>
+
+					<p className={'mb-10 w-3/4 text-neutral-500'}>{`Last updated ${lastSync}`}</p>
+
 					<div className={'flex flex-row items-end mt-2 space-x-4'}>
 						<div>
 							<label className={'block text-neutral-500'} htmlFor={'start'}>{'From'}</label>
