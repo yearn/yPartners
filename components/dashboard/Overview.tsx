@@ -3,6 +3,8 @@ import	{Button}					from	'@yearn-finance/web-lib/components';
 import	{Chevron}					from	'@yearn-finance/web-lib/icons';
 import {Bar, BarChart, ResponsiveContainer, Tooltip, XAxis, YAxis} from 'recharts';
 
+import CustomTooltip from './CustomTooltip';
+
 type TChartData = {
 	name: string,
 	WBTC: number,
@@ -24,24 +26,6 @@ function generateData(): TChartData[]{
 	return data;
 }
 
-type TTooltip = {
-	active?: boolean,
-	symbol?: string,
-	payload?: any
-};
-
-function CustomTooltip({active, symbol, payload}: TTooltip): ReactElement | null {
-	if (active) {
-		return (
-			<div className={'p-2 bg-good-ol-grey-300 rounded opacity-90'}>
-				<p><span className={'font-semibold'}>{'USDC: '}</span>{`${payload[0].value} ${symbol}`}</p>
-				<p><span className={'font-semibold'}>{'WBTC: '}</span>{`${payload[1].value} ${symbol}`}</p>
-			</div>
-		);
-	}
-
-	return null;
-}
 
 function	Overview(): ReactElement {
 	return (
