@@ -3,6 +3,7 @@ import	React, {ReactElement}		from	'react';
 type TTooltip = {
 	active?: boolean,
 	symbol?: string,
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	payload?: any
 };
 
