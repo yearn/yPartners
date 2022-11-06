@@ -1,4 +1,4 @@
-import	React, {ReactElement}		from	'react';
+import	React, {MouseEvent, ReactElement, useState}		from	'react';
 import	{Button}					from	'@yearn-finance/web-lib/components';
 import	{Chevron}					from	'@yearn-finance/web-lib/icons';
 import {Bar, BarChart, ResponsiveContainer, Tooltip, XAxis, YAxis} from 'recharts';
@@ -27,26 +27,29 @@ function generateData(): TChartData[]{
 	return data;
 }
 
+const dataWindow = ['1 day', '1 week', '1 month', '1 year', 'all time'];
 
 function	Overview(): ReactElement {
+	const [activeWindow, set_activeWindow] = useState('1 month');
+
+	function handleWindowChange(e: MouseEvent<HTMLButtonElement>): void {
+		const selectedWindow = e.currentTarget.name;
+		set_activeWindow(selectedWindow);
+	}
+
 	return (
 		<div className={'mt-6 h-[400px]'}>
 			<div className={'flex flex-row mt-4 space-x-4'}>
-				<Button className={'w-[90px] text-xs md:w-[100px] md:text-base'} variant={'outlined'}>
-					{'1 day'}
-				</Button>
-				<Button className={'w-[90px] text-xs md:w-[100px] md:text-base'} variant={'outlined'}>
-					{'1 week'}
-				</Button>
-				<Button className={'w-[90px] text-xs md:w-[100px] md:text-base'} variant={'filled'}>
-					{'1 month'}
-				</Button>
-				<Button className={'w-[90px] text-xs md:w-[100px] md:text-base'} variant={'outlined'}>
-					{'1 year'}
-				</Button>
-				<Button className={'w-[90px] text-xs md:w-[100px] md:text-base'} variant={'outlined'}>
-					{'All time'}
-				</Button>
+				{dataWindow.map((window): ReactElement => (
+					<Button
+						key={window}
+						name={window}
+						className={'w-[90px] text-xs md:w-[100px] md:text-base'}
+						variant={window === activeWindow ? 'filled' : 'outlined'}
+						onClick={handleWindowChange}>
+						{window}
+					</Button>
+				))}
 			</div>
 
 			<VaultDetails/>
