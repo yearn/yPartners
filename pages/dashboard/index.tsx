@@ -1,19 +1,44 @@
 
-import	React, {ReactElement, useEffect, useState}		from	'react';
+import	React, {ChangeEvent, ReactElement, useEffect, useState}		from	'react';
 import	{Button, Card}					from	'@yearn-finance/web-lib/components';
 import Overview from 'components/dashboard/Overview';
 import {usePartner} from 'contexts/usePartner';
 
 function	Index(): ReactElement {
+	const currentDate = new Date();
+	const today = formatDate(currentDate);
+	const lastMonth = formatDate(new Date(new Date().setMonth(currentDate.getMonth() - 1)));
+
 	const	{partner, logo} = usePartner();
 	const [lastSync, set_lastSync] = useState('');
+	const [reportStart, set_reportStart] = useState(lastMonth);
+	const [reportEnd, set_reportEnd] = useState(today);
 
 	useEffect((): void => {
-		const currentDate = new Date().toLocaleString('default',
+		const latestSync = new Date().toLocaleString('default',
 			{month: 'long', day: '2-digit', year: 'numeric', hour: 'numeric', minute:'numeric'});
 
-		set_lastSync(currentDate);
+		set_lastSync(latestSync);
 	}, []);
+
+
+	function downloadReport(): void {
+		alert('Feature currently unavailable');
+	}
+
+	function formatDate(date: Date): string {
+		return date.toLocaleDateString('en-CA');
+	}
+
+	function handleReportDateChange(e: ChangeEvent<HTMLInputElement>): void {
+		const rangeValue = e.target.value;
+
+		if(e.target.name === 'range-start'){
+			set_reportStart(rangeValue);
+		}else {
+			set_reportEnd(rangeValue);
+		}
+	}
 
 	return (
 		<main>
@@ -23,37 +48,42 @@ function	Index(): ReactElement {
 
 					<p className={'mb-10 w-3/4 text-neutral-500'}>{`Last updated ${lastSync}`}</p>
 
-					<div className={'flex flex-row items-end mt-2 space-x-4'}>
-						<div>
-							<label className={'block text-neutral-500'} htmlFor={'start'}>{'From'}</label>
-							<input
-								className={'text-neutral-500'}
-								type={'date'}
-								id={'start'}
-								name={'range-start'}
-								value={'2022-07-22'}
-								min={'2022-01-01'}
-								max={'2022-12-31'} />
+					<form>
+						<div className={'flex flex-row items-end mt-2 space-x-4'}>
+							<div>
+								<label className={'block text-neutral-500'} htmlFor={'start'}>{'From'}</label>
+								<input
+									className={'text-neutral-500'}
+									type={'date'}
+									id={'start'}
+									name={'range-start'}
+									value={reportStart}
+									onChange={handleReportDateChange}
+									min={'2021-01-01'}
+									max={reportEnd} />
+							</div>
+
+							<div>
+								<label className={'block text-neutral-500'} htmlFor={'end'}>{'To'}</label>
+								<input
+									className={'text-neutral-500'}
+									type={'date'}
+									id={'end'}
+									name={'range-end'}
+									value={reportEnd}
+									onChange={handleReportDateChange}
+									min={'2021-01-01'}
+									max={today} />
+							</div>
+
+							<Button
+								onClick={downloadReport}
+								className={'w-[200px] text-sm  md:text-base'}
+								variant={'filled'}>
+								{'Download Report'}
+							</Button>
 						</div>
-
-						<div>
-							<label className={'block text-neutral-500'} htmlFor={'end'}>{'To'}</label>
-							<input
-								className={'text-neutral-500'}
-								type={'date'}
-								id={'end'}
-								name={'range-end'}
-								value={'2022-10-31'}
-								min={'2022-01-01'}
-								max={'2022-12-31'} />
-						</div>
-
-					
-						<Button className={'w-[200px] text-sm  md:text-base'} variant={'filled'}>
-							{'Download Report'}
-						</Button>
-
-					</div>
+					</form>
 				</div>
 
 				<div className={'hidden col-span-1 md:block'} />
