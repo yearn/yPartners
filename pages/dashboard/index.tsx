@@ -1,5 +1,5 @@
 
-import	React, {ChangeEvent, ReactElement, useEffect, useState}		from	'react';
+import	React, {ChangeEvent, FormEvent, ReactElement, useEffect, useState}		from	'react';
 import	{Button, Card}					from	'@yearn-finance/web-lib/components';
 import Overview from 'components/dashboard/Overview';
 import {usePartner} from 'contexts/usePartner';
@@ -22,7 +22,8 @@ function	Index(): ReactElement {
 	}, []);
 
 
-	function downloadReport(): void {
+	function downloadReport(e: FormEvent<HTMLFormElement>): void {
+		e.preventDefault();
 		alert('Feature currently unavailable');
 	}
 
@@ -48,7 +49,7 @@ function	Index(): ReactElement {
 
 					<p className={'mb-10 w-3/4 text-neutral-500'}>{`Last updated ${lastSync}`}</p>
 
-					<form>
+					<form onSubmit={downloadReport}>
 						<div className={'flex flex-row items-end mt-2 space-x-4'}>
 							<div>
 								<label className={'block text-neutral-500'} htmlFor={'start'}>{'From'}</label>
@@ -77,7 +78,6 @@ function	Index(): ReactElement {
 							</div>
 
 							<Button
-								onClick={downloadReport}
 								className={'w-[200px] text-sm  md:text-base'}
 								variant={'filled'}>
 								{'Download Report'}
