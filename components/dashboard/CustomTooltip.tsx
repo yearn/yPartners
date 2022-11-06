@@ -8,7 +8,7 @@ type TTooltip = {
 };
 
 function ToolTip({active, symbol, payload}: TTooltip): ReactElement | null {
-	if (active) {
+	if (active && payload !== null) {
 		return (
 			<div className={'p-2 bg-good-ol-grey-300 rounded opacity-90'}>
 				<p><span className={'font-semibold'}>{'USDC: '}</span>{`${payload[0].value} ${symbol}`}</p>
