@@ -14,10 +14,18 @@ type TChartData = {
 	rsUSDC: string,
 };
 
-function generateData(): TChartData[]{
+const dataWindows = [
+	{name: '1 day', value: 1},
+	{name: '1 week', value: 7}, 
+	{name: '1 month', value: 29}, 
+	{name: '1 year', value: 365}, 
+	{name: 'All time', value: 50}
+];
+
+function generateData(window = 29): TChartData[]{
 	const data = [];
 
-	for (let i = 0; i < 29; i++) {
+	for (let i = 0; i < window; i++) {
 		const fees = {WBTC: ~~(Math.random()* 300), USDC: ~~(Math.random()* 300)};
 		const revShare = {rsWBTC: ((Math.random()%0.3).toFixed(2)), rsUSDC: ((Math.random()%0.3)).toFixed(2)};
 
@@ -27,27 +35,28 @@ function generateData(): TChartData[]{
 	return data;
 }
 
-const dataWindow = ['1 day', '1 week', '1 month', '1 year', 'all time'];
-
 function	Overview(): ReactElement {
 	const [activeWindow, set_activeWindow] = useState('1 month');
+	const [windowValue, set_windowValue] = useState(29);
 
 	function handleWindowChange(e: MouseEvent<HTMLButtonElement>): void {
-		const selectedWindow = e.currentTarget.name;
-		set_activeWindow(selectedWindow);
+		const {name, value} = e.currentTarget;
+		set_activeWindow(name);
+		set_windowValue(+value);
 	}
 
 	return (
 		<div className={'mt-6 h-[400px]'}>
 			<div className={'flex flex-row mt-4 space-x-4'}>
-				{dataWindow.map((window): ReactElement => (
+				{dataWindows.map((window): ReactElement => (
 					<Button
-						key={window}
-						name={window}
+						key={window.name}
+						name={window.name}
+						value={window.value}
 						className={'w-[90px] text-xs md:w-[100px] md:text-base'}
-						variant={window === activeWindow ? 'filled' : 'outlined'}
+						variant={window.name === activeWindow ? 'filled' : 'outlined'}
 						onClick={handleWindowChange}>
-						{window}
+						{window.name}
 					</Button>
 				))}
 			</div>
@@ -60,7 +69,7 @@ function	Overview(): ReactElement {
 					<BarChart
 						width={500}
 						height={300}
-						data={generateData()}
+						data={generateData(windowValue)}
 						margin={{
 							top: 10,
 							right: 80,
@@ -117,7 +126,7 @@ function	Overview(): ReactElement {
 					<BarChart
 						width={500}
 						height={300}
-						data={generateData()}
+						data={generateData(windowValue)}
 						margin={{
 							top: 10,
 							right: 80,
