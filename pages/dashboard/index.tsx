@@ -4,14 +4,21 @@ import	{Button, Card}					from	'@yearn-finance/web-lib/components';
 import Overview from 'components/dashboard/Overview';
 import {usePartner} from 'contexts/usePartner';
 
-function	Index(): ReactElement {
-	const currentDate = new Date();
-	const today = formatDate(currentDate);
-	const lastMonth = formatDate(new Date(new Date().setMonth(currentDate.getMonth() - 1)));
+const currentDate = new Date();
+const currentYear = currentDate.getFullYear();
+const lastMonth = currentDate.getMonth() - 1;
 
+const today = formatDate(currentDate);
+const firstDayLastMonth = formatDate(new Date(new Date().setFullYear(currentYear, lastMonth, 1)));
+
+function formatDate(date: Date): string {
+	return date.toLocaleDateString('en-CA');
+}
+
+function	Index(): ReactElement {
 	const	{partner, logo} = usePartner();
 	const [lastSync, set_lastSync] = useState('');
-	const [reportStart, set_reportStart] = useState(lastMonth);
+	const [reportStart, set_reportStart] = useState(firstDayLastMonth);
 	const [reportEnd, set_reportEnd] = useState(today);
 
 	useEffect((): void => {
@@ -25,10 +32,6 @@ function	Index(): ReactElement {
 	function downloadReport(e: FormEvent<HTMLFormElement>): void {
 		e.preventDefault();
 		alert('Feature currently unavailable');
-	}
-
-	function formatDate(date: Date): string {
-		return date.toLocaleDateString('en-CA');
 	}
 
 	function handleReportDateChange(e: ChangeEvent<HTMLInputElement>): void {
