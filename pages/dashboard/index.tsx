@@ -3,6 +3,7 @@ import	React, {ChangeEvent, FormEvent, ReactElement, useEffect, useState}		from	
 import	{Button, Card}					from	'@yearn-finance/web-lib/components';
 import Overview from 'components/dashboard/Overview';
 import {usePartner} from 'contexts/usePartner';
+import {LOGOS, PARTNERS} from 'utils/b2b/Partners';
 
 const currentDate = new Date();
 const currentYear = currentDate.getFullYear();
@@ -16,7 +17,7 @@ function formatDate(date: Date): string {
 }
 
 function	Index(): ReactElement {
-	const	{partner, logo} = usePartner();
+	const	{partner, logo, set_partner} = usePartner();
 	const [lastSync, set_lastSync] = useState('');
 	const [reportStart, set_reportStart] = useState(firstDayLastMonth);
 	const [reportEnd, set_reportEnd] = useState(today);
@@ -27,6 +28,16 @@ function	Index(): ReactElement {
 
 		set_lastSync(latestSync);
 	}, []);
+
+
+	useEffect((): void => {
+		if(partner === '' && logo && set_partner){
+			// Until auth is finialized, Set random partner if one is not currently selected
+			const {name} = PARTNERS[Math.floor(Math.random() * PARTNERS.length)];
+			set_partner(name);
+			logo.current = LOGOS[name];
+		}
+	}, [logo, partner, set_partner]);
 
 
 	function downloadReport(e: FormEvent<HTMLFormElement>): void {

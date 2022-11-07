@@ -12,10 +12,12 @@ const	Partner = createContext<TPartnerContext>({partner: ''});
 
 export const PartnerContextApp = ({children}: {children: ReactElement}): ReactElement => {
 	const	[partner, set_partner] = useState('');
-	const	logo = useRef(<LogoYearn className={'w-full h-full text-900'}/>);
+	const	logo = useRef(<LogoYearn className={'w-full h-full opacity-0 text-900'}/>);
 
 	useEffect((): void => {
-		logo.current = LOGOS[partner];
+		if(partner !== ''){
+			logo.current = LOGOS[partner];
+		}
 	}, [partner]);
 
 	return (
