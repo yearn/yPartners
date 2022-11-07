@@ -10,6 +10,8 @@ type TChartData = {
 	USDC: number,
 	rsWBTC: string,
 	rsUSDC: string,
+	rbdWBTC: string,
+	rbdUSDC: string,
 };
 
 type TProps = {

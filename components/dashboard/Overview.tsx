@@ -10,6 +10,8 @@ type TChartData = {
 	USDC: number,
 	rsWBTC: string,
 	rsUSDC: string,
+	rbdWBTC: string,
+	rbdUSDC: string,
 };
 
 const dataWindows = [
@@ -27,7 +29,11 @@ function generateData(window = 29): TChartData[]{
 		const fees = {WBTC: ~~(Math.random()* 300), USDC: ~~(Math.random()* 300)};
 		const revShare = {rsWBTC: ((Math.random()%0.3).toFixed(2)), rsUSDC: ((Math.random()%0.3)).toFixed(2)};
 
-		data.push({name: `${i+1}`, ...fees, ...revShare});
+		const baseWrapperBalance = Math.random()*100;
+		const remWrapBalance = 100-baseWrapperBalance;
+		const wrapperBalDist = {rbdWBTC: baseWrapperBalance.toFixed(2), rbdUSDC: remWrapBalance.toFixed(2)};
+
+		data.push({name: `${i+1}`, ...fees, ...revShare, ...wrapperBalDist});
 	} 
 
 	return data;
@@ -75,11 +81,18 @@ function	Overview(): ReactElement {
 				tooltipSymbol={'K'}/>
 
 			<Chart
-				className={'mb-20'}
 				title={'Revenue Shared'}
 				windowValue={windowValue}
 				data={dummyData}
 				bars={[{name: 'rsWBTC', fill: '#82ca9d'}, {name: 'rsUSDC', fill: '#8884d8'}]}
+				tooltipSymbol={'%'}/>
+
+			<Chart
+				className={'mb-20'}
+				title={'Wrapper Balance Distribution'}
+				windowValue={windowValue}
+				data={dummyData}
+				bars={[{name: 'rbdWBTC', fill: '#82ca9d'}, {name: 'rbdUSDC', fill: '#8884d8'}]}
 				tooltipSymbol={'%'}/>
 		</div>
 	);
