@@ -71,6 +71,7 @@ function	Overview(): ReactElement {
 				title={'Fees Earned'}
 				windowValue={windowValue}
 				data={dummyData}
+				bars={[{name: 'WBTC', fill: '#82ca9d'}, {name: 'USDC', fill: '#8884d8'}]}
 				tooltipSymbol={'K'}/>
 
 			<Chart
@@ -78,6 +79,7 @@ function	Overview(): ReactElement {
 				title={'Revenue Shared'}
 				windowValue={windowValue}
 				data={dummyData}
+				bars={[{name: 'rsWBTC', fill: '#82ca9d'}, {name: 'rsUSDC', fill: '#8884d8'}]}
 				tooltipSymbol={'%'}/>
 		</div>
 	);

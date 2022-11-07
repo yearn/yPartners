@@ -19,10 +19,11 @@ type TProps = {
 	tooltipSymbol: string,
 	windowValue: number | undefined,
 	data: TChartData[]
+	bars: {name: string, fill: string}[]
 }
 
 function Chart(props: TProps): ReactElement {
-	const {title, tooltipSymbol, data} = props;
+	const {title, tooltipSymbol, data, bars} = props;
 
 	function chartNavigation(): void {
 		alert('Feature currently unavailable');
@@ -47,14 +48,16 @@ function Chart(props: TProps): ReactElement {
 						<XAxis />
 						<YAxis />
 						<Tooltip content={<CustomTooltip symbol={tooltipSymbol} />}/>
-						<Bar
-							dataKey={'USDC'}
-							stackId={'a'}
-							fill={'#8884d8'} />
-						<Bar
-							dataKey={'WBTC'}
-							stackId={'a'}
-							fill={'#82ca9d'} />
+
+						{bars.map((bar): ReactElement => {
+							return (
+								<Bar
+									key={bar.name}
+									dataKey={bar.name}
+									stackId={'a'}
+									fill={bar.fill} />
+							);
+						})}
 					</BarChart>
 				</ResponsiveContainer>
 
