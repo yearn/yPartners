@@ -24,6 +24,10 @@ type TProps = {
 function Chart(props: TProps): ReactElement {
 	const {title, tooltipSymbol, data} = props;
 
+	function chartNavigation(): void {
+		alert('Feature currently unavailable');
+	}
+
 	return (
 		<div className={props.className}>
 			<h2 className={'mt-10 text-lg font-semibold'}>{title}</h2>
@@ -75,11 +79,11 @@ function Chart(props: TProps): ReactElement {
 			</div>
 
 			<div className={'flex justify-center items-center ml-10 w-3/4' }>
-				<Chevron className={'cursor-pointer'}/>
+				<Chevron className={'cursor-pointer'} onClick={chartNavigation} />
 				<span className={'ml-10 text-neutral-500'}>{'May'}</span> 
 				<span className={'mx-10 font-semibold'}>{'June'}</span>
 				<span className={'mr-10 text-neutral-500'}>{'July'}</span>
-				<Chevron className={'rotate-180 cursor-pointer'} />
+				<Chevron className={'rotate-180 cursor-pointer'} onClick={chartNavigation} />
 			</div>
 		</div>
 	);
