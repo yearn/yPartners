@@ -31,10 +31,13 @@ type TProps = {
 		// interval prop allows tick to be skipped, 0 - shows all, 1 - hides half (skips every other)
 		interval?: number
 	}
+	xAxisOptions: {
+		interval?: number
+	}
 }
 
 function Chart(props: TProps): ReactElement {
-	const {title, tooltipSymbol, data, bars, yAxisOptions} = props;
+	const {title, tooltipSymbol, data, bars, yAxisOptions, xAxisOptions} = props;
 
 	function chartNavigation(): void {
 		alert('Feature currently unavailable');
@@ -42,6 +45,10 @@ function Chart(props: TProps): ReactElement {
 
 	function formatYAxis(value: number): string {
 		return tooltipSymbol === '%' ? `${value}${tooltipSymbol}` : `$ ${value}${tooltipSymbol}`;
+	}
+
+	function formatXAxis(value: number): string {
+		return `${value+1}`;
 	}
 
 	return (
@@ -60,7 +67,7 @@ function Chart(props: TProps): ReactElement {
 							bottom: 5
 						}}
 					>
-						<XAxis />
+						<XAxis tickFormatter={formatXAxis} interval={xAxisOptions.interval}/>
 						<YAxis
 							domain={yAxisOptions.domain}
 							tickCount={yAxisOptions.tickCount}

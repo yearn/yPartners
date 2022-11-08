@@ -55,6 +55,11 @@ function	Overview(): ReactElement {
 		set_windowValue(+value);
 	}
 
+	function getTickInterval(): number | undefined {
+		const tickPreferences: {[key: string]: number} = {'1 day': 1, '1 month': 1, 'All time': 1};
+		return tickPreferences[activeWindow];
+	}
+
 	return (
 		<div className={'mt-6 h-[400px]'}>
 			<div className={'flex flex-row mt-4 space-x-4'}>
@@ -79,6 +84,7 @@ function	Overview(): ReactElement {
 				data={dummyData}
 				bars={[{name: 'WBTC', fill: '#82ca9d'}, {name: 'USDC', fill: '#8884d8'}]}
 				yAxisOptions={{domain: [0, 'auto']}}
+				xAxisOptions={{interval: getTickInterval()}}
 				tooltipSymbol={'K'}/>
 			
 			<Chart
@@ -87,6 +93,7 @@ function	Overview(): ReactElement {
 				data={dummyData}
 				bars={[{name: 'rsWBTC', fill: '#82ca9d'}, {name: 'rsUSDC', fill: '#8884d8'}]}
 				yAxisOptions={{domain: [0, 'auto']}}
+				xAxisOptions={{interval: getTickInterval()}}
 				tooltipSymbol={'%'}/>
 
 			<Chart
@@ -96,6 +103,7 @@ function	Overview(): ReactElement {
 				data={dummyData}
 				bars={[{name: 'rbdWBTC', fill: '#82ca9d'}, {name: 'rbdUSDC', fill: '#8884d8'}]}
 				yAxisOptions={{tickCount: 6}}
+				xAxisOptions={{interval: getTickInterval()}}
 				tooltipSymbol={'%'}/>
 		</div>
 	);
