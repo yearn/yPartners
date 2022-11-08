@@ -40,6 +40,10 @@ function Chart(props: TProps): ReactElement {
 		alert('Feature currently unavailable');
 	}
 
+	function formatYAxis(value: number): string {
+		return tooltipSymbol === '%' ? `${value}${tooltipSymbol}` : `$ ${value}${tooltipSymbol}`;
+	}
+
 	return (
 		<div className={props.className}>
 			<h2 className={'mt-10 text-lg font-semibold'}>{title}</h2>
@@ -61,6 +65,7 @@ function Chart(props: TProps): ReactElement {
 							domain={yAxisOptions.domain}
 							tickCount={yAxisOptions.tickCount}
 							ticks={yAxisOptions.ticks}
+							tickFormatter={formatYAxis}
 							interval={yAxisOptions.interval} />
 						<Tooltip content={<CustomTooltip symbol={tooltipSymbol} />}/>
 
