@@ -1,18 +1,9 @@
 import	React, {MouseEvent, ReactElement, useEffect, useState}		from	'react';
 import	{Button}					from	'@yearn-finance/web-lib/components';
+import {TChartData} from 'types/chart';
 
 import Chart from './Chart';
 import VaultDetails from './VaultDetails';
-
-type TChartData = {
-	name: string,
-	WBTC: number,
-	USDC: number,
-	rsWBTC: string,
-	rsUSDC: string,
-	rbdWBTC: string,
-	rbdUSDC: string,
-};
 
 const dataWindows = [
 	{name: '1 day', value: 1},
@@ -80,6 +71,7 @@ function	Overview(): ReactElement {
 
 			<Chart
 				title={'Fees Earned'}
+				type={'bar'}
 				windowValue={windowValue}
 				data={dummyData}
 				bars={[{name: 'WBTC', fill: '#82ca9d'}, {name: 'USDC', fill: '#8884d8'}]}
@@ -89,6 +81,7 @@ function	Overview(): ReactElement {
 			
 			<Chart
 				title={'Revenue Shared'}
+				type={'bar'}
 				windowValue={windowValue}
 				data={dummyData}
 				bars={[{name: 'rsWBTC', fill: '#82ca9d'}, {name: 'rsUSDC', fill: '#8884d8'}]}
@@ -97,8 +90,9 @@ function	Overview(): ReactElement {
 				tooltipSymbol={'%'}/>
 
 			<Chart
-				className={'mb-20'}
 				title={'Wrapper Balance Distribution'}
+				type={'bar'}
+				className={'mb-20'}
 				windowValue={windowValue}
 				data={dummyData}
 				bars={[{name: 'rbdWBTC', fill: '#82ca9d'}, {name: 'rbdUSDC', fill: '#8884d8'}]}
