@@ -14,6 +14,8 @@ type TChartData = {
 	rbdUSDC: string,
 };
 
+type TAxisDomainItem = string | number  | 'auto' | 'dataMin' | 'dataMax';
+
 type TProps = {
   children?: React.ReactNode,
 	className?: string,
@@ -22,10 +24,17 @@ type TProps = {
 	windowValue: number | undefined,
 	data: TChartData[]
 	bars: {name: string, fill: string}[]
+	yAxisOptions: {
+		domain?: string[] | number[] | [TAxisDomainItem, TAxisDomainItem] 
+		tickCount?: number,
+		ticks?: string[] | number[]	
+		// interval prop allows tick to be skipped, 0 - shows all, 1 - hides half (skips every other)
+		interval?: number
+	}
 }
 
 function Chart(props: TProps): ReactElement {
-	const {title, tooltipSymbol, data, bars} = props;
+	const {title, tooltipSymbol, data, bars, yAxisOptions} = props;
 
 	function chartNavigation(): void {
 		alert('Feature currently unavailable');
@@ -48,7 +57,11 @@ function Chart(props: TProps): ReactElement {
 						}}
 					>
 						<XAxis />
-						<YAxis />
+						<YAxis
+							domain={yAxisOptions.domain}
+							tickCount={yAxisOptions.tickCount}
+							ticks={yAxisOptions.ticks}
+							interval={yAxisOptions.interval} />
 						<Tooltip content={<CustomTooltip symbol={tooltipSymbol} />}/>
 
 						{bars.map((bar): ReactElement => {

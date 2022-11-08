@@ -78,13 +78,15 @@ function	Overview(): ReactElement {
 				windowValue={windowValue}
 				data={dummyData}
 				bars={[{name: 'WBTC', fill: '#82ca9d'}, {name: 'USDC', fill: '#8884d8'}]}
+				yAxisOptions={{domain: [0, 'auto']}}
 				tooltipSymbol={'K'}/>
-
+			
 			<Chart
 				title={'Revenue Shared'}
 				windowValue={windowValue}
 				data={dummyData}
 				bars={[{name: 'rsWBTC', fill: '#82ca9d'}, {name: 'rsUSDC', fill: '#8884d8'}]}
+				yAxisOptions={{domain: [0, 'auto']}}
 				tooltipSymbol={'%'}/>
 
 			<Chart
@@ -93,6 +95,7 @@ function	Overview(): ReactElement {
 				windowValue={windowValue}
 				data={dummyData}
 				bars={[{name: 'rbdWBTC', fill: '#82ca9d'}, {name: 'rbdUSDC', fill: '#8884d8'}]}
+				yAxisOptions={{tickCount: 6}}
 				tooltipSymbol={'%'}/>
 		</div>
 	);
