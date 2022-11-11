@@ -20,11 +20,14 @@ function generateData(window = 29): TChartData[]{
 		const fees = {WBTC: ~~(Math.random()* 300), USDC: ~~(Math.random()* 300)};
 		const revShare = {rsWBTC: ((Math.random()%0.3).toFixed(2)), rsUSDC: ((Math.random()%0.3)).toFixed(2)};
 
+		const baseAggBal = 100 - (Math.random()*50);
+		const aggregateWrapBal = {awb: baseAggBal * 0.7, profitShare: baseAggBal}; 
+		
 		const baseWrapperBalance = Math.random()*100;
 		const remWrapBalance = 100-baseWrapperBalance;
 		const wrapperBalDist = {rbdWBTC: baseWrapperBalance.toFixed(2), rbdUSDC: remWrapBalance.toFixed(2)};
 
-		data.push({name: `${i+1}`, ...fees, ...revShare, ...wrapperBalDist});
+		data.push({name: `${i+1}`, ...fees, ...revShare, ...aggregateWrapBal, ...wrapperBalDist});
 	} 
 
 	return data;
@@ -85,6 +88,16 @@ function	Overview(): ReactElement {
 				windowValue={windowValue}
 				data={dummyData}
 				bars={[{name: 'rsWBTC', fill: '#82ca9d'}, {name: 'rsUSDC', fill: '#8884d8'}]}
+				yAxisOptions={{domain: [0, 'auto']}}
+				xAxisOptions={{interval: getTickInterval()}}
+				tooltipSymbol={'%'}/>
+
+			<Chart
+				title={'Aggregate Wrapper Balance'}
+				type={'composed'}
+				windowValue={windowValue}
+				data={dummyData}
+				bars={[{name: 'awb', fill: '#82ca9d'}, {name: 'profitShare', fill: '#8884d8'}]}
 				yAxisOptions={{domain: [0, 'auto']}}
 				xAxisOptions={{interval: getTickInterval()}}
 				tooltipSymbol={'%'}/>

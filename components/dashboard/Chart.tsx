@@ -17,7 +17,7 @@ function Chart(props: TChartProps): ReactElement {
 			<h2 className={'mt-10 text-lg font-semibold'}>{props.title}</h2>
 			<div className={'flex justify-start items-center mt-2 mb-4 h-[350px]'}>
 
-				{props.type === 'bar' ?  <Bar {...props} /> : <Composed /> }
+				{props.type === 'bar' ?  <Bar {...props} /> : <Composed {...props} /> }
 
 				<div className={'flex flex-col justify-center items-center -mt-8 -ml-4 w-[15%] h-full'}>
 					<div className={'flex flex-row -mt-8 -ml-8'}>
