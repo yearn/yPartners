@@ -1,6 +1,7 @@
 import	React, {ReactElement}		from	'react';
 import {Bar, BarChart, ResponsiveContainer, Tooltip, XAxis, YAxis} from 'recharts';
 import {TChartProps} from 'types/chart';
+import {formatXAxis} from 'utils/b2b/Chart';
 
 import CustomTooltip from '../CustomTooltip';
 
@@ -12,9 +13,6 @@ function CustomBarChart(props: TChartProps): ReactElement {
 		return tooltipSymbol === '%' ? `${value}${tooltipSymbol}` : `$ ${value}${tooltipSymbol}`;
 	}
 
-	function formatXAxis(value: number): string {
-		return `${value+1}`;
-	}
 
 	return (
 		<ResponsiveContainer width={'85%'} height={'100%'}>

@@ -1,6 +1,7 @@
 import	React, {ReactElement}		from	'react';
 import {Bar, ComposedChart, ResponsiveContainer, XAxis, YAxis} from 'recharts';
 import {TChartProps} from 'types/chart';
+import {formatXAxis} from 'utils/b2b/Chart';
 
 function	Composed(props: TChartProps): ReactElement {
 
@@ -25,7 +26,7 @@ function	Composed(props: TChartProps): ReactElement {
 					left: 0,
 					bottom: 5
 				}}>
-				<XAxis xAxisId={1} />
+				<XAxis xAxisId={1} tickFormatter={formatXAxis}  />
 				<XAxis xAxisId={2} hide={true} />
 
 				<YAxis yAxisId={0} dataKey={'profitShare'}/>
