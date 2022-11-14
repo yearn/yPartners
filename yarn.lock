@@ -4134,10 +4134,10 @@ next-auth@^4.10.3:
     preact-render-to-string "^5.1.19"
     uuid "^8.3.2"
 
-next-seo@^5.5.0:
-  version "5.5.0"
-  resolved "https://registry.yarnpkg.com/next-seo/-/next-seo-5.5.0.tgz#12bdfce60a6ae098f49617357a166c2d44dbc29e"
-  integrity sha512-5ouBHFtx8YrSDW44lj0qIEQ+oMcz6stgoITB+SqHUZbhgizoJsyLmq73gJ0lxtEKpcN8vG2QgRIJfdb8OAPChw==
+next-seo@^5.14.1:
+  version "5.14.1"
+  resolved "https://registry.yarnpkg.com/next-seo/-/next-seo-5.14.1.tgz#d07322edc37634fbd9beca51fb04177910d8031c"
+  integrity sha512-NiJeQbxYP3z+EMp52q8k3Q+OfX2+Yv2WehERDj98r2wjXxL+woKpRBdsSVYolTD0Hm8IWs42SzaISE93RoQdOw==
 
 next@^12.3.1:
   version "12.3.1"
