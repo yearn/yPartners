@@ -10,6 +10,14 @@ export type TChartData = {
 
 export type TAxisDomainItem = string | number  | 'auto' | 'dataMin' | 'dataMax';
 
+export type TLegendItem = {
+	type: string,
+	color: string
+	details: string | string[],
+	isThin?: boolean
+};
+
+
 export type TChartProps = {
   children?: React.ReactNode,
 	className?: string,
@@ -28,5 +36,6 @@ export type TChartProps = {
 	}
 	xAxisOptions: {
 		interval?: number
-	}
+	},
+	legendItems: TLegendItem[]
 }
