@@ -13,6 +13,16 @@ const dataWindows = [
 	{name: 'All time', value: 50}
 ];
 
+const dummyLegendMulti = [
+	{type: 'multi', details: ['USDC', 'Wrapper: 0x23a...089ca'], color: '#8884d8'},
+	{type: 'multi', details: ['WBTC', 'Wrapper: 0x23a...089ca'], color: '#82ca9d'}
+];
+
+const dummyLegendSingle = [
+	{type: 'single', details: 'Aggregate Wrapper Balance', color: '#8884d8', isThin: true},
+	{type: 'single', details: 'Profit Share', color: '#82ca9d'}
+];
+
 function generateData(window = 29): TChartData[]{
 	const data = [];
 
@@ -80,7 +90,8 @@ function	Overview(): ReactElement {
 				bars={[{name: 'WBTC', fill: '#82ca9d'}, {name: 'USDC', fill: '#8884d8'}]}
 				yAxisOptions={{domain: [0, 'auto']}}
 				xAxisOptions={{interval: getTickInterval()}}
-				tooltipSymbol={'K'}/>
+				tooltipSymbol={'K'}
+				legendItems={dummyLegendMulti}/>
 			
 			<Chart
 				title={'Revenue Shared'}
@@ -90,7 +101,8 @@ function	Overview(): ReactElement {
 				bars={[{name: 'rsWBTC', fill: '#82ca9d'}, {name: 'rsUSDC', fill: '#8884d8'}]}
 				yAxisOptions={{domain: [0, 'auto']}}
 				xAxisOptions={{interval: getTickInterval()}}
-				tooltipSymbol={'%'}/>
+				tooltipSymbol={'%'}
+				legendItems={dummyLegendMulti}/>
 
 			<Chart
 				title={'Aggregate Wrapper Balance'}
@@ -100,7 +112,8 @@ function	Overview(): ReactElement {
 				bars={[{name: 'awb', fill: '#82ca9d'}, {name: 'profitShare', fill: '#8884d8'}]}
 				yAxisOptions={{domain: [0, 'auto']}}
 				xAxisOptions={{interval: getTickInterval()}}
-				tooltipSymbol={'%'}/>
+				tooltipSymbol={'%'}
+				legendItems={dummyLegendSingle}/>
 
 			<Chart
 				title={'Wrapper Balance Distribution'}
@@ -111,7 +124,8 @@ function	Overview(): ReactElement {
 				bars={[{name: 'rbdWBTC', fill: '#82ca9d'}, {name: 'rbdUSDC', fill: '#8884d8'}]}
 				yAxisOptions={{tickCount: 6}}
 				xAxisOptions={{interval: getTickInterval()}}
-				tooltipSymbol={'%'}/>
+				tooltipSymbol={'%'}
+				legendItems={dummyLegendMulti}/>
 		</div>
 	);
 }

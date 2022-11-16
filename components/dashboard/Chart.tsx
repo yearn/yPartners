@@ -2,9 +2,9 @@ import	React, {ReactElement}		from	'react';
 import {Chevron} from '@yearn-finance/web-lib/icons';
 import {TChartProps} from 'types/chart';
 
+import ChartLegend from './ChartLegend';
 import Bar from './chart/Bar';
 import Composed from './chart/Composed';
-
 
 function Chart(props: TChartProps): ReactElement {
 
@@ -19,23 +19,7 @@ function Chart(props: TChartProps): ReactElement {
 
 				{props.type === 'bar' ?  <Bar {...props} /> : <Composed {...props} /> }
 
-				<div className={'flex flex-col justify-center items-center -mt-8 -ml-4 w-[15%] h-full'}>
-					<div className={'flex flex-row -mt-8 -ml-8'}>
-						<div className={'w-4 h-5 bg-[#8884d8]'} />
-						<div>
-							<p className={'mt-2 ml-2 text-xs underline md:text-sm'}>{'USDC'}</p>
-							<p className={'mt-2 ml-2 text-xs underline md:text-sm'}>{'Wrapper: 0x23a...089ca'}</p>
-						</div>
-					</div>
-
-					<div className={'flex flex-row mt-7 -ml-8' }>
-						<div className={'w-4 h-5 bg-[#82ca9d]'} />
-						<div>
-							<p className={'mt-2 ml-2 text-xs underline md:text-sm'}>{'WBTC'}</p>
-							<p className={'mt-2 ml-2 text-xs underline md:text-sm'}>{'Wrapper: 0x23a...089ca'}</p>
-						</div>
-					</div>
-				</div>
+				<ChartLegend items={props.legendItems}/>
 			</div>
 
 			<div className={'flex justify-center items-center ml-10 w-3/4' }>
