@@ -31,7 +31,7 @@ function generateData(window = 29): TChartData[]{
 		const revShare = {rsWBTC: ((Math.random()%0.3).toFixed(2)), rsUSDC: ((Math.random()%0.3)).toFixed(2)};
 
 		const baseAggBal = 100 - (Math.random()*50);
-		const aggregateWrapBal = {awb: baseAggBal * 0.7, profitShare: baseAggBal}; 
+		const aggregateWrapBal = {awb: (baseAggBal * 0.7).toFixed(0), profitShare: baseAggBal.toFixed(0)}; 
 		
 		const baseWrapperBalance = Math.random()*100;
 		const remWrapBalance = 100-baseWrapperBalance;
@@ -90,7 +90,7 @@ function	Overview(): ReactElement {
 				bars={[{name: 'WBTC', fill: '#82ca9d'}, {name: 'USDC', fill: '#8884d8'}]}
 				yAxisOptions={{domain: [0, 'auto']}}
 				xAxisOptions={{interval: getTickInterval()}}
-				tooltipSymbol={'K'}
+				tooltipItems={[{name: 'USDC', symbol: 'K'}, {name: 'WBTC', symbol: 'K'}]}
 				legendItems={dummyLegendMulti}/>
 			
 			<Chart
@@ -101,7 +101,7 @@ function	Overview(): ReactElement {
 				bars={[{name: 'rsWBTC', fill: '#82ca9d'}, {name: 'rsUSDC', fill: '#8884d8'}]}
 				yAxisOptions={{domain: [0, 'auto']}}
 				xAxisOptions={{interval: getTickInterval()}}
-				tooltipSymbol={'%'}
+				tooltipItems={[{name: 'USDC', symbol: '%'}, {name: 'WBTC', symbol: '%'}]}
 				legendItems={dummyLegendMulti}/>
 
 			<Chart
@@ -112,7 +112,7 @@ function	Overview(): ReactElement {
 				bars={[{name: 'awb', fill: '#82ca9d'}, {name: 'profitShare', fill: '#8884d8'}]}
 				yAxisOptions={{domain: [0, 'auto']}}
 				xAxisOptions={{interval: getTickInterval()}}
-				tooltipSymbol={'%'}
+				tooltipItems={[{name: 'aggregated', symbol: 'M'}, {name: 'profit shared', symbol: '%'}]}
 				legendItems={dummyLegendSingle}/>
 
 			<Chart
@@ -124,7 +124,7 @@ function	Overview(): ReactElement {
 				bars={[{name: 'rbdWBTC', fill: '#82ca9d'}, {name: 'rbdUSDC', fill: '#8884d8'}]}
 				yAxisOptions={{tickCount: 6}}
 				xAxisOptions={{interval: getTickInterval()}}
-				tooltipSymbol={'%'}
+				tooltipItems={[{name: 'USDC', symbol: '%'}, {name: 'WBTC', symbol: '%'}]}
 				legendItems={dummyLegendMulti}/>
 		</div>
 	);

@@ -23,7 +23,10 @@ export type TChartProps = {
 	className?: string,
 	type: string,
 	title: string,
-	tooltipSymbol: string,
+	tooltipItems: {
+		name: string
+		symbol: string
+	}[],
 	windowValue: number | undefined,
 	data: TChartData[]
 	bars: {name: string, fill: string}[]
