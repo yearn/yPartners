@@ -7,7 +7,8 @@ import CustomTooltip from '../CustomTooltip';
 
 function	Composed(props: TChartProps): ReactElement {
 	const {tooltipItems, data, bars, windowValue /* yAxisOptions, xAxisOptions */} = props;
-	const tooltipSymbol = tooltipItems[0].symbol;
+	const firstSymbol = tooltipItems[0].symbol;
+	const secondSymbol = tooltipItems[1].symbol;
 
 	function getBarSize(): number {
 		if(!windowValue){
@@ -36,12 +37,12 @@ function	Composed(props: TChartProps): ReactElement {
 				<YAxis
 					yAxisId={0}
 					dataKey={'profitShare'}
-					tickFormatter={(value): string => formatYAxis(tooltipSymbol, value)}/>
+					tickFormatter={(value): string => formatYAxis(firstSymbol, value)}/>
 				<YAxis
 					yAxisId={1}
 					orientation={'right'}
 					dataKey={'awb'}
-					tickFormatter={(value): string => formatYAxis(tooltipSymbol, value)}/>
+					tickFormatter={(value): string => formatYAxis(secondSymbol, value)}/>
 				<Tooltip content={<CustomTooltip items={tooltipItems} />}/>
 
 				<Bar
