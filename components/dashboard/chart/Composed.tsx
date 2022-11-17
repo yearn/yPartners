@@ -32,20 +32,20 @@ function	Composed(props: TChartProps): ReactElement {
 					bottom: 5
 				}}>
 				<XAxis
-					xAxisId={1}
+					xAxisId={'main'}
 					tickFormatter={formatXAxis}
 					interval={xAxisOptions.interval}  />
-				<XAxis xAxisId={2} hide={true} />
+				<XAxis xAxisId={'hidden'} hide={true} />
 
 				<YAxis
-					yAxisId={0}
+					yAxisId={'left'}
 					dataKey={'profitShare'}
 					domain={yAxisOptions.domain}
 					tickCount={yAxisOptions.tickCount}
 					ticks={yAxisOptions.ticks}
 					tickFormatter={(value): string => formatYAxis(firstSymbol, value)}/>
 				<YAxis
-					yAxisId={1}
+					yAxisId={'right'}
 					orientation={'right'}
 					dataKey={'awb'}
 					domain={yAxisOptions.domain}
@@ -55,11 +55,13 @@ function	Composed(props: TChartProps): ReactElement {
 				<Tooltip content={<CustomTooltip items={tooltipItems} />}/>
 
 				<Bar
-					xAxisId={1}
+					xAxisId={'main'}
+					yAxisId={'left'}
 					dataKey={'profitShare'}
 					fill={bars[0].fill} />
 				<Bar
-					xAxisId={2}
+					xAxisId={'hidden'}
+					yAxisId={'right'}
 					dataKey={'awb'}
 					fill={bars[1].fill} 
 					barSize={getBarSize()} />
