@@ -1,18 +1,13 @@
 import	React, {ReactElement}		from	'react';
 import {Bar, BarChart, ResponsiveContainer, Tooltip, XAxis, YAxis} from 'recharts';
 import {TChartProps} from 'types/chart';
-import {formatXAxis} from 'utils/b2b/Chart';
+import {formatXAxis, formatYAxis} from 'utils/b2b/Chart';
 
 import CustomTooltip from '../CustomTooltip';
 
 
 function CustomBarChart(props: TChartProps): ReactElement {
 	const {tooltipSymbol, data, bars, yAxisOptions, xAxisOptions} = props;
-
-	function formatYAxis(value: number): string {
-		return tooltipSymbol === '%' ? `${value}${tooltipSymbol}` : `$ ${value}${tooltipSymbol}`;
-	}
-
 
 	return (
 		<ResponsiveContainer width={'85%'} height={'100%'}>
@@ -32,7 +27,7 @@ function CustomBarChart(props: TChartProps): ReactElement {
 					domain={yAxisOptions.domain}
 					tickCount={yAxisOptions.tickCount}
 					ticks={yAxisOptions.ticks}
-					tickFormatter={formatYAxis}
+					tickFormatter={(value): string => formatYAxis(tooltipSymbol, value)}
 					interval={yAxisOptions.interval} />
 				<Tooltip content={<CustomTooltip symbol={tooltipSymbol} />}/>
 
