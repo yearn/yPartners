@@ -14,8 +14,8 @@ const dataWindows = [
 ];
 
 const dummyLegendMulti = [
-	{type: 'multi', details: ['USDC', 'Wrapper: 0x23a...089ca'], color: '#8884d8'},
-	{type: 'multi', details: ['WBTC', 'Wrapper: 0x23a...089ca'], color: '#82ca9d'}
+	{type: 'multi', details: ['WBTC', 'Wrapper: 0x23a...089ca'], color: '#8884d8'},
+	{type: 'multi', details: ['USDC', 'Wrapper: 0x23a...089ca'], color: '#82ca9d'}
 ];
 
 const dummyLegendSingle = [
@@ -81,13 +81,12 @@ function	Overview(): ReactElement {
 			</div>
 
 			<VaultDetails/>
-
 			<Chart
 				title={'Fees Earned'}
 				type={'bar'}
 				windowValue={windowValue}
 				data={dummyData}
-				bars={[{name: 'WBTC', fill: '#82ca9d'}, {name: 'USDC', fill: '#8884d8'}]}
+				bars={[{name: 'USDC', fill: '#82ca9d'}, {name: 'WBTC', fill: '#8884d8'}]}
 				yAxisOptions={{domain: [0, 'auto']}}
 				xAxisOptions={{interval: getTickInterval()}}
 				tooltipItems={[{name: 'USDC', symbol: 'K'}, {name: 'WBTC', symbol: 'K'}]}
@@ -98,7 +97,7 @@ function	Overview(): ReactElement {
 				type={'bar'}
 				windowValue={windowValue}
 				data={dummyData}
-				bars={[{name: 'rsWBTC', fill: '#82ca9d'}, {name: 'rsUSDC', fill: '#8884d8'}]}
+				bars={[{name: 'rsUSDC', fill: '#82ca9d'}, {name: 'rsWBTC', fill: '#8884d8'}]}
 				yAxisOptions={{domain: [0, 'auto']}}
 				xAxisOptions={{interval: getTickInterval()}}
 				tooltipItems={[{name: 'USDC', symbol: '%'}, {name: 'WBTC', symbol: '%'}]}
@@ -121,7 +120,7 @@ function	Overview(): ReactElement {
 				className={'mb-20'}
 				windowValue={windowValue}
 				data={dummyData}
-				bars={[{name: 'rbdWBTC', fill: '#82ca9d'}, {name: 'rbdUSDC', fill: '#8884d8'}]}
+				bars={[{name: 'rbdUSDC', fill: '#82ca9d'}, {name: 'rbdWBTC', fill: '#8884d8'}]}
 				yAxisOptions={{tickCount: 6}}
 				xAxisOptions={{interval: getTickInterval()}}
 				tooltipItems={[{name: 'USDC', symbol: '%'}, {name: 'WBTC', symbol: '%'}]}
