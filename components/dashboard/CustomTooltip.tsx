@@ -15,19 +15,14 @@ type TTooltipItem = {
 }
 
 function ToolTip(props: TTooltip): ReactElement | null {
-	const {active, items, payload, label} = props;
+	const {active, items, payload} = props;
 
 	if (active && payload) {
 		return (
 			<div className={'p-2 bg-good-ol-grey-300 rounded opacity-90'}>
-				<p>{`Day ${(label || 0) + 1}`}</p>
-
-				{items.map((item: TTooltipItem, idx: number): ReactElement => {
-					const {name, symbol} = item;
-					return (
-						<p key={name}><span className={'font-semibold'}>{`${name}: `}</span>{`${payload[idx].value} ${symbol}`}</p>
-					);
-				})}
+				<p>{`Day ${payload[0].payload.name}`}</p>
+				<p><span className={'font-semibold'}>{`${items[1].name}:  `}</span>{`${payload[1].value} ${items[1].symbol}`}</p>
+				<p><span className={'font-semibold'}>{`${items[0].name}:  `}</span>{`${payload[0].value} ${items[0].symbol}`}</p>
 			</div>
 		);
 	}
