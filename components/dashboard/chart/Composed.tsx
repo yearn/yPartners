@@ -1,16 +1,20 @@
 import	React, {ReactElement}		from	'react';
-import {Bar, ComposedChart, ResponsiveContainer, XAxis, YAxis} from 'recharts';
+import {Bar, ComposedChart, ResponsiveContainer, Tooltip, XAxis, YAxis} from 'recharts';
 import {TChartProps} from 'types/chart';
-import {formatXAxis} from 'utils/b2b/Chart';
+import {formatXAxis, formatYAxis} from 'utils/b2b/Chart';
+
+import CustomTooltip from '../CustomTooltip';
 
 function	Composed(props: TChartProps): ReactElement {
+	const {tooltipItems, data, bars, windowValue /* yAxisOptions, xAxisOptions */} = props;
+	const tooltipSymbol = tooltipItems[0].symbol;
 
 	function getBarSize(): number {
-		if(!props.windowValue){
+		if(!windowValue){
 			return -1;
 		}
 
-		return props.windowValue < 29 ? 30 : 7;
+		return windowValue < 29 ? 30 : 7;
 	}
 
 	return (
@@ -18,7 +22,7 @@ function	Composed(props: TChartProps): ReactElement {
 			<ComposedChart
 				width={500}
 				height={300}
-				data={props.data}
+				data={data}
 				barCategoryGap={-0.4}
 				margin={{
 					top: 10,
@@ -29,20 +33,25 @@ function	Composed(props: TChartProps): ReactElement {
 				<XAxis xAxisId={1} tickFormatter={formatXAxis}  />
 				<XAxis xAxisId={2} hide={true} />
 
-				<YAxis yAxisId={0} dataKey={'profitShare'}/>
+				<YAxis
+					yAxisId={0}
+					dataKey={'profitShare'}
+					tickFormatter={(value): string => formatYAxis(tooltipSymbol, value)}/>
 				<YAxis
 					yAxisId={1}
 					orientation={'right'}
-					dataKey={'awb'}/>
+					dataKey={'awb'}
+					tickFormatter={(value): string => formatYAxis(tooltipSymbol, value)}/>
+				<Tooltip content={<CustomTooltip items={tooltipItems} />}/>
 
 				<Bar
 					xAxisId={1}
 					dataKey={'profitShare'}
-					fill={props.bars[0].fill} />
+					fill={bars[0].fill} />
 				<Bar
 					xAxisId={2}
 					dataKey={'awb'}
-					fill={props.bars[1].fill} 
+					fill={bars[1].fill} 
 					barSize={getBarSize()} />
 			</ComposedChart>
 		</ResponsiveContainer>

@@ -7,7 +7,8 @@ import CustomTooltip from '../CustomTooltip';
 
 
 function CustomBarChart(props: TChartProps): ReactElement {
-	const {tooltipSymbol, data, bars, yAxisOptions, xAxisOptions} = props;
+	const {tooltipItems, data, bars, yAxisOptions, xAxisOptions} = props;
+	const tooltipSymbol = tooltipItems[0].symbol;
 
 	return (
 		<ResponsiveContainer width={'85%'} height={'100%'}>
@@ -29,7 +30,7 @@ function CustomBarChart(props: TChartProps): ReactElement {
 					ticks={yAxisOptions.ticks}
 					tickFormatter={(value): string => formatYAxis(tooltipSymbol, value)}
 					interval={yAxisOptions.interval} />
-				<Tooltip content={<CustomTooltip symbol={tooltipSymbol} />}/>
+				<Tooltip content={<CustomTooltip items={tooltipItems} />}/>
 
 				{bars.map((bar): ReactElement => {
 					return (
