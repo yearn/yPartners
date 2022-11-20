@@ -1,5 +1,5 @@
-import	React, {ReactElement}		from	'react';
-import {Bar, ComposedChart, ResponsiveContainer, Tooltip, XAxis, YAxis} from 'recharts';
+import	React, {ReactElement, useState}		from	'react';
+import {Bar, Cell, ComposedChart, ResponsiveContainer, Tooltip, XAxis, YAxis} from 'recharts';
 import {TChartProps} from 'types/chart';
 import {formatXAxis, formatYAxis} from 'utils/b2b/Chart';
 
@@ -9,6 +9,8 @@ function	Composed(props: TChartProps): ReactElement {
 	const {tooltipItems, data, bars, windowValue, yAxisOptions, xAxisOptions} = props;
 	const firstSymbol = tooltipItems[0].symbol;
 	const secondSymbol = tooltipItems[1].symbol;
+
+	const [focusBar, set_focusBar] = useState(-1);
 
 	function getBarSize(): number {
 		if(!windowValue){
@@ -24,7 +26,14 @@ function	Composed(props: TChartProps): ReactElement {
 				width={500}
 				height={300}
 				data={data}
-				barCategoryGap={-0.4}
+				barCategoryGap={-0.3}
+				onMouseMove={(state): void => {
+					if (state.isTooltipActive) {
+						set_focusBar(state.activeTooltipIndex as number);
+					} else {
+						set_focusBar(-1);
+					}
+				}}
 				margin={{
 					top: 10,
 					right: 80,
@@ -52,13 +61,18 @@ function	Composed(props: TChartProps): ReactElement {
 					tickCount={yAxisOptions.tickCount}
 					ticks={yAxisOptions.ticks}
 					tickFormatter={(value): string => formatYAxis(secondSymbol, value)}/>
-				<Tooltip content={<CustomTooltip items={tooltipItems} />}/>
+				<Tooltip
+					cursor={{strokeWidth: `${100/(windowValue || 1)}%`}}
+					content={<CustomTooltip items={tooltipItems} />}/>
 
 				<Bar
 					xAxisId={'main'}
 					yAxisId={'left'}
-					dataKey={'profitShare'}
-					fill={bars[0].fill} />
+					dataKey={'profitShare'} >
+					{data.map((_, index): ReactElement => (
+						<Cell key={`cell-${index}`} fill={focusBar === index ? `${bars[0].fill}aa` : bars[0].fill} />
+					))}
+				</Bar>
 				<Bar
 					xAxisId={'hidden'}
 					yAxisId={'right'}
