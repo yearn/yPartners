@@ -15,7 +15,7 @@
 		"@yearn-finance/web-lib": "^0.14.0",
 		"autoprefixer": "^10.4.12",
 		"axios": "^0.27.2",
-		"babel-loader": "^8.2.5",
+		"babel-loader": "^9.1.0",
 		"ethcall": "^4.8.4",
 		"ethers": "^5.7.1",
 		"framer-motion": "^7.5.3",
