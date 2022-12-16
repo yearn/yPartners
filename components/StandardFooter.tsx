@@ -1,8 +1,11 @@
 import	React, {ReactElement}		from	'react';
 import	Link						from	'next/link';
-import	{SwitchTheme}				from	'@yearn-finance/web-lib/components';
-import	{useUI}						from	'@yearn-finance/web-lib/contexts';
-import	{SocialDiscord, SocialGithub, SocialMedium, SocialTwitter}	from	'@yearn-finance/web-lib/icons';
+import	{SwitchTheme}				from	'@yearn-finance/web-lib/components/SwitchTheme';
+import	{useUI}						from	'@yearn-finance/web-lib/contexts/useUI';
+import SocialDiscord from '@yearn-finance/web-lib/icons/IconSocialDiscord';
+import SocialGithub from '@yearn-finance/web-lib/icons/IconSocialGithub';
+import SocialMedium from '@yearn-finance/web-lib/icons/IconSocialMedium';
+import SocialTwitter from '@yearn-finance/web-lib/icons/IconSocialTwitter';
 
 function	Footer(): ReactElement {
 	const	{theme, switchTheme} = useUI();

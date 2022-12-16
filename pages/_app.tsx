@@ -6,8 +6,9 @@ import	Link								from	'next/link';
 import	{useRouter}							from	'next/router';
 import	{SessionProvider, useSession}			from	'next-auth/react';
 import	{DefaultSeo}						from	'next-seo';
-import	{Button}							from	'@yearn-finance/web-lib/components';
-import	{useWeb3, WithYearn}				from	'@yearn-finance/web-lib/contexts';
+import {Button} from '@yearn-finance/web-lib/components/Button';
+import {useWeb3} from '@yearn-finance/web-lib/contexts/useWeb3';
+import {WithYearn} from '@yearn-finance/web-lib/contexts/WithYearn';
 import	{useClientEffect}					from	'@yearn-finance/web-lib/hooks';
 import {PartnerContextApp} from 'contexts/usePartner';
 
@@ -224,7 +225,6 @@ function	MyApp(props: AppProps): ReactElement {
 					shouldUseThemes: false
 				},
 				web3: {
-					shouldUseStrictChainMode: false,
 					defaultChainID: 1,
 					supportedChainID: [1, 250, 42161, 1337, 31337]
 				}

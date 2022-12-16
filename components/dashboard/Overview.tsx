@@ -1,5 +1,6 @@
 import	React, {MouseEvent, ReactElement, useEffect, useState}		from	'react';
-import	{Button}					from	'@yearn-finance/web-lib/components';
+import {Button} from '@yearn-finance/web-lib/components/Button';
+
 import {TChartData} from 'types/chart';
 
 import Chart from './Chart';

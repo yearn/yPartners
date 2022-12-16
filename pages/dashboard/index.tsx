@@ -1,6 +1,7 @@
 
 import	React, {ChangeEvent, FormEvent, ReactElement, useEffect, useState}		from	'react';
-import	{Button, Card}					from	'@yearn-finance/web-lib/components';
+import {Button} from '@yearn-finance/web-lib/components/Button';
+import {Card} from '@yearn-finance/web-lib/components/Card';
 import Overview from 'components/dashboard/Overview';
 import {usePartner} from 'contexts/usePartner';
 import {LOGOS, PARTNERS} from 'utils/b2b/Partners';

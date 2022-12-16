@@ -1,10 +1,10 @@
 import	React, {ReactElement, useCallback, useState}	from	'react';
-import	{format}				from	'@yearn-finance/web-lib/utils';
+import {formatAmount} from '@yearn-finance/web-lib/utils/format.number';
 
 function	SectionStats(): ReactElement {
-	const	formatNumber = useCallback((n: number): string => format.amount(n, 0, 2), []);
-	// const	formatUSD = useCallback((n: number): string => `$${format.amount(n, 2, 2)}`, []);
-	const	formatPercent = useCallback((n: number): string => `${format.amount(n, 0, 2)}%`, []);
+	const	formatNumber = useCallback((n: number): string => formatAmount(n, 0, 2), []);
+	// const	formatUSD = useCallback((n: number): string => `$${formatAmount(n, 2, 2)}`, []);
+	const	formatPercent = useCallback((n: number): string => `${formatAmount(n, 0, 2)}%`, []);
 	const	[tvl] = useState(69125743.15);
 	const	[fees] = useState(420743.15);
 	const	[shares] = useState(15);

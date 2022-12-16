@@ -1,5 +1,5 @@
 import	React, {ReactElement}	from	'react';
-import	{Button}				from	'@yearn-finance/web-lib/components';
+import {Button} from '@yearn-finance/web-lib/components/Button';
 import	B2BMeme					from	'components/B2BMeme';
 import	SectionPartner			from	'components/SectionPartners';
 import	SectionStats			from	'components/SectionStats';

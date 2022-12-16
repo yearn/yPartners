@@ -1,5 +1,5 @@
 import	React, {ReactElement}		from	'react';
-import {Chevron} from '@yearn-finance/web-lib/icons';
+import Chevron from '@yearn-finance/web-lib/icons/IconChevron';
 import {TChartProps} from 'types/chart';
 
 import ChartLegend from './ChartLegend';
