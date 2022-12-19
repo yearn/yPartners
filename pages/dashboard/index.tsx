@@ -1,10 +1,9 @@
 
 import	React, {useEffect, useState}		from	'react';
-import Overview from 'components/dashboard/Overview';
+import {VaultDetailsTabsWrapper} from 'components/dashboard/VaultDetailsTabsWrapper';
 import {usePartner} from 'contexts/usePartner';
 import {LOGOS, PARTNERS} from 'utils/b2b/Partners';
 import {Button} from '@yearn-finance/web-lib/components/Button';
-import {Card} from '@yearn-finance/web-lib/components/Card';
 
 import type {ChangeEvent, FormEvent, ReactElement} from 'react';
 
@@ -112,17 +111,8 @@ function	Index(): ReactElement {
 				<div className={'col-span-2 hidden md:block'} />
 			</section>
 
-			<section aria-label={'tabs'} className={'mb-7 grid grid-cols-12'}>
-				<div className={'col-span-12 w-full'}>
-					<Card.Tabs
-						tabs={[
-							{label: 'Overview', children: <Overview/>},
-							{label: 'Vault 1', children: <Overview/>},
-							{label: 'Vault 2', children: <Overview/>},
-							{label: 'Vault 3', children: <Overview/>}
-						]}
-					/>
-				</div>
+			<section aria-label={'tabs'}>
+				<VaultDetailsTabsWrapper />
 			</section>
 		</main>
 	);
