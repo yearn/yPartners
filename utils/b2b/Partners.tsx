@@ -1,4 +1,3 @@
-import {ReactElement} from 'react';
 import	LogoAlchemix			from	'components/icons/partners/LogoAlchemix';
 import	LogoBrave				from	'components/icons/partners/LogoBrave';
 import	LogoElement				from	'components/icons/partners/LogoElement';
@@ -9,6 +8,7 @@ import	LogoMIM					from	'components/icons/partners/LogoMIM';
 import	LogoQiDAO				from	'components/icons/partners/LogoQiDAO';
 import	LogoZooDao				from	'components/icons/partners/LogoZooDAO';
 
+import type {ReactElement} from 'react';
 import	type {TPartnerList}		from	'types/types';
 
 const	PARTNERS: TPartnerList[] = [
@@ -57,15 +57,15 @@ type TPartnerLogo = {
 }
 
 const LOGOS: TPartnerLogo = {
-	'QiDAO': <LogoQiDAO className={'w-3/4 h-3/4 text-900'} />,
-	'Element Finance': <LogoElement className={'w-3/4 h-3/4 text-900'} />,
-	'Brave': <LogoBrave className={'w-3/4 h-3/4 text-900'} />,
-	'Abracadabra': <LogoMIM className={'w-3/4 h-3/4 text-900'} />,
-	'Ledger': <LogoLedger className={'w-3/4 h-3/4 text-900'} />,
-	'Alchemix': <LogoAlchemix className={'w-3/4 h-3/4 text-900'} />,
-	'Gearbox': <LogoGearbox className={'w-3/4 h-3/4 text-900'} />,
-	'Inverse Finance': <LogoInverse className={'w-3/4 h-3/4 text-900'} />,
-	'ZooDAO': <LogoZooDao className={'w-3/4 h-3/4 text-900'} />
+	'QiDAO': <LogoQiDAO className={'text-900 h-3/4 w-3/4'} />,
+	'Element Finance': <LogoElement className={'text-900 h-3/4 w-3/4'} />,
+	'Brave': <LogoBrave className={'text-900 h-3/4 w-3/4'} />,
+	'Abracadabra': <LogoMIM className={'text-900 h-3/4 w-3/4'} />,
+	'Ledger': <LogoLedger className={'text-900 h-3/4 w-3/4'} />,
+	'Alchemix': <LogoAlchemix className={'text-900 h-3/4 w-3/4'} />,
+	'Gearbox': <LogoGearbox className={'text-900 h-3/4 w-3/4'} />,
+	'Inverse Finance': <LogoInverse className={'text-900 h-3/4 w-3/4'} />,
+	'ZooDAO': <LogoZooDao className={'text-900 h-3/4 w-3/4'} />
 };
 
 export {LOGOS, PARTNERS};

@@ -1,4 +1,6 @@
-import	React, {ReactElement, SVGProps}		from	'react';
+import	React		from	'react';
+
+import type {ReactElement, SVGProps} from 'react';
 
 function	LogoQiDAO(props: SVGProps<SVGSVGElement>): ReactElement {
 	const defaultProps = {

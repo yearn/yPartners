@@ -1,6 +1,8 @@
-import	React, {createContext, Dispatch, MutableRefObject, ReactElement, SetStateAction, useContext, useEffect, useRef, useState}	from	'react';
+import	React, {createContext, useContext, useEffect, useRef, useState}	from	'react';
 import LogoYearn from 'components/icons/LogoYearn';
 import {LOGOS} from 'utils/b2b/Partners';
+
+import type {Dispatch, MutableRefObject, ReactElement, SetStateAction} from 'react';
 
 type TPartnerContext = {
 	partner: string,
@@ -12,7 +14,7 @@ const	Partner = createContext<TPartnerContext>({partner: ''});
 
 export const PartnerContextApp = ({children}: {children: ReactElement}): ReactElement => {
 	const	[partner, set_partner] = useState('');
-	const	logo = useRef(<LogoYearn className={'w-full h-full opacity-0 text-900'}/>);
+	const	logo = useRef(<LogoYearn className={'text-900 h-full w-full opacity-0'}/>);
 
 	useEffect((): void => {
 		if(partner !== ''){

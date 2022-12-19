@@ -1,10 +1,12 @@
 
-import	React, {ChangeEvent, FormEvent, ReactElement, useEffect, useState}		from	'react';
-import {Button} from '@yearn-finance/web-lib/components/Button';
-import {Card} from '@yearn-finance/web-lib/components/Card';
+import	React, {useEffect, useState}		from	'react';
 import Overview from 'components/dashboard/Overview';
 import {usePartner} from 'contexts/usePartner';
 import {LOGOS, PARTNERS} from 'utils/b2b/Partners';
+import {Button} from '@yearn-finance/web-lib/components/Button';
+import {Card} from '@yearn-finance/web-lib/components/Card';
+
+import type {ChangeEvent, FormEvent, ReactElement} from 'react';
 
 const currentDate = new Date();
 const currentYear = currentDate.getFullYear();
@@ -58,14 +60,14 @@ function	Index(): ReactElement {
 
 	return (
 		<main>
-			<section aria-label={'hero'} className={'grid grid-cols-12 mt-[75px] mb-14'}>
+			<section aria-label={'hero'} className={'mt-[75px] mb-14 grid grid-cols-12'}>
 				<div className={'col-span-12 md:col-span-7'}>
 					<h1 className={'mb-2 text-6xl text-neutral-900 md:text-8xl'}>{partner}</h1>
 
 					<p className={'mb-10 w-3/4 text-neutral-500'}>{`Last updated ${lastSync}`}</p>
 
 					<form onSubmit={downloadReport}>
-						<div className={'flex flex-row items-end mt-2 space-x-4'}>
+						<div className={'mt-2 flex flex-row items-end space-x-4'}>
 							<div>
 								<label className={'block text-neutral-500'} htmlFor={'start'}>{'From'}</label>
 								<input
@@ -101,16 +103,16 @@ function	Index(): ReactElement {
 					</form>
 				</div>
 
-				<div className={'hidden col-span-1 md:block'} />
+				<div className={'col-span-1 hidden md:block'} />
 
-				<div className={'hidden col-span-3 md:block'}>
+				<div className={'col-span-3 hidden md:block'}>
 					{logo?.current}
 				</div>
 
-				<div className={'hidden col-span-2 md:block'} />
+				<div className={'col-span-2 hidden md:block'} />
 			</section>
 
-			<section aria-label={'tabs'} className={'grid grid-cols-12 mb-7'}>
+			<section aria-label={'tabs'} className={'mb-7 grid grid-cols-12'}>
 				<div className={'col-span-12 w-full'}>
 					<Card.Tabs
 						tabs={[

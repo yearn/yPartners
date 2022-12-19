@@ -1,5 +1,7 @@
-import	React, {ReactElement, SVGProps}		from	'react';
+import	React		from	'react';
 import	{motion}					from	'framer-motion';
+
+import type {ReactElement, SVGProps} from 'react';
 
 function	B2BMeme(props: SVGProps<SVGSVGElement>): ReactElement {
 	const defaultProps = {

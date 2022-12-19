@@ -1,9 +1,10 @@
-import	React, {ReactElement, useEffect, useState}	from	'react';
-import	{motion}				from	'framer-motion';
+import	React, {useEffect, useState}	from	'react';
 import	IconForDevelopers		from	'components/icons/IconForDevelopers';
 import	IconForInstitutions		from	'components/icons/IconForInstitutions';
 import	IconForProtocols		from	'components/icons/IconForProtocols';
+import	{motion}				from	'framer-motion';
 
+import type {ReactElement} from 'react';
 import	type {TFramerTransition, TPartnerList}		from	'types/types';
 
 const variants = {
@@ -45,20 +46,20 @@ function	Targets(): ReactElement {
 	}, []);
 
 	return (
-		<section aria-label={'targets'} className={'flex flex-row items-center mb-28 space-x-8 md:mb-50'}>
+		<section aria-label={'targets'} className={'mb-28 flex flex-row items-center space-x-8 md:mb-50'}>
 			<div>
 				<div className={'flex flex-col space-y-4'}>
 					<h2 className={'text-3xl font-bold'}>{'Yearn Finance - Powerful & Secure Yield Optimizer'}</h2>
 					<p className={'text-xl'}>{'Permissionless DeFi base layer enabling infinite possibilities for buildooors.'}</p>
 				</div>
-				<div className={'grid grid-cols-1 gap-8 mt-8 w-full max-w-5xl md:grid-cols-3'}>
+				<div className={'mt-8 grid w-full max-w-5xl grid-cols-1 gap-8 md:grid-cols-3'}>
 					{targetList?.map((target: TPartnerList, i: number): ReactElement => (
 						<motion.div
 							key={target.name}
 							custom={i % 3}
 							initial={'initial'}
 							whileInView={'enter'}
-							className={'flex flex-col justify-between p-6 h-66 border-2 border-neutral-400'}
+							className={'flex h-66 flex-col justify-between border-2 border-neutral-400 p-6'}
 							variants={variants}>
 							<div className={'h-14'}>
 								{target.logo}

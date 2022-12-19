@@ -1,5 +1,7 @@
 /* eslint-disable @typescript-eslint/naming-convention */
-import	React, {ReactElement}		from	'react';
+import	React		from	'react';
+
+import type {ReactElement} from 'react';
 
 type TTooltip = {
 	active?: boolean,
@@ -19,7 +21,7 @@ function ToolTip(props: TTooltip): ReactElement | null {
 
 	if (active && payload) {
 		return (
-			<div className={'p-2 bg-good-ol-grey-300 rounded opacity-90'}>
+			<div className={'rounded bg-good-ol-grey-300 p-2 opacity-90'}>
 				<p>{`Day ${payload[0].payload.name}`}</p>
 				<p><span className={'font-semibold'}>{`${items[1].name}:  `}</span>{`${payload[1].value} ${items[1].symbol}`}</p>
 				<p><span className={'font-semibold'}>{`${items[0].name}:  `}</span>{`${payload[0].value} ${items[0].symbol}`}</p>
