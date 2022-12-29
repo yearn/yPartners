@@ -52,6 +52,18 @@ const	PARTNERS: TPartnerList[] = [
 
 ];
 
+const PARTNER_SHORT_NAMES: {[key: string]: string} = {
+	'QiDAO': 'qidao',
+	'Element Finance': 'element',
+	'Brave': 'brave', //*
+	'Abracadabra': 'abracadabra',
+	'Ledger': 'ledger',
+	'Alchemix': 'alchemix',
+	'Gearbox': 'gearbox',
+	'Inverse Finance': 'inverse',
+	'ZooDAO': 'zoodao' //* 
+};
+
 type TPartnerLogo = {
 	[key: string]: ReactElement
 }
@@ -68,4 +80,6 @@ const LOGOS: TPartnerLogo = {
 	'ZooDAO': <LogoZooDao className={'text-900 h-3/4 w-3/4'} />
 };
 
-export {LOGOS, PARTNERS};
+export {
+	LOGOS, PARTNER_SHORT_NAMES, PARTNERS
+};
