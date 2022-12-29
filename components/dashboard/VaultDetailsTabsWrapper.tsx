@@ -1,4 +1,5 @@
 import React, {Fragment, useState} from 'react';
+import {usePartner} from 'contexts/usePartner';
 import {Listbox, Transition} from '@headlessui/react';
 import Chevron from '@yearn-finance/web-lib/icons/IconChevron';
 import IconCopy from '@yearn-finance/web-lib/icons/IconCopy';
@@ -8,44 +9,43 @@ import Overview from './Overview';
 
 import type {ReactElement} from 'react';
 
+type TProps = {
+	selectedIndex: number,
+	set_selectedIndex: (arg0: number) => void
+};
 
-function	Tabs({selectedAboutTabIndex, set_selectedAboutTabIndex}: {
-	selectedAboutTabIndex: number,
-	set_selectedAboutTabIndex: (arg0: number) => void
-}): ReactElement {
-	const tabs = [
-		{value: 0, label: 'Overview'},
-		{value: 1, label: 'Vault 1'},
-		{value: 2, label: 'Vault 2'},
-		{value: 3, label: 'Vault 3'}
-	];
+function	Tabs({selectedIndex, set_selectedIndex}: TProps): ReactElement {
+	const	{vaults} = usePartner();
 
 	return (
 		<>
 			<nav className={'hidden flex-row items-center space-x-10 md:flex'}>
-				{tabs.map((tab): ReactElement => (
+				{vaults.map((vault, idx): ReactElement => (
 					<button
-						key={`desktop-${tab.value}`}
-						onClick={(): void => set_selectedAboutTabIndex(tab.value)}>
+						key={`desktop-${idx}`}
+						onClick={(): void => set_selectedIndex(idx)}>
 						<p
-							title={tab.label}
-							aria-selected={selectedAboutTabIndex === tab.value}
+							title={`${vault.token} - ${vault.network}`}
+							aria-selected={selectedIndex === idx}
 							className={'hover-fix tab'}>
-							{tab.label}
+							{`${vault.token} - ${vault.network}`}
 						</p>
 					</button>	
 				))}
 			</nav>
 			<div className={'relative z-50'}>
 				<Listbox
-					value={selectedAboutTabIndex}
-					onChange={(value: any): void => set_selectedAboutTabIndex(value.value)}>
+					value={selectedIndex}
+					// eslint-disable-next-line @typescript-eslint/no-explicit-any
+					onChange={(value: any): void => {
+						set_selectedIndex(value.index);
+					}}>
 					{({open}): ReactElement => (
 						<>
 							<Listbox.Button
 								className={'flex h-10 w-40 flex-row items-center border-0 border-b-2 border-neutral-900 bg-neutral-100 p-0 font-bold focus:border-neutral-900 md:hidden'}>
 								<div className={'relative flex flex-row items-center'}>
-									{tabs[selectedAboutTabIndex]?.label || 'Menu'}
+									{vaults[selectedIndex]?.token || 'Vaults'}
 								</div>
 								<div className={'absolute right-0'}>
 									<Chevron
@@ -62,12 +62,12 @@ function	Tabs({selectedAboutTabIndex, set_selectedAboutTabIndex}: {
 								leaveFrom={'transform scale-100 opacity-100'}
 								leaveTo={'transform scale-95 opacity-0'}>
 								<Listbox.Options className={'yearn--listbox-menu'}>
-									{tabs.map((tab): ReactElement => (
+									{vaults.map((vault, idx): ReactElement => (
 										<Listbox.Option
 											className={'yearn--listbox-menu-item'}
-											key={tab.value}
-											value={tab}>
-											{tab.label}
+											key={idx}
+											value={vault}>
+											{`${vault.token} - ${vault.network}`}
 										</Listbox.Option>
 									))}
 								</Listbox.Options>
@@ -81,14 +81,16 @@ function	Tabs({selectedAboutTabIndex, set_selectedAboutTabIndex}: {
 }
 
 function	VaultDetailsTabsWrapper(): ReactElement {
-	const [selectedAboutTabIndex, set_selectedAboutTabIndex] = useState(0);
+	const	{vaults} = usePartner();
+
+	const [selectedIndex, set_selectedIndex] = useState(0);
 
 	return (
 		<div aria-label={'Vault Details'} className={'col-span-12 mb-4 flex flex-col bg-neutral-100'}>
 			<div className={'relative flex w-full flex-row items-center justify-between px-4 pt-4 md:px-8'}>
 				<Tabs
-					selectedAboutTabIndex={selectedAboutTabIndex}
-					set_selectedAboutTabIndex={set_selectedAboutTabIndex} />
+					selectedIndex={selectedIndex}
+					set_selectedIndex={set_selectedIndex} />
 				
 				<div className={'flex flex-row items-center justify-end space-x-2 pb-0 md:pb-4 md:last:space-x-4'}>
 					<a
@@ -111,18 +113,10 @@ function	VaultDetailsTabsWrapper(): ReactElement {
 
 			<div className={'-mt-0.5 h-0.5 w-full bg-neutral-300'} />
 
-			{selectedAboutTabIndex === 0 ? (
-				<Overview/>
-			) : null}
-			{selectedAboutTabIndex === 1 ? (
-				<Overview/>
-			) : null}
-			{selectedAboutTabIndex === 2 ? (
-				<Overview/>
-			) : null}
-			{selectedAboutTabIndex === 3 ? (
-				<Overview/>
-			) : null}
+			{vaults.map((_, idx): ReactElement | null => {
+				return idx === selectedIndex ? <Overview key={idx}/> : null;
+			})}
+
 		</div>
 	);
 }
