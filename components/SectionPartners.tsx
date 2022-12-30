@@ -1,9 +1,10 @@
-import	React, {ReactElement, useEffect, useState}	from	'react';
+import	React, {useEffect, useState}	from	'react';
 import router from 'next/router';
-import	{motion}				from	'framer-motion';
 import {usePartner} from 'contexts/usePartner';
 import {PARTNERS} from 'utils/b2b/Partners';
+import	{motion}				from	'framer-motion';
 
+import type {ReactElement} from 'react';
 import	type {TFramerTransition, TPartnerList}		from	'types/types';
 
 const variants = {
@@ -38,19 +39,19 @@ function	Partners(): ReactElement {
 
 
 	return (
-		<section aria-label={'partners'} className={'flex flex-row items-center mb-28 space-x-8 md:mb-50'}>
+		<section aria-label={'partners'} className={'mb-28 flex flex-row items-center space-x-8 md:mb-50'}>
 			<div>
 				<div>
 					<h2 className={'text-3xl font-bold'}>{'Built on Yearn'}</h2>
 				</div>
-				<div className={'grid grid-cols-1 gap-8 mt-8 w-full max-w-5xl md:grid-cols-3'}>
+				<div className={'mt-8 grid w-full max-w-5xl grid-cols-1 gap-8 md:grid-cols-3'}>
 					{partnerList?.map((partner: TPartnerList, i: number): ReactElement => (
 						<motion.div
 							key={partner.name}
 							custom={i % 3}
 							initial={'initial'}
 							whileInView={'enter'}
-							className={'flex flex-col justify-between p-6 h-66 bg-neutral-200 border-2 border-neutral-200 cursor-pointer'}
+							className={'flex h-66 cursor-pointer flex-col justify-between border-2 border-neutral-200 bg-neutral-200 p-6'}
 							variants={variants}
 							onClick={async (): Promise<void> => navToDashboard(partner.name)}	
 						>

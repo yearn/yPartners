@@ -1,9 +1,11 @@
 
-import	React, {ChangeEvent, FormEvent, ReactElement, useEffect, useState}		from	'react';
-import	{Button, Card}					from	'@yearn-finance/web-lib/components';
-import Overview from 'components/dashboard/Overview';
+import	React, {useEffect, useMemo, useState}		from	'react';
+import {VaultDetailsTabsWrapper} from 'components/dashboard/VaultDetailsTabsWrapper';
 import {usePartner} from 'contexts/usePartner';
 import {LOGOS, PARTNERS} from 'utils/b2b/Partners';
+import {Button} from '@yearn-finance/web-lib/components/Button';
+
+import type {ChangeEvent, FormEvent, ReactElement} from 'react';
 
 const currentDate = new Date();
 const currentYear = currentDate.getFullYear();
@@ -17,7 +19,7 @@ function formatDate(date: Date): string {
 }
 
 function	Index(): ReactElement {
-	const	{partner, logo, set_partner} = usePartner();
+	const	{partner, logo, isLoadingVaults, vaults, set_partner} = usePartner();
 	const [lastSync, set_lastSync] = useState('');
 	const [reportStart, set_reportStart] = useState(firstDayLastMonth);
 	const [reportEnd, set_reportEnd] = useState(today);
@@ -55,16 +57,34 @@ function	Index(): ReactElement {
 		}
 	}
 
+	const	VaultGraphs = useMemo((): ReactElement => {
+		if (partner && isLoadingVaults) {
+			return (
+				<h1>{'Loading...'}</h1>
+			);	
+		}
+
+		if (partner && !isLoadingVaults && vaults.length === 0) {
+			return (
+				<h1>{'No Vaults Found'}</h1>
+			);	
+		}
+
+		return (
+			<VaultDetailsTabsWrapper />
+		);
+	}, [partner, vaults, isLoadingVaults]);
+
 	return (
 		<main>
-			<section aria-label={'hero'} className={'grid grid-cols-12 mt-[75px] mb-14'}>
+			<section aria-label={'hero'} className={'mt-[75px] mb-14 grid grid-cols-12'}>
 				<div className={'col-span-12 md:col-span-7'}>
 					<h1 className={'mb-2 text-6xl text-neutral-900 md:text-8xl'}>{partner}</h1>
 
 					<p className={'mb-10 w-3/4 text-neutral-500'}>{`Last updated ${lastSync}`}</p>
 
 					<form onSubmit={downloadReport}>
-						<div className={'flex flex-row items-end mt-2 space-x-4'}>
+						<div className={'mt-2 flex flex-row items-end space-x-4'}>
 							<div>
 								<label className={'block text-neutral-500'} htmlFor={'start'}>{'From'}</label>
 								<input
@@ -100,27 +120,18 @@ function	Index(): ReactElement {
 					</form>
 				</div>
 
-				<div className={'hidden col-span-1 md:block'} />
+				<div className={'col-span-1 hidden md:block'} />
 
-				<div className={'hidden col-span-3 md:block'}>
+				<div className={'col-span-3 hidden md:block'}>
 					{logo?.current}
 				</div>
 
-				<div className={'hidden col-span-2 md:block'} />
+				<div className={'col-span-2 hidden md:block'} />
 			</section>
 
-			<section aria-label={'tabs'} className={'grid grid-cols-12 mb-7'}>
-				<div className={'col-span-12 w-full'}>
-					<Card.Tabs
-						tabs={[
-							{label: 'Overview', children: <Overview/>},
-							{label: 'Vault 1', children: <Overview/>},
-							{label: 'Vault 2', children: <Overview/>},
-							{label: 'Vault 3', children: <Overview/>}
-						]}
-					/>
-				</div>
-			</section>
+			<section aria-label={'tabs'}>
+				{VaultGraphs}
+			</section>	
 		</main>
 	);
 }

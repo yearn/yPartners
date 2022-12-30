@@ -1,9 +1,11 @@
-import	React, {ReactElement}		from	'react';
+import	React		from	'react';
 import {Bar, BarChart, ResponsiveContainer, Tooltip, XAxis, YAxis} from 'recharts';
-import {TChartProps} from 'types/chart';
 import {formatXAxis, formatYAxis} from 'utils/b2b/Chart';
 
-import CustomTooltip from '../CustomTooltip';
+import CustomTooltip from './CustomTooltip';
+
+import type {ReactElement} from 'react';
+import type {TChartProps} from 'types/chart';
 
 
 function CustomBarChart(props: TChartProps): ReactElement {

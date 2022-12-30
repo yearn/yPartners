@@ -1,9 +1,11 @@
-import	React, {MouseEvent, ReactElement, useEffect, useState}		from	'react';
-import	{Button}					from	'@yearn-finance/web-lib/components';
-import {TChartData} from 'types/chart';
+import	React, {useEffect, useState}		from	'react';
+import {Button} from '@yearn-finance/web-lib/components/Button';
 
-import Chart from './Chart';
-import VaultDetails from './VaultDetails';
+import Chart from '../charts/Chart';
+import VaultDetails from '../dashboard/VaultDetails';
+
+import type {MouseEvent, ReactElement} from 'react';
+import type {TChartData} from 'types/chart';
 
 const dataWindows = [
 	{name: '1 day', value: 1},
@@ -66,7 +68,7 @@ function	Overview(): ReactElement {
 
 	return (
 		<div className={'mt-6 h-[400px]'}>
-			<div className={'flex flex-row mt-4 space-x-4'}>
+			<div className={'mt-4 flex flex-row space-x-4'}>
 				{dataWindows.map((window): ReactElement => (
 					<Button
 						key={window.name}

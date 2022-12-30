@@ -1,12 +1,14 @@
-import	React, {ReactElement}		from	'react';
-import {TLegendItem} from 'types/chart';
+import	React		from	'react';
+
+import type {ReactElement} from 'react';
+import type {TLegendItem} from 'types/chart';
 
 function MultiItem(props: {details: string[], color: string, isThin?: boolean}): ReactElement {
 	const lines = props.details;
 	const itemWidth = props.isThin ? '0.5rem' : '1rem';
 
 	return (
-		<div  className={'flex flex-row mb-8 -ml-8'}>
+		<div  className={'mb-8 -ml-8 flex flex-row'}>
 			<div className={'h-5'} style={{width: itemWidth, backgroundColor: props.color}} />
 
 			<div>
@@ -24,8 +26,8 @@ function SingleItem(props: {details: string, color: string, isThin?: boolean}): 
 	const itemWidth = props.isThin ? '0.5rem' : '1rem';
 
 	return (
-		<div className={'flex flex-row mb-8 -ml-8'}>
-			<div className={'w-4 h-5'} style={{width: itemWidth, backgroundColor: props.color}} />
+		<div className={'mb-8 -ml-8 flex flex-row'}>
+			<div className={'h-5 w-4'} style={{width: itemWidth, backgroundColor: props.color}} />
 			<p className={'ml-2 text-xs underline md:text-sm'}>{itemName}</p>
 		</div> 
 	);
@@ -34,7 +36,7 @@ function SingleItem(props: {details: string, color: string, isThin?: boolean}): 
 
 function ChartLegend(props: {items: TLegendItem[] }): ReactElement {
 	return (
-		<div className={'flex flex-col justify-center items-start -mt-8 ml-4 w-[15%] h-full'}>
+		<div className={'-mt-8 ml-4 flex h-full w-[15%] flex-col items-start justify-center'}>
 			{props.items.map((item: TLegendItem, idx: number): ReactElement => {
 				const {type, details, color, isThin} = item;
 

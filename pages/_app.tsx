@@ -1,15 +1,18 @@
 /* eslint-disable jsx-a11y/role-supports-aria-props */
-import	React, {ReactElement, useState}		from	'react';
-import	{AppProps}							from	'next/app';
+import	React, {useState}		from	'react';
 import	Head								from	'next/head';
 import	Link								from	'next/link';
 import	{useRouter}							from	'next/router';
 import	{SessionProvider, useSession}			from	'next-auth/react';
 import	{DefaultSeo}						from	'next-seo';
-import	{Button}							from	'@yearn-finance/web-lib/components';
-import	{useWeb3, WithYearn}				from	'@yearn-finance/web-lib/contexts';
-import	{useClientEffect}					from	'@yearn-finance/web-lib/hooks';
 import {PartnerContextApp} from 'contexts/usePartner';
+import {Button} from '@yearn-finance/web-lib/components/Button';
+import {useWeb3} from '@yearn-finance/web-lib/contexts/useWeb3';
+import {WithYearn} from '@yearn-finance/web-lib/contexts/WithYearn';
+import	{useClientEffect}					from	'@yearn-finance/web-lib/hooks';
+
+import type	{AppProps}							from	'next/app';
+import type {ReactElement} from 'react';
 
 import	'../style.css';
 
@@ -150,7 +153,7 @@ function	AppHeader(): ReactElement {
 
 	return (
 		<header>
-			<div className={'flex flex-row justify-between items-center py-6 w-full'}>
+			<div className={'flex w-full flex-row items-center justify-between py-6'}>
 				<div className={'flex flex-row items-center space-x-6 md:space-x-10'}>
 					<div>
 						<Link href={'/'}>
@@ -201,8 +204,8 @@ function	AppWrapper(props: AppProps): ReactElement {
 	return (
 		<>
 			<AppHead />
-			<div id={'app'} className={'grid flex-col grid-cols-12 gap-x-4 mx-auto mb-0 max-w-6xl md:flex-row'}>
-				<div className={'flex flex-col col-span-12 w-full min-h-[100vh]'}>
+			<div id={'app'} className={'mx-auto mb-0 grid max-w-6xl grid-cols-12 flex-col gap-x-4 md:flex-row'}>
+				<div className={'col-span-12 flex min-h-[100vh] w-full flex-col'}>
 					<AppHeader />
 					<Component
 						key={router.route}
@@ -224,7 +227,6 @@ function	MyApp(props: AppProps): ReactElement {
 					shouldUseThemes: false
 				},
 				web3: {
-					shouldUseStrictChainMode: false,
 					defaultChainID: 1,
 					supportedChainID: [1, 250, 42161, 1337, 31337]
 				}

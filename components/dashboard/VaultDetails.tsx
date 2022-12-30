@@ -1,9 +1,11 @@
-import	React, {ReactElement}		from	'react';
+import	React		from	'react';
+
+import type {ReactElement} from 'react';
 
 
 function	VaultDetails(): ReactElement {
 	return (
-		<div className={'flex justify-between my-20 w-[80%] bg-good-ol-grey-100'}>
+		<div className={'my-20 flex w-[80%] justify-between bg-good-ol-grey-100'}>
 			<div>
 				<p>{'TVL'}</p>
 				<h1>{'$ 987, 125, 743. 68'}</h1>

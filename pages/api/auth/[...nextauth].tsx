@@ -1,6 +1,8 @@
-import	NextAuth, {NextAuthOptions}	from	'next-auth';
+import	NextAuth	from	'next-auth';
 import	CredentialsProvider			from	'next-auth/providers/credentials';
 import	{ethers}					from	'ethers';
+
+import type {NextAuthOptions} from 'next-auth';
 
 export const authOptions: NextAuthOptions = {
 	secret: process.env.NEXTAUTH_SECRET,
