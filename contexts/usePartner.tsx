@@ -30,11 +30,14 @@ type TPartnerContext = {
 	logo?: MutableRefObject<ReactElement>,
 	set_partner?: Dispatch<SetStateAction<string>>
 	vaults: TPartnerVault[],
+	isLoadingVaults: boolean,
+	
 }
 
 const	defaultProps: TPartnerContext = {
 	partner: '',
-	vaults: []
+	vaults: [],
+	isLoadingVaults: false
 };
 
 const	Partner = createContext<TPartnerContext>(defaultProps);
@@ -50,7 +53,7 @@ export const PartnerContextApp = ({children}: {children: ReactElement}): ReactEl
 	}, [partner]);
 
 	// Conditonally fetch vault data when partner is set
-	const	{data: payouts} = useSWR(
+	const	{data: payouts, isLoading: isLoadingVaults} = useSWR(
 		partner ? `https://api.yearn.vision/partners/${PARTNER_SHORT_NAMES[partner]}/payout_total` : null,
 		baseFetcher,
 		{revalidateOnFocus: false}
@@ -89,7 +92,8 @@ export const PartnerContextApp = ({children}: {children: ReactElement}): ReactEl
 				partner,
 				set_partner,
 				logo,
-				vaults: vaults
+				vaults: vaults,
+				isLoadingVaults
 			}}>
 			{children}
 		</Partner.Provider>
