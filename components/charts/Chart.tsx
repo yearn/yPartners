@@ -1,9 +1,9 @@
 import	React		from	'react';
 import Chevron from '@yearn-finance/web-lib/icons/IconChevron';
 
+import Bar from './Bar';
 import ChartLegend from './ChartLegend';
-import Bar from './chart/Bar';
-import Composed from './chart/Composed';
+import Composed from './Composed';
 
 import type {ReactElement} from 'react';
 import type {TChartProps} from 'types/chart';
