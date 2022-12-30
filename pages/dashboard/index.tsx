@@ -1,5 +1,5 @@
 
-import	React, {useEffect, useState}		from	'react';
+import	React, {useEffect, useMemo, useState}		from	'react';
 import {VaultDetailsTabsWrapper} from 'components/dashboard/VaultDetailsTabsWrapper';
 import {usePartner} from 'contexts/usePartner';
 import {LOGOS, PARTNERS} from 'utils/b2b/Partners';
@@ -19,7 +19,7 @@ function formatDate(date: Date): string {
 }
 
 function	Index(): ReactElement {
-	const	{partner, logo, set_partner} = usePartner();
+	const	{partner, logo, isLoadingVaults, vaults, set_partner} = usePartner();
 	const [lastSync, set_lastSync] = useState('');
 	const [reportStart, set_reportStart] = useState(firstDayLastMonth);
 	const [reportEnd, set_reportEnd] = useState(today);
@@ -56,6 +56,24 @@ function	Index(): ReactElement {
 			set_reportEnd(rangeValue);
 		}
 	}
+
+	const	VaultGraphs = useMemo((): ReactElement => {
+		if (partner && isLoadingVaults) {
+			return (
+				<h1>{'Loading...'}</h1>
+			);	
+		}
+
+		if (partner && !isLoadingVaults && vaults.length === 0) {
+			return (
+				<h1>{'No Vaults Found'}</h1>
+			);	
+		}
+
+		return (
+			<VaultDetailsTabsWrapper />
+		);
+	}, [partner, vaults, isLoadingVaults]);
 
 	return (
 		<main>
@@ -112,8 +130,8 @@ function	Index(): ReactElement {
 			</section>
 
 			<section aria-label={'tabs'}>
-				<VaultDetailsTabsWrapper />
-			</section>
+				{VaultGraphs}
+			</section>	
 		</main>
 	);
 }
