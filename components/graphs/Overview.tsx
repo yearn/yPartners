@@ -2,7 +2,7 @@ import	React, {useEffect, useState}		from	'react';
 import {Button} from '@yearn-finance/web-lib/components/Button';
 
 import Chart from '../charts/Chart';
-import VaultDetails from './VaultDetails';
+import VaultDetails from '../dashboard/VaultDetails';
 
 import type {MouseEvent, ReactElement} from 'react';
 import type {TChartData} from 'types/chart';

@@ -5,7 +5,7 @@ import Chevron from '@yearn-finance/web-lib/icons/IconChevron';
 import IconCopy from '@yearn-finance/web-lib/icons/IconCopy';
 import IconLinkOut from '@yearn-finance/web-lib/icons/IconLinkOut';
 
-import Overview from './Overview';
+import Overview from '../graphs/Overview';
 
 import type {ReactElement} from 'react';
 
