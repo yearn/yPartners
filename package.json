@@ -13,7 +13,7 @@
 	},
 	"dependencies": {
 		"@yearn-finance/web-lib": "^0.17.49",
-		"axios": "^1.2.1",
+		"axios": "^1.2.2",
 		"ethcall": "^4.8.12",
 		"ethers": "^5.7.2",
 		"framer-motion": "^7.6.19",
