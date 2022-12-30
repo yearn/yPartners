@@ -1,8 +1,9 @@
 import	React, {createContext, useContext, useEffect, useMemo, useRef, useState}	from	'react';
-import LogoYearn from 'components/icons/LogoYearn';
-import {LOGOS, PARTNER_SHORT_NAMES} from 'utils/b2b/Partners';
 import useSWR from 'swr';
 import {baseFetcher} from '@yearn-finance/web-lib/utils/fetchers';
+
+import LogoYearn from '../components/icons/LogoYearn';
+import {LOGOS, PARTNER_SHORT_NAMES} from '../utils/b2b/Partners';
 
 import type {Dispatch, MutableRefObject, ReactElement, SetStateAction} from 'react';
 import type {SWRResponse} from 'swr';

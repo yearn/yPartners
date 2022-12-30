@@ -1,10 +1,10 @@
 import React, {Fragment, useState} from 'react';
-import {usePartner} from 'contexts/usePartner';
 import {Listbox, Transition} from '@headlessui/react';
 import Chevron from '@yearn-finance/web-lib/icons/IconChevron';
 import IconCopy from '@yearn-finance/web-lib/icons/IconCopy';
 import IconLinkOut from '@yearn-finance/web-lib/icons/IconLinkOut';
 
+import {usePartner} from '../../contexts/usePartner';
 import Overview from '../graphs/Overview';
 
 import type {ReactElement} from 'react';

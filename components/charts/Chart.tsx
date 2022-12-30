@@ -6,7 +6,7 @@ import ChartLegend from './ChartLegend';
 import Composed from './Composed';
 
 import type {ReactElement} from 'react';
-import type {TChartProps} from 'types/chart';
+import type {TChartProps} from '../../types/chart';
 
 function Chart(props: TChartProps): ReactElement {
 

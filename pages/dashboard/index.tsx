@@ -1,9 +1,10 @@
 
 import	React, {useEffect, useMemo, useState}		from	'react';
-import {VaultDetailsTabsWrapper} from 'components/dashboard/VaultDetailsTabsWrapper';
-import {usePartner} from 'contexts/usePartner';
-import {LOGOS, PARTNERS} from 'utils/b2b/Partners';
 import {Button} from '@yearn-finance/web-lib/components/Button';
+
+import {VaultDetailsTabsWrapper} from '../../components/dashboard/VaultDetailsTabsWrapper';
+import {usePartner} from '../../contexts/usePartner';
+import {LOGOS, PARTNERS} from '../../utils/b2b/Partners';
 
 import type {ChangeEvent, FormEvent, ReactElement} from 'react';
 
