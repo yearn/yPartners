@@ -1,4 +1,4 @@
-import	React, {useCallback, useState}	from	'react';
+import React, {useState}	from	'react';
 import useSWR from 'swr';
 import {baseFetcher} from '@yearn-finance/web-lib/utils/fetchers';
 import {formatAmount} from '@yearn-finance/web-lib/utils/format.number';
@@ -7,8 +7,6 @@ import type {ReactElement} from 'react';
 import type {SWRResponse} from 'swr';
 
 function	SectionStats(): ReactElement {
-	const	formatNumber = useCallback((n: number): string => formatAmount(n, 0, 2), []);
-	const	formatPercent = useCallback((n: number): string => `${formatAmount(n, 0, 2)}%`, []);
 	const	[shares] = useState(15);
 
 	const	{data: count} = useSWR(
@@ -35,19 +33,19 @@ function	SectionStats(): ReactElement {
 			<div className={'mt-4 mr-4 flex flex-col space-y-2 pr-5 md:mt-0 md:mr-8'}>
 				<p>{'TVL by all Partners'}</p>
 				<b className={'text-3xl tabular-nums'}>
-					{tvl ? `$ ${formatNumber(tvl.tvl_total)}` : '-'}
+					{tvl ? `$ ${formatAmount(tvl.tvl_total, 0, 2)}` : '-'}
 				</b>
 			</div>
 			<div className={'mt-4 mr-4 flex flex-col space-y-2 pr-5 md:mt-0 md:mr-8'}>
 				<p>{'Fees earned by Partners'}</p>
 				<b className={'text-3xl tabular-nums'}>
-					{fees ? `$ ${formatNumber(fees.partners_total)}` : '-'}
+					{fees ? `$ ${formatAmount(fees.partners_total, 0, 2)}` : '-'}
 				</b>
 			</div>
 			<div className={'mt-4 mr-8 flex flex-col space-y-2 pr-5 md:mt-0'}>
 				<p>{'Share of Revenue'}</p>
 				<b className={'text-3xl tabular-nums'}>
-					{formatPercent(shares)}
+					{`${formatAmount(shares, 0, 2)}%`}
 				</b>
 			</div>
 			<div className={'mt-4 flex flex-col space-y-2 pr-5 md:mt-0'}>
