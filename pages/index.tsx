@@ -13,7 +13,7 @@ function	Index(): ReactElement {
 			<section aria-label={'hero'} className={'mt-[85px] mb-28 grid grid-cols-12 items-center'}>
 				<div className={'col-span-12 md:col-span-8'}>
 					<h1 className={'mb-6 text-6xl text-neutral-900 md:text-8xl'}>{'Yearn Partners'}</h1>
-					<p className={'text-lg'}>{'Integrate Yearn vaults to earn up to 50 % profit share'}</p>
+					<p className={'text-lg'}>{'Integrate Yearn vaults to earn up to 50% profit share'}</p>
 					<div className={'mt-4 flex flex-row space-x-4'}>
 						<Button className={'w-[200px]'}>
 							{'Apply'}
