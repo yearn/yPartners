@@ -7,24 +7,7 @@ import {LOGOS, PARTNER_SHORT_NAMES} from '../utils/b2b/Partners';
 
 import type {Dispatch, MutableRefObject, ReactElement, SetStateAction} from 'react';
 import type {SWRResponse} from 'swr';
-
-type TPartnerVault = {
-	index: number,
-	address: string,
-	balance: number
-	bucket: string
-	token: string
-	tvl: number
-	network: string
-};
-
-type TPartnerVaultByAddress = {
-	[address: string]: TPartnerVault
-}
-
-type TPartnerVaultsByNetwork = {
-	[network: string]: TPartnerVaultByAddress
-}
+import type {TPartnerVault, TPartnerVaultsByNetwork} from 'types/types';
 
 type TPartnerContext = {
 	partner: string,
