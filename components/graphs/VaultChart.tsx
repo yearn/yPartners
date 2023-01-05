@@ -6,6 +6,7 @@ import VaultDetails from '../dashboard/VaultDetails';
 
 import type {MouseEvent, ReactElement} from 'react';
 import type {TChartData} from 'types/chart';
+import type {TPartnerVault} from 'types/types';
 
 const dataWindows = [
 	{name: '1 day', value: 1},
@@ -45,7 +46,7 @@ function generateData(window = 29): TChartData[]{
 	return data;
 }
 
-function	Overview(): ReactElement {
+function	VaultChart(props: { vault: TPartnerVault }): ReactElement {
 	const [activeWindow, set_activeWindow] = useState('1 month');
 	const [windowValue, set_windowValue] = useState(29);
 	const [dummyData, set_dummyData] = useState(generateData());
@@ -82,7 +83,7 @@ function	Overview(): ReactElement {
 				))}
 			</div>
 
-			<VaultDetails/>
+			<VaultDetails vault={props.vault}  />
 			<Chart
 				title={'Fees Earned'}
 				type={'bar'}
@@ -131,4 +132,4 @@ function	Overview(): ReactElement {
 	);
 }
 
-export default Overview;
+export default VaultChart;
