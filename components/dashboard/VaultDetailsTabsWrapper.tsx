@@ -5,7 +5,7 @@ import IconCopy from '@yearn-finance/web-lib/icons/IconCopy';
 import IconLinkOut from '@yearn-finance/web-lib/icons/IconLinkOut';
 
 import {usePartner} from '../../contexts/usePartner';
-import Overview from '../graphs/Overview';
+import VaultChart from '../graphs/VaultChart';
 
 import type {ReactElement} from 'react';
 
@@ -113,8 +113,8 @@ function	VaultDetailsTabsWrapper(): ReactElement {
 
 			<div className={'-mt-0.5 h-0.5 w-full bg-neutral-300'} />
 
-			{vaults.map((_, idx): ReactElement | null => {
-				return idx === selectedIndex ? <Overview key={idx}/> : null;
+			{vaults.map((vault, idx): ReactElement | null => {
+				return idx === selectedIndex ? <VaultChart vault={vault} key={idx}/> : null;
 			})}
 
 		</div>
