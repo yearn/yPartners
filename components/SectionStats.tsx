@@ -1,30 +1,47 @@
 import	React, {useCallback, useState}	from	'react';
+import useSWR from 'swr';
+import {baseFetcher} from '@yearn-finance/web-lib/utils/fetchers';
 import {formatAmount} from '@yearn-finance/web-lib/utils/format.number';
 
 import type {ReactElement} from 'react';
+import type {SWRResponse} from 'swr';
 
 function	SectionStats(): ReactElement {
 	const	formatNumber = useCallback((n: number): string => formatAmount(n, 0, 2), []);
-	// const	formatUSD = useCallback((n: number): string => `$${formatAmount(n, 2, 2)}`, []);
 	const	formatPercent = useCallback((n: number): string => `${formatAmount(n, 0, 2)}%`, []);
-	const	[tvl] = useState(69125743.15);
-	const	[fees] = useState(420743.15);
 	const	[shares] = useState(15);
-	const	[partners] = useState(9);
+
+	const	{data: count} = useSWR(
+		`${process.env.YVISION_BASE_URI}/partners/count`,
+		baseFetcher,
+		{revalidateOnFocus: false}
+	) as SWRResponse;
+
+	const	{data: fees} = useSWR(
+		`${process.env.YVISION_BASE_URI}/partners/total`,
+		baseFetcher,
+		{revalidateOnFocus: false}
+	) as SWRResponse;
+
+	const	{data: tvl} = useSWR(
+		`${process.env.YVISION_BASE_URI}/tvl/total`,
+		baseFetcher,
+		{revalidateOnFocus: false}
+	) as SWRResponse;
+	
 
 	return (
 		<section aria-label={'stats'} className={'mb-28 flex flex-row flex-wrap items-center md:mb-50'}>
 			<div className={'mt-4 mr-4 flex flex-col space-y-2 pr-5 md:mt-0 md:mr-8'}>
 				<p>{'TVL by all Partners'}</p>
 				<b className={'text-3xl tabular-nums'}>
-					{/* {formatUSD(tvl)} - temp solution to format errors during hydration */}
-					{tvl}
+					{tvl ? `$ ${formatNumber(tvl.tvl_total)}` : '-'}
 				</b>
 			</div>
 			<div className={'mt-4 mr-4 flex flex-col space-y-2 pr-5 md:mt-0 md:mr-8'}>
 				<p>{'Fees earned by Partners'}</p>
 				<b className={'text-3xl tabular-nums'}>
-					{fees}
+					{fees ? `$ ${formatNumber(fees.partners_total)}` : '-'}
 				</b>
 			</div>
 			<div className={'mt-4 mr-8 flex flex-col space-y-2 pr-5 md:mt-0'}>
@@ -36,7 +53,7 @@ function	SectionStats(): ReactElement {
 			<div className={'mt-4 flex flex-col space-y-2 pr-5 md:mt-0'}>
 				<p>{'Partners'}</p>
 				<b className={'text-3xl tabular-nums'}>
-					{formatNumber(partners)}
+					{count ? count.partners_count : '-'}
 				</b>
 			</div>
 		</section>
