@@ -55,7 +55,7 @@ export const PartnerContextApp = ({children}: {children: ReactElement}): ReactEl
 
 	// Conditonally fetch vault data when partner is set
 	const	{data: payouts, isLoading: isLoadingVaults} = useSWR(
-		partner ? `https://api.yearn.vision/partners/${PARTNER_SHORT_NAMES[partner]}/payout_total` : null,
+		partner ? `${process.env.YVISION_BASE_URI}/partners/${PARTNER_SHORT_NAMES[partner]}/payout_total` : null,
 		baseFetcher,
 		{revalidateOnFocus: false}
 	) as SWRResponse;
