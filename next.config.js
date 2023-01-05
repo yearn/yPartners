@@ -47,6 +47,9 @@ module.exports = ({
 		},
 		ALCHEMY_KEY: process.env.ALCHEMY_KEY,
 		INFURA_KEY: process.env.INFURA_KEY,
-		NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET
+		NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET,
+		// YVISION_BASE_URI: 'https://api.yearn.vision',
+		// YVISION_BASE_URI: 'https://api.staging.yearn.vision',
+		YVISION_BASE_URI: 'http://localhost:5000'
 	}
 });
