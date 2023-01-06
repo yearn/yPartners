@@ -3,6 +3,7 @@ import {Listbox, Transition} from '@headlessui/react';
 import Chevron from '@yearn-finance/web-lib/icons/IconChevron';
 import IconCopy from '@yearn-finance/web-lib/icons/IconCopy';
 import IconLinkOut from '@yearn-finance/web-lib/icons/IconLinkOut';
+import {copyToClipboard} from '@yearn-finance/web-lib/utils/helpers';
 
 import {usePartner} from '../../contexts/usePartner';
 import VaultChart from '../graphs/VaultChart';
@@ -94,17 +95,13 @@ function	VaultDetailsTabsWrapper(): ReactElement {
 				
 				<div className={'flex flex-row items-center justify-end space-x-2 pb-0 md:pb-4 md:last:space-x-4'}>
 					<a
-						href={'https://etherscan.io/'}
+						href={`https://etherscan.io/address/${vaults[selectedIndex].address}`}
 						target={'_blank'}
 						rel={'noopener noreferrer'}>
 						<span className={'sr-only'}>{'Open in explorer'}</span>
 						<IconLinkOut className={'h-5 w-5 cursor-alias text-neutral-600 transition-colors hover:text-neutral-900 md:h-6 md:w-6'} />
 					</a>
-					<button
-						onClick={(): void => {
-							alert('Feature currently unavailable');
-						}
-						}>
+					<button onClick={(): void => copyToClipboard(vaults[selectedIndex].address)}>
 						<span className={'sr-only'}>{'Copy address'}</span>
 						<IconCopy className={'h-5 w-5 text-neutral-600 transition-colors hover:text-neutral-900 md:h-6 md:w-6'} />
 					</button>
