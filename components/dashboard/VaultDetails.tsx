@@ -12,12 +12,12 @@ function	VaultDetails(props: {vault: TPartnerVault}): ReactElement {
 		<div className={'my-20 flex w-[80%] justify-between bg-good-ol-grey-100'}>
 			<div>
 				<p>{'TVL'}</p>
-				<h1>{formatAmount(tvl)}</h1>
+				<h1>{`$ ${formatAmount(tvl, 0, 2)}`}</h1>
 			</div>
 
 			<div>
 				<p>{'Fees earned to date'}</p>
-				<h1>{formatAmount(balance)}</h1>
+				<h1>{`$ ${formatAmount(balance, 0, 2)}`}</h1>
 			</div>
 
 			<div>
