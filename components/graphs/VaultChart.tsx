@@ -9,7 +9,6 @@ import type {TChartData} from 'types/chart';
 import type {TPartnerVault} from 'types/types';
 
 const dataWindows = [
-	{name: '1 day', value: 1},
 	{name: '1 week', value: 7}, 
 	{name: '1 month', value: 29}, 
 	{name: '1 year', value: 365}, 
