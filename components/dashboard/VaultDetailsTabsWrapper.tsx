@@ -83,8 +83,9 @@ function	Tabs({selectedIndex, set_selectedIndex}: TProps): ReactElement {
 
 function	VaultDetailsTabsWrapper(): ReactElement {
 	const	{vaults} = usePartner();
-
 	const [selectedIndex, set_selectedIndex] = useState(0);
+
+	const vaultAddress = vaults[selectedIndex] ?  vaults[selectedIndex].address : '';
 
 	return (
 		<div aria-label={'Vault Details'} className={'col-span-12 mb-4 flex flex-col bg-neutral-100'}>
@@ -95,7 +96,7 @@ function	VaultDetailsTabsWrapper(): ReactElement {
 				
 				<div className={'flex flex-row items-center justify-end space-x-2 pb-0 md:pb-4 md:last:space-x-4'}>
 					<a
-						href={`https://etherscan.io/address/${vaults[selectedIndex].address}`}
+						href={`https://etherscan.io/address/${vaultAddress}`}
 						target={'_blank'}
 						rel={'noopener noreferrer'}>
 						<span className={'sr-only'}>{'Open in explorer'}</span>
