@@ -1,5 +1,5 @@
 /* eslint-disable jsx-a11y/role-supports-aria-props */
-import	React, {useState}		from	'react';
+import	React, {useEffect, useState}		from	'react';
 import	Head								from	'next/head';
 import	Link								from	'next/link';
 import	{useRouter}							from	'next/router';
@@ -7,16 +7,34 @@ import	{SessionProvider, useSession}			from	'next-auth/react';
 import	{DefaultSeo}						from	'next-seo';
 import {PartnerContextApp} from 'contexts/usePartner';
 import {Button} from '@yearn-finance/web-lib/components/Button';
+import {Dropdown} from '@yearn-finance/web-lib/components/Dropdown';
 import {useWeb3} from '@yearn-finance/web-lib/contexts/useWeb3';
 import {WithYearn} from '@yearn-finance/web-lib/contexts/WithYearn';
 import	{useClientEffect}					from	'@yearn-finance/web-lib/hooks';
+import NetworkArbitrum from '@yearn-finance/web-lib/icons/IconNetworkArbitrum';
+import NetworkEthereum from '@yearn-finance/web-lib/icons/IconNetworkEthereum';
+import NetworkFantom from '@yearn-finance/web-lib/icons/IconNetworkFantom';
+import NetworkOptimism from '@yearn-finance/web-lib/icons/IconNetworkOptimism';
 
 import type	{AppProps}							from	'next/app';
 import type {ReactElement} from 'react';
 
 import	'../style.css';
 
-function	AppHead(): ReactElement {
+type TNetworkOption = {
+	icon: ReactElement,
+	label: string,
+	value: number
+}
+
+const	options: TNetworkOption[] = [
+	{icon: <NetworkEthereum />, label: 'Ethereum', value: 1},
+	{icon: <NetworkFantom />, label: 'Fantom', value: 250},
+	{icon: <NetworkOptimism />, label: 'Optimism', value: 10},
+	{icon: <NetworkArbitrum />, label: 'Arbitrum', value: 42161}
+];
+
+function	AppHead(): ReactElement {	
 	return (
 		<>
 			<Head>
@@ -91,9 +109,17 @@ function	AppHead(): ReactElement {
 
 function	AppHeader(): ReactElement {
 	const	router = useRouter();
-	const	{isActive, address, openLoginModal, onSwitchChain} = useWeb3();
+	const	{chainID, isActive, address, openLoginModal, onSwitchChain} = useWeb3();
 	const	{data: session} = useSession();
 	const	[walletIdentity] = useState('Log in');
+
+	const	[selectedOption, set_selectedOption] = useState(options[0]);
+
+	useEffect((): void => {
+		const	_selectedOption = options.find((e): boolean => e.value === Number(chainID)) || options[0];
+		set_selectedOption(_selectedOption);
+	}, [chainID, isActive]);
+
 	// const	hasPendingSignature = useRef(false);
 
 	// const authenticate = useCallback(async (_ens: string): Promise<void> => {
@@ -183,7 +209,14 @@ function	AppHeader(): ReactElement {
 						</Link>
 					</div>
 				</div>
-				<div>
+
+				<div className={'flex flex-row items-center space-x-6 md:space-x-10'}>
+					<Dropdown
+						defaultOption={options[0]}
+						options={options}
+						selected={selectedOption}
+						onSelect={(option: any): void => onSwitchChain(option.value as number, true)} />
+
 					<Button
 						variant={'filled'}
 						className={'!h-[30px]'}
