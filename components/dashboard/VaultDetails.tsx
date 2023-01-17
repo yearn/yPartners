@@ -6,7 +6,9 @@ import type {TPartnerVault} from 'types/types';
 
 
 function	VaultDetails(props: {vault: TPartnerVault}): ReactElement {
-	const {balance, tvl} = props.vault;
+	const {balance, tvl, apy, riskScore} = props.vault;
+	
+	const formatPercent = (n: number, min = 2, max = 2): string => `${formatAmount(n || 0, min, max)}%`;
 
 	return (
 		<div className={'my-20 flex w-[80%] justify-between bg-good-ol-grey-100'}>
@@ -22,12 +24,12 @@ function	VaultDetails(props: {vault: TPartnerVault}): ReactElement {
 
 			<div>
 				<p>{'Annual Yield'}</p>
-				<h1>{'- %'}</h1>
+				<h1>{formatPercent(apy)}</h1>
 			</div>
 
 			<div>
 				<p>{'Risk Score'}</p>
-				<h1>{'-'}</h1>
+				<h1>{formatAmount(riskScore, 0, 2)}</h1>
 			</div>
 		</div>
 	);
