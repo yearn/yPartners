@@ -8,6 +8,8 @@ export type TPartnerVault = {
 	token: string
 	tvl: number
 	network: string
+	riskScore: number,
+	apy: number
 };
 
 type TPartnerVaultByAddress = {
