@@ -1,5 +1,7 @@
 import React, {Fragment, useState} from 'react';
+import {getExplorerURL} from 'utils/b2b';
 import {Listbox, Transition} from '@headlessui/react';
+import {useWeb3} from '@yearn-finance/web-lib/contexts/useWeb3';
 import Chevron from '@yearn-finance/web-lib/icons/IconChevron';
 import IconCopy from '@yearn-finance/web-lib/icons/IconCopy';
 import IconLinkOut from '@yearn-finance/web-lib/icons/IconLinkOut';
@@ -82,6 +84,7 @@ function	Tabs({selectedIndex, set_selectedIndex}: TProps): ReactElement {
 }
 
 function	VaultDetailsTabsWrapper(): ReactElement {
+	const	{chainID} = useWeb3();
 	const	{vaults} = usePartner();
 	const [selectedIndex, set_selectedIndex] = useState(0);
 
@@ -96,7 +99,7 @@ function	VaultDetailsTabsWrapper(): ReactElement {
 				
 				<div className={'flex flex-row items-center justify-end space-x-2 pb-0 md:pb-4 md:last:space-x-4'}>
 					<a
-						href={`https://etherscan.io/address/${vaultAddress}`}
+						href={`${getExplorerURL(chainID)}/address/${vaultAddress}`}
 						target={'_blank'}
 						rel={'noopener noreferrer'}>
 						<span className={'sr-only'}>{'Open in explorer'}</span>
