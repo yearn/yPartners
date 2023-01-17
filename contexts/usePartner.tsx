@@ -71,9 +71,9 @@ export const PartnerContextApp = ({children}: {children: ReactElement}): ReactEl
 			const partnerVault = vaultsCurrentNetwork[yVault.address];
 
 			if(partnerVault){
-				const {riskScore, apy} = yVault;
+				const {riskScore, apy, address} = yVault;
 
-				const _vault = {...partnerVault, riskScore, apy: apy.net_apy};
+				const _vault = {...partnerVault, address, riskScore, apy: apy.net_apy};
 
 				if(_vault.balance > 0){
 					_vaults.push(_vault);
