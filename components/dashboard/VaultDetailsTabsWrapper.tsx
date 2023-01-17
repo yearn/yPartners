@@ -26,10 +26,10 @@ function	Tabs({selectedIndex, set_selectedIndex}: TProps): ReactElement {
 						key={`desktop-${idx}`}
 						onClick={(): void => set_selectedIndex(idx)}>
 						<p
-							title={`${vault.token} - ${vault.network}`}
+							title={vault.token}
 							aria-selected={selectedIndex === idx}
 							className={'hover-fix tab'}>
-							{`${vault.token} - ${vault.network}`}
+							{vault.token}
 						</p>
 					</button>	
 				))}
@@ -68,7 +68,7 @@ function	Tabs({selectedIndex, set_selectedIndex}: TProps): ReactElement {
 											className={'yearn--listbox-menu-item'}
 											key={idx}
 											value={vault}>
-											{`${vault.token} - ${vault.network}`}
+											{vault.token}
 										</Listbox.Option>
 									))}
 								</Listbox.Options>
