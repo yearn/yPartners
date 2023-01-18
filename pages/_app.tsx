@@ -1,3 +1,4 @@
+/* eslint-disable jsx-a11y/role-supports-aria-props */
 import React, {useEffect, useState} from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
@@ -214,6 +215,7 @@ function	AppHeader(): ReactElement {
 						defaultOption={options[0]}
 						options={options}
 						selected={selectedOption}
+						// eslint-disable-next-line @typescript-eslint/no-explicit-any
 						onSelect={(option: any): void => onSwitchChain(option.value as number, true)} />
 
 					<Button
