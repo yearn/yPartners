@@ -88,7 +88,7 @@ function	VaultDetailsTabsWrapper(): ReactElement {
 	const	{vaults} = usePartner();
 	const [selectedIndex, set_selectedIndex] = useState(0);
 
-	const vaultAddress = vaults[selectedIndex] ?  vaults[selectedIndex].address : '';
+	const vaultAddress = vaults[selectedIndex] ? vaults[selectedIndex].address : '';
 
 	return (
 		<div aria-label={'Vault Details'} className={'col-span-12 mb-4 flex flex-col bg-neutral-100'}>

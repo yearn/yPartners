@@ -82,7 +82,7 @@ function	VaultChart(props: { vault: TPartnerVault }): ReactElement {
 				))}
 			</div>
 
-			<VaultDetails vault={props.vault}  />
+			<VaultDetails vault={props.vault} />
 			<Chart
 				title={'Fees Earned'}
 				type={'bar'}
