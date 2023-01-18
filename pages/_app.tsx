@@ -200,7 +200,6 @@ function	AppHeader(): ReactElement {
 function	AppWrapper(props: AppProps): ReactElement {
 	const	{Component, pageProps, router} = props;
 
-
 	return (
 		<>
 			<AppHead />
