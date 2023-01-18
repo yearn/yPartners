@@ -45,7 +45,7 @@ function	Composed(props: TChartProps): ReactElement {
 				<XAxis
 					xAxisId={'main'}
 					tickFormatter={formatXAxis}
-					interval={xAxisOptions.interval}  />
+					interval={xAxisOptions.interval} />
 				<XAxis xAxisId={'hidden'} hide={true} />
 
 				<YAxis

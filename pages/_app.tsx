@@ -1,17 +1,16 @@
-/* eslint-disable jsx-a11y/role-supports-aria-props */
-import	React, {useState}		from	'react';
-import	Head								from	'next/head';
-import	Link								from	'next/link';
-import	{useRouter}							from	'next/router';
-import	{SessionProvider, useSession}			from	'next-auth/react';
-import	{DefaultSeo}						from	'next-seo';
+import React, {useState} from 'react';
+import Head from 'next/head';
+import Link from 'next/link';
+import {useRouter} from 'next/router';
+import {SessionProvider, useSession} from 'next-auth/react';
+import {DefaultSeo} from 'next-seo';
 import {PartnerContextApp} from 'contexts/usePartner';
 import {Button} from '@yearn-finance/web-lib/components/Button';
 import {useWeb3} from '@yearn-finance/web-lib/contexts/useWeb3';
 import {WithYearn} from '@yearn-finance/web-lib/contexts/WithYearn';
-import	{useClientEffect}					from	'@yearn-finance/web-lib/hooks';
+import {useClientEffect} from '@yearn-finance/web-lib/hooks';
 
-import type	{AppProps}							from	'next/app';
+import type {AppProps} from 'next/app';
 import type {ReactElement} from 'react';
 
 import	'../style.css';
@@ -113,7 +112,7 @@ function	AppHeader(): ReactElement {
 	// 			router.push(callbackUrl);
 	// 		}
 	// 	}
-		
+
 	// }, [provider, address, router]);
 
 	// useClientEffect((): void => {

@@ -8,7 +8,7 @@ export type TChartData = {
 	rbdUSDC: string,
 };
 
-export type TAxisDomainItem = string | number  | 'auto' | 'dataMin' | 'dataMax';
+export type TAxisDomainItem = string | number | 'auto' | 'dataMin' | 'dataMax';
 
 export type TLegendItem = {
 	type: string,
@@ -19,7 +19,7 @@ export type TLegendItem = {
 
 
 export type TChartProps = {
-  children?: React.ReactNode,
+	children?: React.ReactNode,
 	className?: string,
 	type: string,
 	title: string,
