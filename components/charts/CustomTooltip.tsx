@@ -1,5 +1,4 @@
-/* eslint-disable @typescript-eslint/naming-convention */
-import	React		from	'react';
+import React from 'react';
 
 import type {ReactElement} from 'react';
 
@@ -17,9 +16,9 @@ type TTooltipItem = {
 }
 
 function ToolTip(props: TTooltip): ReactElement | null {
-	const {active, items, payload} = props;
+	const {active: isActive, items, payload} = props;
 
-	if (active && payload) {
+	if (isActive && payload) {
 		return (
 			<div className={'rounded bg-good-ol-grey-300 p-2 opacity-90'}>
 				<p>{`Day ${payload[0].payload.name}`}</p>

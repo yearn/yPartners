@@ -23,7 +23,15 @@ function	Tabs({selectedIndex, set_selectedIndex}: TProps): ReactElement {
 	return (
 		<>
 			<nav className={'hidden flex-row items-center space-x-10 md:flex'}>
-				{vaults.map((vault, idx): ReactElement => (
+				<button disabled className={'cursor-not-allowed'}>
+					<p
+						title={'Overview'}
+						aria-selected={false}
+						className={'hover-fix tab !cursor-not-allowed'}>
+						{'Overview'}
+					</p>
+				</button>
+				{Object.values(vaults || []).map((vault, idx): ReactElement => (
 					<button
 						key={`desktop-${idx}`}
 						onClick={(): void => set_selectedIndex(idx)}>
@@ -33,7 +41,7 @@ function	Tabs({selectedIndex, set_selectedIndex}: TProps): ReactElement {
 							className={'hover-fix tab'}>
 							{vault.token}
 						</p>
-					</button>	
+					</button>
 				))}
 			</nav>
 			<div className={'relative z-50'}>
@@ -65,7 +73,7 @@ function	Tabs({selectedIndex, set_selectedIndex}: TProps): ReactElement {
 								leaveFrom={'transform scale-100 opacity-100'}
 								leaveTo={'transform scale-95 opacity-0'}>
 								<Listbox.Options className={'yearn--listbox-menu'}>
-									{vaults.map((vault, idx): ReactElement => (
+									{Object.values(vaults || []).map((vault, idx): ReactElement => (
 										<Listbox.Option
 											className={'yearn--listbox-menu-item'}
 											key={idx}
@@ -84,8 +92,8 @@ function	Tabs({selectedIndex, set_selectedIndex}: TProps): ReactElement {
 }
 
 function	VaultDetailsTabsWrapper(): ReactElement {
-	const	{chainID} = useWeb3();
-	const	{vaults} = usePartner();
+	const {chainID} = useWeb3();
+	const {vaults} = usePartner();
 	const [selectedIndex, set_selectedIndex] = useState(0);
 
 	const vaultAddress = vaults[selectedIndex] ? vaults[selectedIndex].address : '';
@@ -96,7 +104,7 @@ function	VaultDetailsTabsWrapper(): ReactElement {
 				<Tabs
 					selectedIndex={selectedIndex}
 					set_selectedIndex={set_selectedIndex} />
-				
+
 				<div className={'flex flex-row items-center justify-end space-x-2 pb-0 md:pb-4 md:last:space-x-4'}>
 					<a
 						href={`${getExplorerURL(chainID)}/address/${vaultAddress}`}
@@ -114,7 +122,7 @@ function	VaultDetailsTabsWrapper(): ReactElement {
 
 			<div className={'-mt-0.5 h-0.5 w-full bg-neutral-300'} />
 
-			{vaults.map((vault, idx): ReactElement | null => {
+			{Object.values(vaults || []).map((vault, idx): ReactElement | null => {
 				return idx === selectedIndex ? <VaultChart vault={vault} key={idx}/> : null;
 			})}
 

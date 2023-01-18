@@ -14,38 +14,47 @@ import	type {TPartnerList}		from	'types/types';
 const	PARTNERS: TPartnerList[] = [
 	{
 		name: 'QiDAO',
+		shortName: 'qidao',
 		description: 'A stablecoin protocol utilizing collateralized debt positions',
 		logo: <LogoQiDAO className={'text-900'} />
 	}, {
 		name: 'Element Finance',
+		shortName: 'element',
 		description: 'An open source protocl for fixed and variable yield markets',
 		logo: <LogoElement className={'text-900'} />
 	}, {
 		name: 'Brave',
+		shortName: 'brave',
 		description: 'Fast, private, secure web browser for PC, Mac, and mobile',
 		logo: <LogoBrave className={'text-900'} />
 	}, {
 		name: 'Abracadabra',
+		shortName: 'abracadabra',
 		description: 'A decentralized crypto lending platform ',
 		logo: <LogoMIM className={'text-900'} />
 	}, {
 		name: 'Ledger',
+		shortName: 'ledger',
 		description: 'An application to quickly and securely manage their assets',
 		logo: <LogoLedger className={'text-900'} />
 	}, {
 		name: 'Alchemix',
+		shortName: 'alchemix',
 		description: 'Self-repaying loans without risk of liquidation',
 		logo: <LogoAlchemix className={'text-900'} />
 	}, {
 		name: 'Gearbox',
+		shortName: 'gearbox',
 		description: 'A generalized leverage protocol',
 		logo: <LogoGearbox className={'text-900'} />
 	}, {
 		name: 'Inverse Finance',
+		shortName: 'inverse',
 		description: 'An open source protocol for borrowing and lending assets',
 		logo: <LogoInverse className={'text-900'} />
 	}, {
 		name: 'ZooDAO',
+		shortName: 'zoodao',
 		description: 'A platform that allows users to earn passive income from NFTs',
 		logo: <LogoZooDao className={'text-900'} />
 	}
@@ -61,7 +70,7 @@ const PARTNER_SHORT_NAMES: {[key: string]: string} = {
 	'Alchemix': 'alchemix',
 	'Gearbox': 'gearbox',
 	'Inverse Finance': 'inverse',
-	'ZooDAO': 'zoodao' //* 
+	'ZooDAO': 'zoodao' //*
 };
 
 type TPartnerLogo = {

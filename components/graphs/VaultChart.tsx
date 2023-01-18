@@ -9,9 +9,9 @@ import type {TChartData} from 'types/chart';
 import type {TPartnerVault} from 'types/types';
 
 const dataWindows = [
-	{name: '1 week', value: 7}, 
-	{name: '1 month', value: 29}, 
-	{name: '1 year', value: 365}, 
+	{name: '1 week', value: 7},
+	{name: '1 month', value: 29},
+	{name: '1 year', value: 365},
 	{name: 'All time', value: 50}
 ];
 
@@ -33,14 +33,14 @@ function generateData(window = 29): TChartData[]{
 		const revShare = {rsWBTC: ((Math.random()%0.3).toFixed(2)), rsUSDC: ((Math.random()%0.3)).toFixed(2)};
 
 		const baseAggBal = 100 - (Math.random()*50);
-		const aggregateWrapBal = {awb: (baseAggBal * 0.7).toFixed(0), profitShare: baseAggBal.toFixed(0)}; 
-		
+		const aggregateWrapBal = {awb: (baseAggBal * 0.7).toFixed(0), profitShare: baseAggBal.toFixed(0)};
+
 		const baseWrapperBalance = Math.random()*100;
 		const remWrapBalance = 100-baseWrapperBalance;
 		const wrapperBalDist = {rbdWBTC: baseWrapperBalance.toFixed(2), rbdUSDC: remWrapBalance.toFixed(2)};
 
 		data.push({name: `${i+1}`, ...fees, ...revShare, ...aggregateWrapBal, ...wrapperBalDist});
-	} 
+	}
 
 	return data;
 }
@@ -93,7 +93,7 @@ function	VaultChart(props: { vault: TPartnerVault }): ReactElement {
 				xAxisOptions={{interval: getTickInterval()}}
 				tooltipItems={[{name: 'USDC', symbol: 'K'}, {name: 'WBTC', symbol: 'K'}]}
 				legendItems={dummyLegendMulti}/>
-			
+
 			<Chart
 				title={'Revenue Shared'}
 				type={'bar'}

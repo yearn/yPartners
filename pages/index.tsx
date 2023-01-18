@@ -1,8 +1,8 @@
-import	React	from	'react';
-import	B2BMeme					from	'components/B2BMeme';
-import	SectionPartner			from	'components/SectionPartners';
-import	SectionStats			from	'components/SectionStats';
-import	SectionTargets			from	'components/SectionTargets';
+import React from 'react';
+import B2BMeme from 'components/B2BMeme';
+import SectionPartner from 'components/SectionPartners';
+import SectionStats from 'components/SectionStats';
+import SectionTargets from 'components/SectionTargets';
 import {Button} from '@yearn-finance/web-lib/components/Button';
 
 import type {ReactElement} from 'react';
@@ -28,7 +28,7 @@ function	Index(): ReactElement {
 					<B2BMeme />
 				</div>
 			</section>
-		
+
 			<SectionStats />
 
 			<SectionTargets />

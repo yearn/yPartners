@@ -1,5 +1,6 @@
 import type	{ReactElement}	from	'react';
 import type {TAddress} from '@yearn-finance/web-lib/utils/address';
+import type {TDict} from '@yearn-finance/web-lib/utils/types';
 
 export type TPartnerVault = {
 	address: string,
@@ -10,18 +11,16 @@ export type TPartnerVault = {
 	network: string
 	riskScore: number,
 	apy: number
+	chainID: number
 };
 
-type TPartnerVaultByAddress = {
-	[address: string]: TPartnerVault
-}
-
 export type TPartnerVaultsByNetwork = {
-	[network: string]: TPartnerVaultByAddress
+	[network: string]: TDict<TPartnerVault>
 }
 
 export type TPartnerList = {
 	name: string;
+	shortName: string;
 	description: string;
 	logo: ReactElement;
 }
@@ -88,6 +87,7 @@ export type TYearnVault = {
 	icon: string,
 	category: string,
 	riskScore: number,
+	chainID: number,
 	token: {
 		address: TAddress,
 		name: string,
