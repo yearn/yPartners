@@ -1,11 +1,10 @@
-import	React, {useState}		from	'react';
+import React, {useState} from 'react';
+import CustomTooltip from 'components/charts/CustomTooltip';
 import {Bar, Cell, ComposedChart, ResponsiveContainer, Tooltip, XAxis, YAxis} from 'recharts';
-
-import {formatXAxis, formatYAxis} from '../../utils/b2b/Chart';
-import CustomTooltip from './CustomTooltip';
+import {formatXAxis, formatYAxis} from 'utils/b2b/Chart';
 
 import type {ReactElement} from 'react';
-import type {TChartProps} from '../../types/chart';
+import type {TChartProps} from 'types/chart';
 
 function	Composed(props: TChartProps): ReactElement {
 	const {tooltipItems, data, bars, windowValue, yAxisOptions, xAxisOptions} = props;
@@ -79,7 +78,7 @@ function	Composed(props: TChartProps): ReactElement {
 					xAxisId={'hidden'}
 					yAxisId={'right'}
 					dataKey={'awb'}
-					fill={bars[1].fill} 
+					fill={bars[1].fill}
 					barSize={getBarSize()} />
 			</ComposedChart>
 		</ResponsiveContainer>

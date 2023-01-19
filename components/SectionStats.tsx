@@ -23,7 +23,7 @@ function	SectionStats(): ReactElement {
 		baseFetcher,
 		{revalidateOnFocus: false}
 	) as SWRResponse;
-	
+
 
 	return (
 		<section aria-label={'stats'} className={'mb-28 flex flex-row flex-wrap items-center md:mb-50'}>

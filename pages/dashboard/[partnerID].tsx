@@ -1,12 +1,13 @@
 
-import	React, {useEffect, useMemo, useState}		from	'react';
+import React, {useEffect, useMemo, useState} from 'react';
+import {VaultDetailsTabsWrapper} from 'components/dashboard/VaultDetailsTabsWrapper';
+import {PartnerContextApp, usePartner} from 'contexts/usePartner';
+import {LOGOS, PARTNERS} from 'utils/b2b/Partners';
 import {Button} from '@yearn-finance/web-lib/components/Button';
 
-import {VaultDetailsTabsWrapper} from '../../components/dashboard/VaultDetailsTabsWrapper';
-import {usePartner} from '../../contexts/usePartner';
-import {LOGOS, PARTNERS} from '../../utils/b2b/Partners';
-
+import type {GetStaticPathsResult, GetStaticPropsResult} from 'next';
 import type {ChangeEvent, FormEvent, ReactElement} from 'react';
+import type {TPartnerList} from 'types/types';
 
 const currentDate = new Date();
 const currentYear = currentDate.getFullYear();
@@ -19,11 +20,14 @@ function formatDate(date: Date): string {
 	return date.toLocaleDateString('en-CA');
 }
 
-function	Index(): ReactElement {
-	const	{partner, logo, isLoadingVaults, vaults, set_partner} = usePartner();
+function Index({partnerID}: {partnerID: string}): ReactElement {
+	const {isLoadingVaults, vaults} = usePartner();
 	const [lastSync, set_lastSync] = useState('');
 	const [reportStart, set_reportStart] = useState(firstDayLastMonth);
 	const [reportEnd, set_reportEnd] = useState(today);
+
+	const currentPartner = PARTNERS.find((e: TPartnerList): boolean => e.shortName === partnerID);
+	const currentPartnerName = currentPartner ? currentPartner.name : '';
 
 	useEffect((): void => {
 		const latestSync = new Date().toLocaleString('default',
@@ -32,15 +36,6 @@ function	Index(): ReactElement {
 		set_lastSync(latestSync);
 	}, []);
 
-
-	useEffect((): void => {
-		if(partner === '' && logo && set_partner){
-			// Until auth is finialized, Set random partner if one is not currently selected
-			const {name} = PARTNERS[Math.floor(Math.random() * PARTNERS.length)];
-			set_partner(name);
-			logo.current = LOGOS[name];
-		}
-	}, [logo, partner, set_partner]);
 
 
 	function downloadReport(e: FormEvent<HTMLFormElement>): void {
@@ -59,28 +54,28 @@ function	Index(): ReactElement {
 	}
 
 	const	VaultGraphs = useMemo((): ReactElement => {
-		if (partner && isLoadingVaults) {
+		if (currentPartner && isLoadingVaults) {
 			return (
 				<h1>{'Loading...'}</h1>
-			);	
+			);
 		}
 
-		if (partner && !isLoadingVaults && vaults.length === 0) {
+		if (currentPartner && !isLoadingVaults && Object.values(vaults || []).length === 0) {
 			return (
 				<h1>{'No Vaults Found'}</h1>
-			);	
+			);
 		}
 
 		return (
 			<VaultDetailsTabsWrapper />
 		);
-	}, [partner, vaults, isLoadingVaults]);
+	}, [currentPartner, vaults, isLoadingVaults]);
 
 	return (
 		<main>
 			<section aria-label={'hero'} className={'mt-[75px] mb-14 grid grid-cols-12'}>
 				<div className={'col-span-12 md:col-span-7'}>
-					<h1 className={'mb-2 text-6xl text-neutral-900 md:text-8xl'}>{partner}</h1>
+					<h1 className={'mb-2 text-6xl text-neutral-900 md:text-8xl'}>{currentPartner?.name}</h1>
 
 					<p className={'mb-10 w-3/4 text-neutral-500'}>{`Last updated ${lastSync}`}</p>
 
@@ -124,7 +119,7 @@ function	Index(): ReactElement {
 				<div className={'col-span-1 hidden md:block'} />
 
 				<div className={'col-span-3 hidden md:block'}>
-					{logo?.current}
+					{LOGOS[currentPartnerName]}
 				</div>
 
 				<div className={'col-span-2 hidden md:block'} />
@@ -132,9 +127,31 @@ function	Index(): ReactElement {
 
 			<section aria-label={'tabs'}>
 				{VaultGraphs}
-			</section>	
+			</section>
 		</main>
 	);
 }
 
-export default Index;
+
+function	PartnerDashboardWrapper({partnerID}: {partnerID: string}): ReactElement {
+	return (
+		<PartnerContextApp partnerID={partnerID}>
+			<Index partnerID={partnerID} />
+		</PartnerContextApp>
+	);
+}
+
+
+export async function getStaticPaths(): Promise<GetStaticPathsResult> {
+	const	partners = PARTNERS;
+	return {
+		paths: partners.map((partner): {params: {partnerID: string}} => ({params: {partnerID: partner.shortName}})),
+		fallback: false
+	};
+}
+
+export async function getStaticProps(context: {params: {partnerID: string}}): Promise<GetStaticPropsResult<any>> {
+	return ({props: {partnerID: context.params.partnerID}});
+}
+
+export default PartnerDashboardWrapper;
