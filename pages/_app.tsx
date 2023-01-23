@@ -159,7 +159,7 @@ function	AppHeader(): ReactElement {
 						</Link>
 					</div>
 					<div>
-						<Link href={'/'}>
+						<Link href={'/team-up'}>
 							<p
 								aria-selected={router.pathname === '/team-up'}
 								className={'project--nav'}>
@@ -168,7 +168,7 @@ function	AppHeader(): ReactElement {
 						</Link>
 					</div>
 					<div>
-						<Link href={'/'}>
+						<Link href={'/learn-more'}>
 							<p
 								aria-selected={router.pathname === '/learn-more'}
 								className={'project--nav'}>
