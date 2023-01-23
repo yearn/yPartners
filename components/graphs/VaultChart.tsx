@@ -50,6 +50,8 @@ function	VaultChart(props: { vault: TPartnerVault }): ReactElement {
 	const [windowValue, set_windowValue] = useState(29);
 	const [dummyData, set_dummyData] = useState(generateData());
 
+	console.log(props.vault);
+
 	useEffect((): void => {
 		const data = generateData(windowValue);
 		set_dummyData(data);
@@ -62,7 +64,7 @@ function	VaultChart(props: { vault: TPartnerVault }): ReactElement {
 	}
 
 	function getTickInterval(): number | undefined {
-		const tickPreferences: {[key: string]: number} = {'1 day': 1, '1 month': 1, 'All time': 1};
+		const tickPreferences: {[key: string]: number} = {'1 month': 1, 'All time': 1};
 		return tickPreferences[activeWindow];
 	}
 
