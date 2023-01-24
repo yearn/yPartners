@@ -1,11 +1,11 @@
 import	LogoAlchemix			from	'components/icons/partners/LogoAlchemix';
-import	LogoBrave				from	'components/icons/partners/LogoBrave';
 import	LogoElement				from	'components/icons/partners/LogoElement';
 import	LogoGearbox				from	'components/icons/partners/LogoGearbox';
 import	LogoInverse				from	'components/icons/partners/LogoInverse';
 import	LogoLedger				from	'components/icons/partners/LogoLedger';
 import	LogoMIM					from	'components/icons/partners/LogoMIM';
 import	LogoQiDAO				from	'components/icons/partners/LogoQiDAO';
+import	LogoSpool				from	'components/icons/partners/LogoSpool';
 import	LogoZooDao				from	'components/icons/partners/LogoZooDAO';
 
 import type {ReactElement} from 'react';
@@ -23,10 +23,10 @@ const	PARTNERS: TPartnerList[] = [
 		description: 'An open source protocl for fixed and variable yield markets',
 		logo: <LogoElement className={'text-900'} />
 	}, {
-		name: 'Brave',
-		shortName: 'brave',
-		description: 'Fast, private, secure web browser for PC, Mac, and mobile',
-		logo: <LogoBrave className={'text-900'} />
+		name: 'Spool',
+		shortName: 'spool',
+		description: '-',
+		logo: <LogoSpool className={'text-900'} />
 	}, {
 		name: 'Abracadabra',
 		shortName: 'abracadabra',
@@ -64,7 +64,6 @@ const	PARTNERS: TPartnerList[] = [
 const PARTNER_SHORT_NAMES: {[key: string]: string} = {
 	'QiDAO': 'qidao',
 	'Element Finance': 'element',
-	'Brave': 'brave', //*
 	'Abracadabra': 'abracadabra',
 	'Ledger': 'ledger',
 	'Alchemix': 'alchemix',
@@ -80,7 +79,7 @@ type TPartnerLogo = {
 const LOGOS: TPartnerLogo = {
 	'QiDAO': <LogoQiDAO className={'text-900 h-3/4 w-3/4'} />,
 	'Element Finance': <LogoElement className={'text-900 h-3/4 w-3/4'} />,
-	'Brave': <LogoBrave className={'text-900 h-3/4 w-3/4'} />,
+	'Spool': <LogoSpool className={'text-900 h-3/4 w-3/4'} />,
 	'Abracadabra': <LogoMIM className={'text-900 h-3/4 w-3/4'} />,
 	'Ledger': <LogoLedger className={'text-900 h-3/4 w-3/4'} />,
 	'Alchemix': <LogoAlchemix className={'text-900 h-3/4 w-3/4'} />,
