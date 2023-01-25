@@ -25,7 +25,7 @@ const	PARTNERS: TPartnerList[] = [
 	}, {
 		name: 'Spool',
 		shortName: 'spool',
-		description: '-',
+		description: 'A non-custodial permissionless middleware that allows users to earn DeFi returns',
 		logo: <LogoSpool className={'text-900'} />
 	}, {
 		name: 'Abracadabra',
