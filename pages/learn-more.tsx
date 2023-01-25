@@ -6,7 +6,7 @@ import type {ReactElement} from 'react';
 
 function	TeamUpPage(): ReactElement {
 	return (
-		<div className={'w-full bg-neutral-200 p-6'}>
+		<div className={'mb-40 w-full bg-neutral-200 p-6'}>
 			<div className={'max-w-screen-md p-2'}>
 			
 				<h1 className={'pb-6 text-3xl'}>{'Learn more'}</h1>
