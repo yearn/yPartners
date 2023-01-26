@@ -28,7 +28,8 @@ function	SectionStats(): ReactElement {
 	return (
 		<section aria-label={'stats'} className={'mb-28 flex flex-row flex-wrap items-center md:mb-50'}>
 			<div className={'mt-4 mr-4 flex flex-col space-y-2 pr-5 md:mt-0 md:mr-8'}>
-				<p>{'TVL by all Partners'}</p>
+				<p>{'Current from Partners TVL'}</p>
+				{/* <p>{'TVL by all Partners'}</p> */}
 				<b className={'text-3xl tabular-nums'}>
 					{tvl ? `$ ${formatAmount(tvl.tvl_total, 0, 2)}` : '-'}
 				</b>
