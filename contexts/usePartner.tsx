@@ -28,7 +28,7 @@ export const PartnerContextApp = ({
 }: {partnerID: string, children: ReactElement}): ReactElement => {
 	const	{vaults: yVaults} = useYearn();
 	const	{data: payouts, isLoading: isLoadingVaults} = useSWR(
-		`${process.env.YVISION_BASE_URI}/partners/${partnerID}/payout_total`,
+		`${process.env.YVISION_BASE_URI}/partners/${partnerID}/balance`,
 		baseFetcher,
 		{revalidateOnFocus: false}
 	) as SWRResponse;
