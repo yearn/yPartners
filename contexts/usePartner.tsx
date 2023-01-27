@@ -46,7 +46,7 @@ export const PartnerContextApp = ({
 				if (yVaultData) {
 					const {riskScore, apy} = yVaultData;
 					currentVault.riskScore = riskScore;
-					currentVault.apy = apy.net_apy;
+					currentVault.apy = apy.net_apy * 100;
 					if (currentVault.balance > 0) {
 						partnerVaults[`${currentVault.address}_${chainID}`] = currentVault;
 					}
