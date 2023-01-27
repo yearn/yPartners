@@ -1,5 +1,5 @@
 import	React, {useMemo, useState}		from	'react';
-import dayjs from 'dayjs';
+import dayjs, {unix} from 'dayjs';
 import {NETWORK_CHAINID} from 'utils/b2b';
 import axios from 'axios';
 import {Button} from '@yearn-finance/web-lib/components/Button';
@@ -24,7 +24,7 @@ function	VaultChart(props: { vault: TPartnerVault, partnerID: string }): ReactEl
 	const {partnerID, vault} = props;
 	const [activeWindow, set_activeWindow] = useState('1 month');
 	const [windowValue, set_windowValue] = useState(29);
-	const [balanceTVLs, set_balanceTVLs] = useState<TDict<{name: number, balanceTVL: number}[]>>();
+	const [balanceTVLs, set_balanceTVLs] = useState<TDict<{name: string, balanceTVL: number}[]>>();
 
 	useMemo((): void => {
 		const baseURI = `${process.env.YVISION_BASE_URI}/partners/${partnerID}/balance`;
@@ -41,11 +41,11 @@ function	VaultChart(props: { vault: TPartnerVault, partnerID: string }): ReactEl
 
 		// reverse so requests resolve with first elements being the oldest
 		endpoints.reverse();
-		const partnerBalanceTVL: TDict<{name: number, balanceTVL: number}[]> = {};
+		const partnerBalanceTVL: TDict<{name: string, balanceTVL: number}[]> = {};
 
 		Promise.all(endpoints.map(async (endpoint): Promise<AxiosResponse> => axios.get(endpoint))).then(
 			(responses): void => {
-				responses.forEach(({data}, idx): void => {
+				responses.forEach(({data}): void => {
 					const vaultsAllNetworksOject = Object.values(data || {})[0] as TPartnerVaultsByNetwork;
 
 					for (const [networkName, vaultsForNetwork] of Object.entries(vaultsAllNetworksOject || {})) {
@@ -53,7 +53,8 @@ function	VaultChart(props: { vault: TPartnerVault, partnerID: string }): ReactEl
 
 						for (const [vaultAddress, currentVault] of Object.entries(vaultsForNetwork || {})) {
 							const vaultBalanceArray = partnerBalanceTVL[`${toAddress(vaultAddress)}_${chainID}`];
-							const dataPoint = {name: idx+1, balanceTVL: currentVault.tvl};
+							
+							const dataPoint = {name: unix(data.ts).format('MMM DD YYYY'), balanceTVL: currentVault.tvl};
 
 							if(vaultBalanceArray){
 								partnerBalanceTVL[`${toAddress(vaultAddress)}_${chainID}`].push(dataPoint);

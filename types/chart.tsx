@@ -29,7 +29,7 @@ export type TChartProps = {
 	}[],
 	windowValue: number | undefined,
 	// data: TChartData[]
-	data: {name: number, balanceTVL: number}[]
+	data: {name: string, balanceTVL: number}[]
 	bars: {name: string, fill: string}[]
 	yAxisOptions: {
 		domain?: string[] | number[] | [TAxisDomainItem, TAxisDomainItem] 
