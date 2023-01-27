@@ -90,7 +90,9 @@ function	Tabs({selectedIndex, set_selectedIndex}: TProps): ReactElement {
 	);
 }
 
-function	VaultDetailsTabsWrapper(): ReactElement {
+function	VaultDetailsTabsWrapper(props: {partnerID: string}): ReactElement {
+	const {partnerID} = props;
+	
 	const {vaults} = usePartner();
 	const [selectedIndex, set_selectedIndex] = useState(0);
 
@@ -124,7 +126,10 @@ function	VaultDetailsTabsWrapper(): ReactElement {
 			<div className={'-mt-0.5 h-0.5 w-full bg-neutral-300'} />
 
 			{Object.values(vaults || []).map((vault, idx): ReactElement | null => {
-				return idx === selectedIndex ? <VaultChart vault={vault} key={idx}/> : null;
+				return idx === selectedIndex ? <VaultChart
+					vault={vault}
+					partnerID={partnerID}
+					key={idx}/> : null;
 			})}
 
 		</div>

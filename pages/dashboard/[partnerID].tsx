@@ -67,9 +67,9 @@ function Index({partnerID}: {partnerID: string}): ReactElement {
 		}
 
 		return (
-			<VaultDetailsTabsWrapper />
+			<VaultDetailsTabsWrapper partnerID={partnerID} />
 		);
-	}, [currentPartner, vaults, isLoadingVaults]);
+	}, [currentPartner, vaults, isLoadingVaults, partnerID]);
 
 	return (
 		<main>

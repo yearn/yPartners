@@ -1,4 +1,5 @@
 import React from 'react';
+import {formatAmount} from '@yearn-finance/web-lib/utils/format.number';
 
 import type {ReactElement} from 'react';
 
@@ -22,8 +23,8 @@ function ToolTip(props: TTooltip): ReactElement | null {
 		return (
 			<div className={'rounded bg-good-ol-grey-300 p-2 opacity-90'}>
 				<p>{`Day ${payload[0].payload.name}`}</p>
-				<p><span className={'font-semibold'}>{`${items[1].name}:  `}</span>{`${payload[1].value} ${items[1].symbol}`}</p>
-				<p><span className={'font-semibold'}>{`${items[0].name}:  `}</span>{`${payload[0].value} ${items[0].symbol}`}</p>
+				{/* <p><span className={'font-semibold'}>{`${items[1].name}:  `}</span>{`${payload[1].value} ${items[1].symbol}`}</p> */}
+				<p><span className={'font-semibold'}>{`${items[0].name}:  `}</span>{`${items[0].symbol} ${formatAmount(payload[0].value, 2, 2)}`}</p>
 			</div>
 		);
 	}

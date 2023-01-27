@@ -21,7 +21,7 @@ function CustomBarChart(props: TChartProps): ReactElement {
 				margin={{
 					top: 10,
 					right: 80,
-					left: 0,
+					left: 10,
 					bottom: 5
 				}}
 			>

@@ -1,12 +1,12 @@
-export type TChartData = {
-	name: string,
-	WBTC: number,
-	USDC: number,
-	rsWBTC: string,
-	rsUSDC: string,
-	rbdWBTC: string,
-	rbdUSDC: string,
-};
+// export type TChartData = {
+// 	name: string,
+// 	WBTC: number,
+// 	USDC: number,
+// 	rsWBTC: string,
+// 	rsUSDC: string,
+// 	rbdWBTC: string,
+// 	rbdUSDC: string,
+// };
 
 export type TAxisDomainItem = string | number | 'auto' | 'dataMin' | 'dataMax';
 
@@ -28,7 +28,8 @@ export type TChartProps = {
 		symbol: string
 	}[],
 	windowValue: number | undefined,
-	data: TChartData[]
+	// data: TChartData[]
+	data: {name: number, balanceTVL: number}[]
 	bars: {name: string, fill: string}[]
 	yAxisOptions: {
 		domain?: string[] | number[] | [TAxisDomainItem, TAxisDomainItem] 

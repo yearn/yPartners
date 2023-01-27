@@ -1,12 +1,17 @@
-import	React, {useEffect, useState}		from	'react';
+import	React, {useMemo, useState}		from	'react';
+import dayjs from 'dayjs';
+import {NETWORK_CHAINID} from 'utils/b2b';
+import axios from 'axios';
 import {Button} from '@yearn-finance/web-lib/components/Button';
+import {toAddress} from '@yearn-finance/web-lib/utils/address';
 
 import Chart from '../charts/Chart';
 import VaultDetails from '../dashboard/VaultDetails';
 
+import type {AxiosResponse} from 'axios';
 import type {MouseEvent, ReactElement} from 'react';
-import type {TChartData} from 'types/chart';
-import type {TPartnerVault} from 'types/types';
+import type {TPartnerVault, TPartnerVaultsByNetwork} from 'types/types';
+import type {TDict} from '@yearn-finance/web-lib/utils/types';
 
 const dataWindows = [
 	{name: '1 week', value: 7},
@@ -15,47 +20,54 @@ const dataWindows = [
 	{name: 'All time', value: 50}
 ];
 
-const dummyLegendMulti = [
-	{type: 'multi', details: ['WBTC', 'Wrapper: 0x23a...089ca'], color: '#8884d8'},
-	{type: 'multi', details: ['USDC', 'Wrapper: 0x23a...089ca'], color: '#82ca9d'}
-];
+function	VaultChart(props: { vault: TPartnerVault, partnerID: string }): ReactElement {
+	const {partnerID, vault} = props;
+	const [activeWindow, set_activeWindow] = useState('1 week');
+	const [windowValue, set_windowValue] = useState(7);
+	const [balanceTVLs, set_balanceTVLs] = useState<TDict<{name: number, balanceTVL: number}[]>>();
 
-const dummyLegendSingle = [
-	{type: 'single', details: 'Aggregate Wrapper Balance', color: '#8884d8', isThin: true},
-	{type: 'single', details: 'Profit Share', color: '#82ca9d'}
-];
+	useMemo((): void => {
+		const baseURI = `${process.env.YVISION_BASE_URI}/partners/${partnerID}/balance`;
 
-function generateData(window = 29): TChartData[]{
-	const data = [];
+		const now = dayjs().unix();
+		const startOfToday = dayjs().startOf('D').unix();
 
-	for (let i = 0; i < window; i++) {
-		const fees = {WBTC: ~~(Math.random()* 300), USDC: ~~(Math.random()* 300)};
-		const revShare = {rsWBTC: ((Math.random()%0.3).toFixed(2)), rsUSDC: ((Math.random()%0.3)).toFixed(2)};
+		const endpoints = [`${baseURI}?ts=${now}`];
+			
+		for (let i = 1; i < windowValue; i++) {
+			const ts = startOfToday - (86400 * i);
+			endpoints.push(`${baseURI}?ts=${ts}`);
+		}
 
-		const baseAggBal = 100 - (Math.random()*50);
-		const aggregateWrapBal = {awb: (baseAggBal * 0.7).toFixed(0), profitShare: baseAggBal.toFixed(0)};
+		// reverse so requests resolve with first elements being the oldest
+		endpoints.reverse();
+		const partnerBalanceTVL: TDict<{name: number, balanceTVL: number}[]> = {};
 
-		const baseWrapperBalance = Math.random()*100;
-		const remWrapBalance = 100-baseWrapperBalance;
-		const wrapperBalDist = {rbdWBTC: baseWrapperBalance.toFixed(2), rbdUSDC: remWrapBalance.toFixed(2)};
+		Promise.all(endpoints.map(async (endpoint): Promise<AxiosResponse> => axios.get(endpoint))).then(
+			(responses): void => {
+				responses.forEach(({data}, idx): void => {
+					const vaultsAllNetworksOject = Object.values(data || {})[0] as TPartnerVaultsByNetwork;
 
-		data.push({name: `${i+1}`, ...fees, ...revShare, ...aggregateWrapBal, ...wrapperBalDist});
-	}
+					for (const [networkName, vaultsForNetwork] of Object.entries(vaultsAllNetworksOject || {})) {
+						const	chainID = NETWORK_CHAINID[networkName];
 
-	return data;
-}
+						for (const [vaultAddress, currentVault] of Object.entries(vaultsForNetwork || {})) {
+							const vaultBalanceArray = partnerBalanceTVL[`${toAddress(vaultAddress)}_${chainID}`];
+							const dataPoint = {name: idx+1, balanceTVL: currentVault.tvl};
 
-function	VaultChart(props: { vault: TPartnerVault }): ReactElement {
-	const [activeWindow, set_activeWindow] = useState('1 month');
-	const [windowValue, set_windowValue] = useState(29);
-	const [dummyData, set_dummyData] = useState(generateData());
+							if(vaultBalanceArray){
+								partnerBalanceTVL[`${toAddress(vaultAddress)}_${chainID}`].push(dataPoint);
+							}else{
+								partnerBalanceTVL[`${toAddress(vaultAddress)}_${chainID}`] = [dataPoint];
+							}
+						}
+					}
+				});
 
-	console.log(props.vault);
+				set_balanceTVLs(partnerBalanceTVL);
+			});
 
-	useEffect((): void => {
-		const data = generateData(windowValue);
-		set_dummyData(data);
-	}, [windowValue]);
+	}, [partnerID, windowValue]);
 
 	function handleWindowChange(e: MouseEvent<HTMLButtonElement>): void {
 		const {name, value} = e.currentTarget;
@@ -73,6 +85,7 @@ function	VaultChart(props: { vault: TPartnerVault }): ReactElement {
 			<div className={'mt-4 flex flex-row space-x-4'}>
 				{dataWindows.map((window): ReactElement => (
 					<Button
+						disabled={window.value === 365}
 						key={window.name}
 						name={window.name}
 						value={window.value}
@@ -84,8 +97,20 @@ function	VaultChart(props: { vault: TPartnerVault }): ReactElement {
 				))}
 			</div>
 
-			<VaultDetails vault={props.vault} />
+			<VaultDetails vault={vault} />
 			<Chart
+				title={'Wrapper Balance (USD)'}
+				type={'bar'}
+				className={'mb-20'}
+				windowValue={windowValue}
+				data={balanceTVLs ? balanceTVLs[`${vault.address}_${vault.chainID}`] : []}
+				bars={[{name: 'balanceTVL', fill: '#8884d8'}]}
+				yAxisOptions={{domain: ['auto', 'auto']}}
+				xAxisOptions={{interval: getTickInterval()}}
+				tooltipItems={[{name: 'balance', symbol: '$'}]}
+				legendItems={[{type: 'single', details: `${vault.token}`, color: '#8884d8'}]}/>
+
+			{/* <Chart
 				title={'Fees Earned'}
 				type={'bar'}
 				windowValue={windowValue}
@@ -105,9 +130,9 @@ function	VaultChart(props: { vault: TPartnerVault }): ReactElement {
 				yAxisOptions={{domain: [0, 'auto']}}
 				xAxisOptions={{interval: getTickInterval()}}
 				tooltipItems={[{name: 'USDC', symbol: '%'}, {name: 'WBTC', symbol: '%'}]}
-				legendItems={dummyLegendMulti}/>
+				legendItems={dummyLegendMulti}/> */}
 
-			<Chart
+			{/* <Chart
 				title={'Aggregate Wrapper Balance'}
 				type={'composed'}
 				windowValue={windowValue}
@@ -116,9 +141,9 @@ function	VaultChart(props: { vault: TPartnerVault }): ReactElement {
 				yAxisOptions={{domain: [0, 'auto']}}
 				xAxisOptions={{interval: getTickInterval()}}
 				tooltipItems={[{name: 'aggregated', symbol: 'M'}, {name: 'profit shared', symbol: '%'}]}
-				legendItems={dummyLegendSingle}/>
+				legendItems={dummyLegendSingle}/> */}
 
-			<Chart
+			{/* <Chart
 				title={'Wrapper Balance Distribution'}
 				type={'bar'}
 				className={'mb-20'}
@@ -128,7 +153,7 @@ function	VaultChart(props: { vault: TPartnerVault }): ReactElement {
 				yAxisOptions={{tickCount: 6}}
 				xAxisOptions={{interval: getTickInterval()}}
 				tooltipItems={[{name: 'USDC', symbol: '%'}, {name: 'WBTC', symbol: '%'}]}
-				legendItems={dummyLegendMulti}/>
+				legendItems={dummyLegendMulti}/> */}
 		</div>
 	);
 }
