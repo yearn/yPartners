@@ -13,7 +13,7 @@ function MultiItem(props: {details: string[], color: string, isThin?: boolean}):
 
 			<div>
 				{lines.map((line: string, idx: number): ReactElement => (
-					<p key={`line-${idx}`} className={'ml-2 text-xs underline md:text-sm'}>{line}</p>
+					<p key={`line-${idx}`} className={'ml-2 text-xs md:text-sm'}>{line}</p>
 				))}
 			</div>
 		</div>

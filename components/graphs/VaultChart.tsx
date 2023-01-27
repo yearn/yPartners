@@ -3,7 +3,7 @@ import dayjs from 'dayjs';
 import {NETWORK_CHAINID} from 'utils/b2b';
 import axios from 'axios';
 import {Button} from '@yearn-finance/web-lib/components/Button';
-import {toAddress} from '@yearn-finance/web-lib/utils/address';
+import {toAddress, truncateHex} from '@yearn-finance/web-lib/utils/address';
 
 import Chart from '../charts/Chart';
 import VaultDetails from '../dashboard/VaultDetails';
@@ -108,7 +108,7 @@ function	VaultChart(props: { vault: TPartnerVault, partnerID: string }): ReactEl
 				yAxisOptions={{domain: ['auto', 'auto']}}
 				xAxisOptions={{interval: getTickInterval()}}
 				tooltipItems={[{name: 'balance', symbol: '$'}]}
-				legendItems={[{type: 'single', details: `${vault.token}`, color: '#8884d8'}]}/>
+				legendItems={[{type: 'multi', details: [`${vault.token}`, `Wrapper: ${truncateHex(vault.address, 4)}`], color: '#8884d8'}]}/>
 
 			{/* <Chart
 				title={'Fees Earned'}
