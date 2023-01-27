@@ -25,11 +25,11 @@ function Chart(props: TChartProps): ReactElement {
 			</div>
 
 			<div className={'ml-10 flex w-3/4 items-center justify-center' }>
-				<Chevron className={'cursor-pointer'} onClick={chartNavigation} />
-				<span className={'ml-10 text-neutral-500'}>{'May'}</span>
+				<Chevron className={'mx-20 cursor-pointer'} onClick={chartNavigation} />
+				{/* <span className={'mx-10 text-neutral-500'}>{'Prev'}</span>
 				<span className={'mx-10 font-semibold'}>{'June'}</span>
-				<span className={'mr-10 text-neutral-500'}>{'July'}</span>
-				<Chevron className={'rotate-180 cursor-pointer'} onClick={chartNavigation} />
+				<span className={'mx-10 text-neutral-500'}>{'Next'}</span> */}
+				<Chevron className={'mx-20 rotate-180 cursor-pointer'} onClick={chartNavigation} />
 			</div>
 		</div>
 	);
