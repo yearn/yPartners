@@ -22,8 +22,8 @@ const dataWindows = [
 
 function	VaultChart(props: { vault: TPartnerVault, partnerID: string }): ReactElement {
 	const {partnerID, vault} = props;
-	const [activeWindow, set_activeWindow] = useState('1 week');
-	const [windowValue, set_windowValue] = useState(7);
+	const [activeWindow, set_activeWindow] = useState('1 month');
+	const [windowValue, set_windowValue] = useState(29);
 	const [balanceTVLs, set_balanceTVLs] = useState<TDict<{name: number, balanceTVL: number}[]>>();
 
 	useMemo((): void => {
