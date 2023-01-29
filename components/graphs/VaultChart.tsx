@@ -20,11 +20,18 @@ const dataWindows = [
 	{name: 'All time', value: 50}
 ];
 
-function	VaultChart(props: { vault: TPartnerVault, partnerID: string }): ReactElement {
-	const {partnerID, vault} = props;
+const chartColors = [
+	'#8884d8', '#82ca9d', '#79A7D9', '#BB8FD9', '#D99F9A',
+	'#D9C76F', '#8555A6', '#A68855', '#C98581', '#43597D'
+];
+
+function	VaultChart(props: { vault: TPartnerVault, partnerID: string, idx: number }): ReactElement {
+	const {partnerID, vault, idx} = props;
 	const [activeWindow, set_activeWindow] = useState('1 month');
 	const [windowValue, set_windowValue] = useState(29);
 	const [balanceTVLs, set_balanceTVLs] = useState<TDict<{name: string, balanceTVL: number}[]>>();
+
+	const fillColor = chartColors[idx % chartColors.length] ;
 
 	useMemo((): void => {
 		const baseURI = `${process.env.YVISION_BASE_URI}/partners/${partnerID}/balance`;
@@ -105,11 +112,11 @@ function	VaultChart(props: { vault: TPartnerVault, partnerID: string }): ReactEl
 				className={'mb-20'}
 				windowValue={windowValue}
 				data={balanceTVLs ? balanceTVLs[`${vault.address}_${vault.chainID}`] : []}
-				bars={[{name: 'balanceTVL', fill: '#8884d8'}]}
+				bars={[{name: 'balanceTVL', fill: fillColor}]}
 				yAxisOptions={{domain: ['auto', 'auto']}}
 				xAxisOptions={{interval: getTickInterval()}}
 				tooltipItems={[{name: 'balance', symbol: '$'}]}
-				legendItems={[{type: 'multi', details: [`${vault.token}`, `Wrapper: ${truncateHex(vault.address, 4)}`], color: '#8884d8'}]}/>
+				legendItems={[{type: 'multi', details: [`${vault.token}`, `Wrapper: ${truncateHex(vault.address, 4)}`], color: fillColor}]}/>
 
 			{/* <Chart
 				title={'Fees Earned'}

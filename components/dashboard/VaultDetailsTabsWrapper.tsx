@@ -127,6 +127,7 @@ function	VaultDetailsTabsWrapper(props: {partnerID: string}): ReactElement {
 			{Object.values(vaults || []).map((vault, idx): ReactElement | null => {
 				return idx === selectedIndex ? <VaultChart
 					vault={vault}
+					idx={idx}
 					partnerID={partnerID}
 					key={idx}/> : null;
 			})}
