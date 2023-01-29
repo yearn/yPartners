@@ -46,16 +46,15 @@ function	Tabs({selectedIndex, set_selectedIndex}: TProps): ReactElement {
 			<div className={'relative z-50'}>
 				<Listbox
 					value={selectedIndex}
-					// eslint-disable-next-line @typescript-eslint/no-explicit-any
-					onChange={(value: any): void => {
-						set_selectedIndex(value.index);
+					onChange={(value): void => {
+						set_selectedIndex(value);
 					}}>
 					{({open}): ReactElement => (
 						<>
 							<Listbox.Button
 								className={'flex h-10 w-40 flex-row items-center border-0 border-b-2 border-neutral-900 bg-neutral-100 p-0 font-bold focus:border-neutral-900 md:hidden'}>
 								<div className={'relative flex flex-row items-center'}>
-									{vaults[selectedIndex]?.token || 'Vaults'}
+									{Object.values(vaults || [])[selectedIndex]?.token || 'Vaults'}
 								</div>
 								<div className={'absolute right-0'}>
 									<Chevron
@@ -76,7 +75,7 @@ function	Tabs({selectedIndex, set_selectedIndex}: TProps): ReactElement {
 										<Listbox.Option
 											className={'yearn--listbox-menu-item'}
 											key={idx}
-											value={vault}>
+											value={idx}>
 											{vault.token}
 										</Listbox.Option>
 									))}
