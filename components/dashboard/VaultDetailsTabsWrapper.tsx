@@ -13,7 +13,7 @@ import type {ReactElement} from 'react';
 
 type TProps = {
 	selectedIndex: number,
-	set_selectedIndex: (arg0: number) => void
+	set_selectedIndex: React.Dispatch<React.SetStateAction<number>>
 };
 
 function	Tabs({selectedIndex, set_selectedIndex}: TProps): ReactElement {
@@ -116,7 +116,7 @@ function	VaultDetailsTabsWrapper(props: {partnerID: string}): ReactElement {
 						<span className={'sr-only'}>{'Open in explorer'}</span>
 						<IconLinkOut className={'h-5 w-5 cursor-alias text-neutral-600 transition-colors hover:text-neutral-900 md:h-6 md:w-6'} />
 					</a>
-					<button onClick={(): void => copyToClipboard(vaults[selectedIndex].address)}>
+					<button onClick={(): void => copyToClipboard(vaultAddress)}>
 						<span className={'sr-only'}>{'Copy address'}</span>
 						<IconCopy className={'h-5 w-5 text-neutral-600 transition-colors hover:text-neutral-900 md:h-6 md:w-6'} />
 					</button>
