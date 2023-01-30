@@ -2,33 +2,31 @@ import	React, {useMemo, useState}		from	'react';
 import dayjs, {unix} from 'dayjs';
 import {NETWORK_CHAINID} from 'utils/b2b';
 import axios from 'axios';
-import {Button} from '@yearn-finance/web-lib/components/Button';
 import {toAddress, truncateHex} from '@yearn-finance/web-lib/utils/address';
 
 import Chart from '../charts/Chart';
 import VaultDetails from '../dashboard/VaultDetails';
 
 import type {AxiosResponse} from 'axios';
-import type {MouseEvent, ReactElement} from 'react';
+import type {ReactElement} from 'react';
 import type {TPartnerVault, TPartnerVaultsByNetwork} from 'types/types';
 import type {TDict} from '@yearn-finance/web-lib/utils/types';
-
-const dataWindows = [
-	{name: '1 week', value: 7},
-	{name: '1 month', value: 29},
-	{name: '1 year', value: 365},
-	{name: 'All time', value: 50}
-];
 
 const chartColors = [
 	'#8884d8', '#82ca9d', '#79A7D9', '#BB8FD9', '#D99F9A',
 	'#D9C76F', '#8555A6', '#A68855', '#C98581', '#43597D'
 ];
 
-function	VaultChart(props: { vault: TPartnerVault, partnerID: string, idx: number }): ReactElement {
-	const {partnerID, vault, idx} = props;
-	const [activeWindow, set_activeWindow] = useState('1 month');
-	const [windowValue, set_windowValue] = useState(29);
+type TVaultChartProps = {
+	vault: TPartnerVault,
+	partnerID: string,
+	idx: number,
+	windowValue: number,
+	activeWindow: string
+}
+
+function	VaultChart(props: TVaultChartProps): ReactElement {
+	const {partnerID, vault, idx, windowValue, activeWindow} = props;
 	const [balanceTVLs, set_balanceTVLs] = useState<TDict<{name: string, balanceTVL: number}[]>>();
 
 	const fillColor = chartColors[idx % chartColors.length] ;
@@ -77,33 +75,13 @@ function	VaultChart(props: { vault: TPartnerVault, partnerID: string, idx: numbe
 
 	}, [partnerID, windowValue]);
 
-	function handleWindowChange(e: MouseEvent<HTMLButtonElement>): void {
-		const {name, value} = e.currentTarget;
-		set_activeWindow(name);
-		set_windowValue(+value);
-	}
-
 	function getTickInterval(): number | undefined {
 		const tickPreferences: {[key: string]: number} = {'1 month': 1, 'All time': 1};
 		return tickPreferences[activeWindow];
 	}
 
 	return (
-		<div className={'mt-6 h-[400px]'}>
-			<div className={'mt-4 flex flex-row space-x-4'}>
-				{dataWindows.map((window): ReactElement => (
-					<Button
-						disabled={window.value === 365}
-						key={window.name}
-						name={window.name}
-						value={window.value}
-						className={'w-[90px] text-xs md:w-[100px] md:text-base'}
-						variant={window.name === activeWindow ? 'filled' : 'outlined'}
-						onClick={handleWindowChange}>
-						{window.name}
-					</Button>
-				))}
-			</div>
+		<div className={'h-[400px]'}>
 
 			<VaultDetails vault={vault} />
 			<Chart

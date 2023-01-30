@@ -1,6 +1,7 @@
 import React, {Fragment, useState} from 'react';
 import {getExplorerURL} from 'utils/b2b';
 import {Listbox, Transition} from '@headlessui/react';
+import {Button} from '@yearn-finance/web-lib/components/Button';
 import Chevron from '@yearn-finance/web-lib/icons/IconChevron';
 import IconCopy from '@yearn-finance/web-lib/icons/IconCopy';
 import IconLinkOut from '@yearn-finance/web-lib/icons/IconLinkOut';
@@ -9,7 +10,14 @@ import {copyToClipboard} from '@yearn-finance/web-lib/utils/helpers';
 import {usePartner} from '../../contexts/usePartner';
 import VaultChart from '../graphs/VaultChart';
 
-import type {ReactElement} from 'react';
+import type {MouseEvent, ReactElement} from 'react';
+
+const dataWindows = [
+	{name: '1 week', value: 7},
+	{name: '1 month', value: 29},
+	{name: '1 year', value: 365},
+	{name: 'All time', value: 50}
+];
 
 type TProps = {
 	selectedIndex: number,
@@ -101,11 +109,19 @@ function	VaultDetailsTabsWrapper(props: {partnerID: string}): ReactElement {
 	
 	const {vaults} = usePartner();
 	const [selectedIndex, set_selectedIndex] = useState(0);
+	const [activeWindow, set_activeWindow] = useState('1 month');
+	const [windowValue, set_windowValue] = useState(29);
 
 	const selectedVault = Object.values(vaults)[selectedIndex];
 
 	const vaultAddress = selectedVault ? selectedVault.address : '';
 	const vaultChainID = selectedVault ? selectedVault.chainID : 1;
+
+	function handleWindowChange(e: MouseEvent<HTMLButtonElement>): void {
+		const {name, value} = e.currentTarget;
+		set_activeWindow(name);
+		set_windowValue(+value);
+	}
 
 	return (
 		<div aria-label={'Vault Details'} className={'col-span-12 mb-4 flex flex-col bg-neutral-100'}>
@@ -134,12 +150,30 @@ function	VaultDetailsTabsWrapper(props: {partnerID: string}): ReactElement {
 
 			<div className={'-mt-0.5 h-0.5 w-full bg-neutral-300'} />
 
+			<div className={'mt-10 flex flex-row space-x-4'}>
+				{dataWindows.map((window): ReactElement => (
+					<Button
+						disabled={window.value === 365}
+						key={window.name}
+						name={window.name}
+						value={window.value}
+						className={'w-[90px] text-xs md:w-[100px] md:text-base'}
+						variant={window.name === activeWindow ? 'filled' : 'outlined'}
+						onClick={handleWindowChange}>
+						{window.name}
+					</Button>
+				))}
+			</div>
+
 			{Object.values(vaults || []).map((vault, idx): ReactElement | null => {
 				return idx === selectedIndex ? <VaultChart
+					key={idx}
 					vault={vault}
 					idx={idx}
 					partnerID={partnerID}
-					key={idx}/> : null;
+					activeWindow={activeWindow}
+					windowValue={windowValue}
+				/> : null;
 			})}
 
 		</div>
