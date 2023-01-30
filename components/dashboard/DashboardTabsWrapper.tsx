@@ -10,6 +10,7 @@ import {copyToClipboard} from '@yearn-finance/web-lib/utils/helpers';
 
 import {usePartner} from '../../contexts/usePartner';
 import VaultChart from '../graphs/VaultChart';
+import SummaryMetrics from './SummaryMetrics';
 
 import type {MouseEvent, ReactElement} from 'react';
 
@@ -115,8 +116,9 @@ function	DashboardTabsWrapper(props: {partnerID: string}): ReactElement {
 
 	const selectedVault = Object.values(vaults)[selectedIndex];
 
-	const vaultAddress = selectedVault ? selectedVault.address : '';
-	const vaultChainID = selectedVault ? selectedVault.chainID : 1;
+	const selectedAddress = selectedVault ? selectedVault.address : '';
+	const selectedChainID = selectedVault ? selectedVault.chainID : 1;
+	const selectedToken = selectedVault ? selectedVault.token : '';
 
 	function handleWindowChange(e: MouseEvent<HTMLButtonElement>): void {
 		const {name, value} = e.currentTarget;
@@ -134,14 +136,14 @@ function	DashboardTabsWrapper(props: {partnerID: string}): ReactElement {
 				<div className={'flex flex-row items-center justify-end space-x-2 pb-0 md:pb-4 md:last:space-x-4'}>
 					<a
 						className={ selectedIndex === -1 ? 'hidden' : ''}
-						href={`${getExplorerURL(vaultChainID)}/address/${vaultAddress}`}
+						href={`${getExplorerURL(selectedChainID)}/address/${selectedAddress}`}
 						target={'_blank'}
 						rel={'noopener noreferrer'}>
 						<span className={'sr-only'}>{'Open in explorer'}</span>
 						<IconLinkOut className={'h-5 w-5 cursor-alias text-neutral-600 transition-colors hover:text-neutral-900 md:h-6 md:w-6'} />
 					</a>
 					<button
-						onClick={(): void => copyToClipboard(vaultAddress)}
+						onClick={(): void => copyToClipboard(selectedAddress)}
 						className={ selectedIndex === -1 ? 'hidden' : ''}>
 						<span className={'sr-only'}>{'Copy address'}</span>
 						<IconCopy className={'h-5 w-5 text-neutral-600 transition-colors hover:text-neutral-900 md:h-6 md:w-6'} />
@@ -166,10 +168,17 @@ function	DashboardTabsWrapper(props: {partnerID: string}): ReactElement {
 				))}
 			</div>
 
-			{Object.values(vaults || []).map((vault, idx): ReactElement | null => {
+			<SummaryMetrics
+				vaults={vaults}
+				vault={selectedVault}
+				selectedIndex={selectedIndex}/>
+
+			{Object.values(vaults || []).map((_, idx): ReactElement | null => {
 				return idx === selectedIndex ? <VaultChart
 					key={idx}
-					vault={vault}
+					address={selectedAddress}
+					chainID={selectedChainID}
+					token={selectedToken}
 					idx={idx}
 					partnerID={partnerID}
 					activeWindow={activeWindow}

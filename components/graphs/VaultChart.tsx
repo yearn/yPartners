@@ -5,11 +5,10 @@ import axios from 'axios';
 import {toAddress, truncateHex} from '@yearn-finance/web-lib/utils/address';
 
 import Chart from '../charts/Chart';
-import SummaryMetrics from '../dashboard/SummaryMetrics';
 
 import type {AxiosResponse} from 'axios';
 import type {ReactElement} from 'react';
-import type {TPartnerVault, TPartnerVaultsByNetwork} from 'types/types';
+import type {TPartnerVaultsByNetwork} from 'types/types';
 import type {TDict} from '@yearn-finance/web-lib/utils/types';
 
 const chartColors = [
@@ -18,7 +17,9 @@ const chartColors = [
 ];
 
 type TVaultChartProps = {
-	vault: TPartnerVault,
+	address: string,
+	chainID: number,
+	token: string,
 	partnerID: string,
 	idx: number,
 	windowValue: number,
@@ -26,7 +27,7 @@ type TVaultChartProps = {
 }
 
 function	VaultChart(props: TVaultChartProps): ReactElement {
-	const {partnerID, vault, idx, windowValue, activeWindow} = props;
+	const {address, chainID, token, partnerID, idx, windowValue, activeWindow} = props;
 	const [balanceTVLs, set_balanceTVLs] = useState<TDict<{name: string, balanceTVL: number}[]>>();
 
 	const fillColor = chartColors[idx % chartColors.length] ;
@@ -83,18 +84,17 @@ function	VaultChart(props: TVaultChartProps): ReactElement {
 	return (
 		<div className={'h-[400px]'}>
 
-			<SummaryMetrics vault={vault} />
 			<Chart
 				title={'Wrapper Balance (USD)'}
 				type={'bar'}
 				className={'mb-20'}
 				windowValue={windowValue}
-				data={balanceTVLs ? balanceTVLs[`${vault.address}_${vault.chainID}`] : []}
+				data={balanceTVLs ? balanceTVLs[`${address}_${chainID}`] : []}
 				bars={[{name: 'balanceTVL', fill: fillColor}]}
 				yAxisOptions={{domain: ['auto', 'auto']}}
 				xAxisOptions={{interval: getTickInterval()}}
 				tooltipItems={[{name: 'balance', symbol: '$'}]}
-				legendItems={[{type: 'multi', details: [`${vault.token}`, `Wrapper: ${truncateHex(vault.address, 4)}`], color: fillColor}]}/>
+				legendItems={[{type: 'multi', details: [`${token}`, `Wrapper: ${truncateHex(address, 4)}`], color: fillColor}]}/>
 
 			{/* <Chart
 				title={'Fees Earned'}
