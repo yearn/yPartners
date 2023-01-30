@@ -1,4 +1,5 @@
 import React, {Fragment, useState} from 'react';
+import OverviewChart from 'components/graphs/OverviewChart';
 import {getExplorerURL} from 'utils/b2b';
 import {Listbox, Transition} from '@headlessui/react';
 import {Button} from '@yearn-finance/web-lib/components/Button';
@@ -104,7 +105,7 @@ function	Tabs({selectedIndex, set_selectedIndex}: TProps): ReactElement {
 	);
 }
 
-function	VaultDetailsTabsWrapper(props: {partnerID: string}): ReactElement {
+function	DashboardTabsWrapper(props: {partnerID: string}): ReactElement {
 	const {partnerID} = props;
 	
 	const {vaults} = usePartner();
@@ -176,8 +177,14 @@ function	VaultDetailsTabsWrapper(props: {partnerID: string}): ReactElement {
 				/> : null;
 			})}
 
+			<OverviewChart
+				vaults={vaults || []}
+				partnerID={partnerID}
+				activeWindow={activeWindow}
+				windowValue={windowValue}
+			/>
 		</div>
 	);
 }
 
-export {VaultDetailsTabsWrapper};
+export {DashboardTabsWrapper};

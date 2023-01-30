@@ -1,6 +1,6 @@
 
 import React, {useEffect, useMemo, useState} from 'react';
-import {VaultDetailsTabsWrapper} from 'components/dashboard/VaultDetailsTabsWrapper';
+import {DashboardTabsWrapper} from 'components/dashboard/DashboardTabsWrapper';
 import {PartnerContextApp, usePartner} from 'contexts/usePartner';
 import {LOGOS, PARTNERS} from 'utils/b2b/Partners';
 import {Button} from '@yearn-finance/web-lib/components/Button';
@@ -67,7 +67,7 @@ function Index({partnerID}: {partnerID: string}): ReactElement {
 		}
 
 		return (
-			<VaultDetailsTabsWrapper partnerID={partnerID} />
+			<DashboardTabsWrapper partnerID={partnerID} />
 		);
 	}, [currentPartner, vaults, isLoadingVaults, partnerID]);
 

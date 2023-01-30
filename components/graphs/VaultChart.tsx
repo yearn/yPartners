@@ -5,7 +5,7 @@ import axios from 'axios';
 import {toAddress, truncateHex} from '@yearn-finance/web-lib/utils/address';
 
 import Chart from '../charts/Chart';
-import VaultDetails from '../dashboard/VaultDetails';
+import SummaryMetrics from '../dashboard/SummaryMetrics';
 
 import type {AxiosResponse} from 'axios';
 import type {ReactElement} from 'react';
@@ -83,7 +83,7 @@ function	VaultChart(props: TVaultChartProps): ReactElement {
 	return (
 		<div className={'h-[400px]'}>
 
-			<VaultDetails vault={vault} />
+			<SummaryMetrics vault={vault} />
 			<Chart
 				title={'Wrapper Balance (USD)'}
 				type={'bar'}

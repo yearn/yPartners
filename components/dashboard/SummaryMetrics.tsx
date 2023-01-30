@@ -2,10 +2,15 @@ import React from 'react';
 import {formatAmount} from '@yearn-finance/web-lib/utils/format.number';
 
 import type {ReactElement} from 'react';
-import type {TPartnerVault} from 'types/types';
 
+type TSummaryMetrics = {
+	balance: number,
+	tvl: number,
+	apy: number,
+	riskScore: number
+}
 
-function VaultDetails(props: {vault: TPartnerVault}): ReactElement {
+function SummaryMetrics(props: {vault: TSummaryMetrics}): ReactElement {
 	const {balance, tvl, apy, riskScore} = props.vault;
 
 	const formatPercent = (n: number, min = 2, max = 2): string => `${formatAmount(n || 0, min, max)}%`;
@@ -35,4 +40,4 @@ function VaultDetails(props: {vault: TPartnerVault}): ReactElement {
 	);
 }
 
-export default VaultDetails;
+export default SummaryMetrics;
