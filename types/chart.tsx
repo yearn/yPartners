@@ -1,13 +1,3 @@
-// export type TChartData = {
-// 	name: string,
-// 	WBTC: number,
-// 	USDC: number,
-// 	rsWBTC: string,
-// 	rsUSDC: string,
-// 	rbdWBTC: string,
-// 	rbdUSDC: string,
-// };
-
 export type TAxisDomainItem = string | number | 'auto' | 'dataMin' | 'dataMax';
 
 export type TLegendItem = {
@@ -17,6 +7,10 @@ export type TLegendItem = {
 	isThin?: boolean
 };
 
+export type TBalanceTVL = {
+	name: string;
+	balanceTVL: number;
+}
 
 export type TChartProps = {
 	children?: React.ReactNode,
@@ -29,7 +23,7 @@ export type TChartProps = {
 	}[],
 	windowValue: number | undefined,
 	// data: TChartData[]
-	data: {name: string, balanceTVL: number}[]
+	data: TBalanceTVL[] | undefined
 	bars: {name: string, fill: string}[]
 	yAxisOptions: {
 		domain?: string[] | number[] | [TAxisDomainItem, TAxisDomainItem] 

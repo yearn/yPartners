@@ -1,18 +1,24 @@
-import React, {Fragment, useState} from 'react';
+import React, {Fragment, useMemo, useState} from 'react';
 import OverviewChart from 'components/graphs/OverviewChart';
-import {getExplorerURL} from 'utils/b2b';
+import dayjs, {unix} from 'dayjs';
+import {getExplorerURL, NETWORK_CHAINID} from 'utils/b2b';
+import axios from 'axios';
 import {Listbox, Transition} from '@headlessui/react';
 import {Button} from '@yearn-finance/web-lib/components/Button';
 import Chevron from '@yearn-finance/web-lib/icons/IconChevron';
 import IconCopy from '@yearn-finance/web-lib/icons/IconCopy';
 import IconLinkOut from '@yearn-finance/web-lib/icons/IconLinkOut';
+import {toAddress} from '@yearn-finance/web-lib/utils/address';
 import {copyToClipboard} from '@yearn-finance/web-lib/utils/helpers';
 
 import {usePartner} from '../../contexts/usePartner';
 import VaultChart from '../graphs/VaultChart';
 import SummaryMetrics from './SummaryMetrics';
 
+import type {AxiosResponse} from 'axios';
 import type {MouseEvent, ReactElement} from 'react';
+import type {TPartnerVaultsByNetwork} from 'types/types';
+import type {TDict} from '@yearn-finance/web-lib/utils/types';
 
 const dataWindows = [
 	{name: '1 week', value: 7},
@@ -108,11 +114,11 @@ function	Tabs({selectedIndex, set_selectedIndex}: TProps): ReactElement {
 
 function	DashboardTabsWrapper(props: {partnerID: string}): ReactElement {
 	const {partnerID} = props;
-	
 	const {vaults} = usePartner();
 	const [selectedIndex, set_selectedIndex] = useState(0);
 	const [activeWindow, set_activeWindow] = useState('1 month');
 	const [windowValue, set_windowValue] = useState(29);
+	const [balanceTVLs, set_balanceTVLs] = useState<TDict<{name: string, balanceTVL: number}[]>>();
 
 	const selectedVault = Object.values(vaults)[selectedIndex];
 
@@ -125,6 +131,51 @@ function	DashboardTabsWrapper(props: {partnerID: string}): ReactElement {
 		set_activeWindow(name);
 		set_windowValue(+value);
 	}
+
+
+	useMemo((): void => {
+		const baseURI = `${process.env.YVISION_BASE_URI}/partners/${partnerID}/balance`;
+
+		const now = dayjs().unix();
+		const startOfToday = dayjs().startOf('D').unix();
+
+		const endpoints = [`${baseURI}?ts=${now}`];
+			
+		for (let i = 1; i < windowValue; i++) {
+			const ts = startOfToday - (86400 * i);
+			endpoints.push(`${baseURI}?ts=${ts}`);
+		}
+
+		// reverse so requests resolve with first elements being the oldest
+		endpoints.reverse();
+		const partnerBalanceTVL: TDict<{name: string, balanceTVL: number}[]> = {};
+
+		Promise.all(endpoints.map(async (endpoint): Promise<AxiosResponse> => axios.get(endpoint))).then(
+			(responses): void => {
+				responses.forEach(({data}): void => {
+					const vaultsAllNetworksOject = Object.values(data || {})[0] as TPartnerVaultsByNetwork;
+
+					for (const [networkName, vaultsForNetwork] of Object.entries(vaultsAllNetworksOject || {})) {
+						const	chainID = NETWORK_CHAINID[networkName];
+
+						for (const [vaultAddress, currentVault] of Object.entries(vaultsForNetwork || {})) {
+							const vaultBalanceArray = partnerBalanceTVL[`${toAddress(vaultAddress)}_${chainID}`];
+							
+							const dataPoint = {name: unix(data.ts).format('MMM DD YYYY'), balanceTVL: currentVault.tvl};
+
+							if(vaultBalanceArray){
+								partnerBalanceTVL[`${toAddress(vaultAddress)}_${chainID}`].push(dataPoint);
+							}else{
+								partnerBalanceTVL[`${toAddress(vaultAddress)}_${chainID}`] = [dataPoint];
+							}
+						}
+					}
+				});
+
+				set_balanceTVLs(partnerBalanceTVL);
+			});
+
+	}, [partnerID, windowValue]);
 
 	return (
 		<div aria-label={'Vault Details'} className={'col-span-12 mb-4 flex flex-col bg-neutral-100'}>
@@ -176,13 +227,12 @@ function	DashboardTabsWrapper(props: {partnerID: string}): ReactElement {
 			{Object.values(vaults || []).map((_, idx): ReactElement | null => {
 				return idx === selectedIndex ? <VaultChart
 					key={idx}
-					address={selectedAddress}
-					chainID={selectedChainID}
-					token={selectedToken}
 					idx={idx}
-					partnerID={partnerID}
+					address={selectedAddress}
+					token={selectedToken}
 					activeWindow={activeWindow}
 					windowValue={windowValue}
+					balanceTVL={balanceTVLs ? balanceTVLs[`${selectedAddress}_${selectedChainID}`] : []}
 				/> : null;
 			})}
 
