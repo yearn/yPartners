@@ -15,33 +15,34 @@ type TProps = {
 //  Give summary metrics vault and the vaults plus the selected index so it knows what to do 
 
 function SummaryMetrics(props: TProps): ReactElement {
-	const {balance, tvl, apy, riskScore} = props.vault;
+	const {vault, vaults} = props;
 
 	const formatPercent = (n: number, min = 2, max = 2): string => `${formatAmount(n || 0, min, max)}%`;
 
+	const allVaultsTVL = Object.values(vaults).reduce(((acc, vault): number => acc + vault.tvl), 0);
+	const allVaultsFees = Object.values(vaults).reduce(((acc, vault): number => acc + vault.balance), 0);
+	
 	return (
 		<div className={'my-20 flex w-[80%] justify-between bg-good-ol-grey-100'}>
 			<div>
 				<p>{'TVL'}</p>
-				<h1>{`$ ${formatAmount(tvl, 0, 2)}`}</h1>
+				<h1>{'$ '}{vault ? formatAmount(props.vault.tvl) : formatAmount(allVaultsTVL)}</h1>
 			</div>
 
 			<div>
-				<p>{'Fees earned to date'}</p>
-				<h1>{`$ ${formatAmount(balance, 0, 2)}`}</h1>
+				<p>{'Fees earned to date **'}</p>
+				<h1>{'$ '}{vault ? formatAmount(props.vault.balance, 0, 2) : formatAmount(allVaultsFees)}</h1>
 			</div>
 
-			{apy ? 
-				<div>
-					<p>{'Annual Yield'}</p>
-					<h1>{formatPercent(apy)}</h1>
-				</div> : null }
+			<div>
+				<p>{'Annual Yield'}</p>
+				<h1>{vault ? formatPercent(props.vault.apy) : '-'}</h1>
+			</div>
 
-			{riskScore ? 
-				<div>
-					<p>{'Risk Score'}</p>
-					<h1>{formatAmount(riskScore, 0, 2)}</h1>
-				</div> : null }
+			<div>
+				<p>{'Risk Score'}</p>
+				<h1>{vault ? formatAmount(props.vault.riskScore, 0, 2) : '-'}</h1>
+			</div>
 		</div>
 	);
 }
