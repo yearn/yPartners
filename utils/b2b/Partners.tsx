@@ -88,6 +88,26 @@ const LOGOS: TPartnerLogo = {
 	'ZooDAO': <LogoZooDao className={'text-900 h-3/4 w-3/4'} />
 };
 
+
+
+type TProfitShareTier = {
+	[key: string]: number
+}
+
+const PROFIT_SHARE_TEIRS: TProfitShareTier = {
+	'0'  : 999999,
+	'10' : 1000000,
+	'15' : 5000000,
+	'20' : 10000000,
+	'25' : 50000000,
+	'30' : 100000000,
+	'35' : 200000000,
+	'40' : 400000000,
+	'45' : 700000000,
+	'50' : 1000000000
+
+};
+
 export {
-	LOGOS, PARTNER_SHORT_NAMES, PARTNERS
+	LOGOS, PARTNER_SHORT_NAMES, PARTNERS, PROFIT_SHARE_TEIRS
 };
