@@ -24,6 +24,7 @@ function	OverviewChart(props: TOverviewChartProps): ReactElement {
 			<Chart
 				title={'Aggregate Wrapper Balance (USD)'}
 				type={'composed'}
+				className={'mb-20'}
 				windowValue={windowValue}
 				data={wrapperTotals}
 				bars={[{name: 'data.totalTVL', fill: '#8884d8'}, {name: 'data.profitShare', fill: '#82ca9d'}]}
