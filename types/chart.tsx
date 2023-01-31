@@ -7,9 +7,9 @@ export type TLegendItem = {
 	isThin?: boolean
 };
 
-export type TBalanceTVL = {
+export type TChartBar = {
 	name: string;
-	balanceTVL: number;
+	data: { [prop: string]: number}; 
 }
 
 export type TChartProps = {
@@ -22,8 +22,7 @@ export type TChartProps = {
 		symbol: string
 	}[],
 	windowValue: number | undefined,
-	// data: TChartData[]
-	data: TBalanceTVL[] | undefined
+	data: TChartBar[] | undefined
 	bars: {name: string, fill: string}[]
 	yAxisOptions: {
 		domain?: string[] | number[] | [TAxisDomainItem, TAxisDomainItem] 
