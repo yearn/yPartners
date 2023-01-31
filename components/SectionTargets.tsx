@@ -1,11 +1,11 @@
-import	React, {useEffect, useState}	from	'react';
-import	IconForDevelopers		from	'components/icons/IconForDevelopers';
-import	IconForInstitutions		from	'components/icons/IconForInstitutions';
-import	IconForProtocols		from	'components/icons/IconForProtocols';
-import	{motion}				from	'framer-motion';
+import React, {useEffect, useState} from 'react';
+import IconForDevelopers from 'components/icons/IconForDevelopers';
+import IconForInstitutions from 'components/icons/IconForInstitutions';
+import IconForProtocols from 'components/icons/IconForProtocols';
+import {motion} from 'framer-motion';
 
 import type {ReactElement} from 'react';
-import	type {TFramerTransition, TPartnerList}		from	'types/types';
+import type {TFramerTransition, TPartnerList} from 'types/types';
 
 const variants = {
 	enter: (i: number): TFramerTransition => ({
@@ -23,14 +23,17 @@ const variants = {
 const	targets: TPartnerList[] = [
 	{
 		name: 'For Protocols',
+		shortName: 'protocols',
 		description: 'Integration platform for  effortless yield optimization',
 		logo: <IconForProtocols className={'text-900'} />
 	}, {
 		name: 'For Developers',
+		shortName: 'developers',
 		description: 'Sandbox for novel and innovative DeFi applications',
 		logo: <IconForDevelopers className={'text-900'} />
 	}, {
 		name: 'For Organizations & Institutions',
+		shortName: 'institutions',
 		description: 'Infrastructure for accessing fixed yield in a compliant manner',
 		logo: <IconForInstitutions className={'text-900'} />
 	}
@@ -68,7 +71,7 @@ function	Targets(): ReactElement {
 								<b className={'text-lg'}>{target.name}</b>
 								<p>{target.description}</p>
 							</div>
-						</motion.div>	
+						</motion.div>
 					))}
 				</div>
 			</div>

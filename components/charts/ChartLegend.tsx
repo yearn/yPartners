@@ -1,4 +1,4 @@
-import	React		from	'react';
+import React from 'react';
 
 import type {ReactElement} from 'react';
 import type {TLegendItem} from 'types/chart';
@@ -13,10 +13,10 @@ function MultiItem(props: {details: string[], color: string, isThin?: boolean}):
 
 			<div>
 				{lines.map((line: string, idx: number): ReactElement => (
-					<p key={`line-${idx}`} className={'ml-2 text-xs underline md:text-sm'}>{line}</p>
-				))} 
+					<p key={`line-${idx}`} className={'ml-2 text-xs md:text-sm'}>{line}</p>
+				))}
 			</div>
-		</div> 
+		</div>
 	);
 }
 
@@ -29,7 +29,7 @@ function SingleItem(props: {details: string, color: string, isThin?: boolean}): 
 		<div className={'mb-8 -ml-8 flex flex-row'}>
 			<div className={'h-5 w-4'} style={{width: itemWidth, backgroundColor: props.color}} />
 			<p className={'ml-2 text-xs underline md:text-sm'}>{itemName}</p>
-		</div> 
+		</div>
 	);
 }
 
@@ -40,12 +40,12 @@ function ChartLegend(props: {items: TLegendItem[] }): ReactElement {
 			{props.items.map((item: TLegendItem, idx: number): ReactElement => {
 				const {type, details, color, isThin} = item;
 
-				return (type === 'multi' ? 
+				return (type === 'multi' ?
 					<MultiItem
 						key={idx}
 						color={color}
 						details={details as string[]}
-						isThin={isThin} /> 
+						isThin={isThin} />
 					: <SingleItem
 						key={idx}
 						color={color}

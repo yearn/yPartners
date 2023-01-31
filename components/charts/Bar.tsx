@@ -1,4 +1,4 @@
-import	React		from	'react';
+import React from 'react';
 import {Bar, BarChart, ResponsiveContainer, Tooltip, XAxis, YAxis} from 'recharts';
 import {formatXAxis, formatYAxis} from 'utils/b2b/Chart';
 
@@ -21,7 +21,7 @@ function CustomBarChart(props: TChartProps): ReactElement {
 				margin={{
 					top: 10,
 					right: 80,
-					left: 0,
+					left: 30,
 					bottom: 5
 				}}
 			>

@@ -1,98 +1,65 @@
-import	React, {createContext, useContext, useEffect, useMemo, useRef, useState}	from	'react';
+import	React, {createContext, useContext, useMemo}	from 'react';
+import {useYearn} from 'contexts/useYearn';
+import {NETWORK_CHAINID} from 'utils/b2b';
 import useSWR from 'swr';
+import {toAddress} from '@yearn-finance/web-lib/utils/address';
 import {baseFetcher} from '@yearn-finance/web-lib/utils/fetchers';
 
-import LogoYearn from '../components/icons/LogoYearn';
-import {LOGOS, PARTNER_SHORT_NAMES} from '../utils/b2b/Partners';
-
-import type {Dispatch, MutableRefObject, ReactElement, SetStateAction} from 'react';
+import type {ReactElement} from 'react';
 import type {SWRResponse} from 'swr';
-
-type TPartnerVault = {
-	index: number,
-	address: string,
-	balance: number
-	bucket: string
-	token: string
-	tvl: number
-	network: string
-};
-
-type TPartnerVaultByAddress = {
-	[address: string]: TPartnerVault
-}
-
-type TPartnerVaultsByNetwork = {
-	[network: string]: TPartnerVaultByAddress
-}
+import type {TPartnerVault, TPartnerVaultsByNetwork} from 'types/types';
+import type {TDict} from '@yearn-finance/web-lib/utils/types';
 
 type TPartnerContext = {
-	partner: string,
-	logo?: MutableRefObject<ReactElement>,
-	set_partner?: Dispatch<SetStateAction<string>>
-	vaults: TPartnerVault[],
+	vaults: TDict<TPartnerVault>,
 	isLoadingVaults: boolean,
-	
 }
 
 const	defaultProps: TPartnerContext = {
-	partner: '',
-	vaults: [],
+	vaults: {},
 	isLoadingVaults: false
 };
 
 const	Partner = createContext<TPartnerContext>(defaultProps);
 
-export const PartnerContextApp = ({children}: {children: ReactElement}): ReactElement => {
-	const	[partner, set_partner] = useState('');
-	const	logo = useRef(<LogoYearn className={'text-900 h-full w-full opacity-0'}/>);
-
-	useEffect((): void => {
-		if(partner !== ''){
-			logo.current = LOGOS[partner];
-		}
-	}, [partner]);
-
-	// Conditonally fetch vault data when partner is set
+export const PartnerContextApp = ({
+	partnerID,
+	children
+}: {partnerID: string, children: ReactElement}): ReactElement => {
+	const	{vaults: yVaults} = useYearn();
 	const	{data: payouts, isLoading: isLoadingVaults} = useSWR(
-		partner ? `https://api.yearn.vision/partners/${PARTNER_SHORT_NAMES[partner]}/payout_total` : null,
+		`${process.env.YVISION_BASE_URI}/partners/${partnerID}/balance`,
 		baseFetcher,
 		{revalidateOnFocus: false}
 	) as SWRResponse;
 
-	// eslint-disable-next-line prefer-destructuring
-	const vaultsAllNetworks= Object.values(payouts || {})[0] as TPartnerVaultsByNetwork;
+	const	vaults = useMemo((): TDict<TPartnerVault> => {
+		const vaultsAllNetworksOject = Object.values(payouts || {})[0] as TPartnerVaultsByNetwork;
+		const partnerVaults: TDict<TPartnerVault> = {};
+		for (const [networkName, vaultsForNetwork] of Object.entries(vaultsAllNetworksOject || {})) {
+			const	chainID = NETWORK_CHAINID[networkName];
+			for (const [vaultAddress, currentVault] of Object.entries(vaultsForNetwork || {})) {
+				currentVault.chainID = chainID;
+				currentVault.address = toAddress(vaultAddress);
 
-	const	vaults = useMemo((): TPartnerVault[] => {
-		if(!vaultsAllNetworks){
-			return []; 
-		}
-	
-		const _vaults: TPartnerVault[] = [];
-
-		Object.keys(vaultsAllNetworks).forEach((network): void => {
-			const vaultsByNetwork = vaultsAllNetworks[network];
-			
-			const vaultsAddresses = Object.keys(vaultsByNetwork);
-
-			vaultsAddresses.forEach((address: string): void => {
-				const _vault = {...vaultsByNetwork[address], network, address};
-
-				if(_vault.balance > 0){
-					_vaults.push(_vault);
+				const	yVaultData = yVaults[currentVault.address];
+				if (yVaultData) {
+					const {riskScore, apy} = yVaultData;
+					currentVault.riskScore = riskScore;
+					currentVault.apy = apy.net_apy * 100;
+					if (currentVault.balance > 0) {
+						partnerVaults[`${currentVault.address}_${chainID}`] = currentVault;
+					}
 				}
-			});
-		});	
+			}
+		}
 
-		return _vaults;
-	}, [vaultsAllNetworks]);
-	
+		return partnerVaults;
+	}, [payouts, yVaults]);
+
 	return (
 		<Partner.Provider
 			value={{
-				partner,
-				set_partner,
-				logo,
 				vaults: vaults,
 				isLoadingVaults
 			}}>

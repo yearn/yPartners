@@ -1,13 +1,3 @@
-export type TChartData = {
-	name: string,
-	WBTC: number,
-	USDC: number,
-	rsWBTC: string,
-	rsUSDC: string,
-	rbdWBTC: string,
-	rbdUSDC: string,
-};
-
 export type TAxisDomainItem = string | number | 'auto' | 'dataMin' | 'dataMax';
 
 export type TLegendItem = {
@@ -17,6 +7,10 @@ export type TLegendItem = {
 	isThin?: boolean
 };
 
+export type TChartBar = {
+	name: string;
+	data: { [prop: string]: number}; 
+}
 
 export type TChartProps = {
 	children?: React.ReactNode,
@@ -28,7 +22,7 @@ export type TChartProps = {
 		symbol: string
 	}[],
 	windowValue: number | undefined,
-	data: TChartData[]
+	data: TChartBar[] | undefined
 	bars: {name: string, fill: string}[]
 	yAxisOptions: {
 		domain?: string[] | number[] | [TAxisDomainItem, TAxisDomainItem] 
