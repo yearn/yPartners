@@ -9,7 +9,7 @@ import type {TChartProps} from 'types/chart';
 function	Composed(props: TChartProps): ReactElement {
 	const {tooltipItems, data, bars, windowValue, yAxisOptions, xAxisOptions} = props;
 	const firstSymbol = tooltipItems[0].symbol;
-	const secondSymbol = tooltipItems[1].symbol;
+	// const secondSymbol = tooltipItems[1].symbol;
 
 	const [focusBar, set_focusBar] = useState(-1);
 
@@ -38,7 +38,7 @@ function	Composed(props: TChartProps): ReactElement {
 				margin={{
 					top: 10,
 					right: 80,
-					left: 0,
+					left: 30,
 					bottom: 5
 				}}>
 				<XAxis
@@ -49,36 +49,39 @@ function	Composed(props: TChartProps): ReactElement {
 
 				<YAxis
 					yAxisId={'left'}
-					dataKey={'profitShare'}
+					dataKey={'data.totalTVL'}
 					domain={yAxisOptions.domain}
 					tickCount={yAxisOptions.tickCount}
 					ticks={yAxisOptions.ticks}
 					tickFormatter={(value): string => formatYAxis(firstSymbol, value)}/>
+
 				<YAxis
 					yAxisId={'right'}
 					orientation={'right'}
-					dataKey={'awb'}
+					dataKey={'data.profitShare'}
 					domain={yAxisOptions.domain}
 					tickCount={yAxisOptions.tickCount}
-					ticks={yAxisOptions.ticks}
-					tickFormatter={(value): string => formatYAxis(secondSymbol, value)}/>
+					ticks={yAxisOptions.ticks} 
+					tickFormatter={(value): string => formatYAxis('%', value)} />
+
 				<Tooltip
 					cursor={{strokeWidth: `${100/(windowValue || 1)}%`}}
 					content={<CustomTooltip items={tooltipItems} />}/>
 
 				<Bar
 					xAxisId={'main'}
-					yAxisId={'left'}
-					dataKey={'profitShare'} >
-					{data.map((_, index): ReactElement => (
-						<Cell key={`cell-${index}`} fill={focusBar === index ? `${bars[0].fill}aa` : bars[0].fill} />
+					yAxisId={'right'}
+					dataKey={'data.profitShare'}
+					fill={bars[1].fill} >
+					{(data || []).map((_, index): ReactElement => (
+						<Cell key={`cell-${index}`} fill={focusBar === index ? `${bars[1].fill}aa` : bars[1].fill} />
 					))}
 				</Bar>
 				<Bar
 					xAxisId={'hidden'}
-					yAxisId={'right'}
-					dataKey={'awb'}
-					fill={bars[1].fill}
+					yAxisId={'left'}
+					dataKey={'data.totalTVL'}
+					fill={bars[0].fill}
 					barSize={getBarSize()} />
 			</ComposedChart>
 		</ResponsiveContainer>

@@ -1,10 +1,11 @@
 import	React		from	'react';
+import {getTickInterval} from 'utils/b2b/Chart';
 import {truncateHex} from '@yearn-finance/web-lib/utils/address';
 
 import Chart from '../charts/Chart';
 
 import type {ReactElement} from 'react';
-import type {TBalanceTVL} from 'types/chart';
+import type {TChartBar} from 'types/chart';
 
 const chartColors = [
 	'#8884d8', '#82ca9d', '#79A7D9', '#BB8FD9', '#D99F9A',
@@ -18,19 +19,13 @@ type TVaultChartProps = {
 	idx: number,
 	windowValue: number,
 	activeWindow: string,
-	balanceTVL: TBalanceTVL[]
+	balanceTVL: TChartBar[]
 }
 
 function	VaultChart(props: TVaultChartProps): ReactElement {
 	const {address, token, idx, windowValue, activeWindow, balanceTVL} = props;
-
-
+	
 	const fillColor = chartColors[idx % chartColors.length] ;
-
-	function getTickInterval(): number | undefined {
-		const tickPreferences: {[key: string]: number} = {'1 month': 1, 'All time': 1};
-		return tickPreferences[activeWindow];
-	}
 
 	return (
 		<div className={'h-[400px]'}>
@@ -41,9 +36,9 @@ function	VaultChart(props: TVaultChartProps): ReactElement {
 				className={'mb-20'}
 				windowValue={windowValue}
 				data={balanceTVL}
-				bars={[{name: 'balanceTVL', fill: fillColor}]}
+				bars={[{name: 'data.balanceTVL', fill: fillColor}]}
 				yAxisOptions={{domain: ['auto', 'auto']}}
-				xAxisOptions={{interval: getTickInterval()}}
+				xAxisOptions={{interval: getTickInterval(activeWindow)}}
 				tooltipItems={[{name: 'balance', symbol: '$'}]}
 				legendItems={[{type: 'multi', details: [`${token}`, `Wrapper: ${truncateHex(address, 4)}`], color: fillColor}]}/>
 
@@ -68,17 +63,6 @@ function	VaultChart(props: TVaultChartProps): ReactElement {
 				xAxisOptions={{interval: getTickInterval()}}
 				tooltipItems={[{name: 'USDC', symbol: '%'}, {name: 'WBTC', symbol: '%'}]}
 				legendItems={dummyLegendMulti}/> */}
-
-			{/* <Chart
-				title={'Aggregate Wrapper Balance'}
-				type={'composed'}
-				windowValue={windowValue}
-				data={dummyData}
-				bars={[{name: 'awb', fill: '#82ca9d'}, {name: 'profitShare', fill: '#8884d8'}]}
-				yAxisOptions={{domain: [0, 'auto']}}
-				xAxisOptions={{interval: getTickInterval()}}
-				tooltipItems={[{name: 'aggregated', symbol: 'M'}, {name: 'profit shared', symbol: '%'}]}
-				legendItems={dummyLegendSingle}/> */}
 
 			{/* <Chart
 				title={'Wrapper Balance Distribution'}

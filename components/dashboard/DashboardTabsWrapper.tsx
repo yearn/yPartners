@@ -2,6 +2,7 @@ import React, {Fragment, useMemo, useState} from 'react';
 import OverviewChart from 'components/graphs/OverviewChart';
 import dayjs, {unix} from 'dayjs';
 import {getExplorerURL, NETWORK_CHAINID} from 'utils/b2b';
+import {PROFIT_SHARE_TEIRS} from 'utils/b2b/Partners';
 import axios from 'axios';
 import {Listbox, Transition} from '@headlessui/react';
 import {Button} from '@yearn-finance/web-lib/components/Button';
@@ -17,6 +18,7 @@ import SummaryMetrics from './SummaryMetrics';
 
 import type {AxiosResponse} from 'axios';
 import type {MouseEvent, ReactElement} from 'react';
+import type {TChartBar} from 'types/chart';
 import type {TPartnerVaultsByNetwork} from 'types/types';
 import type {TDict} from '@yearn-finance/web-lib/utils/types';
 
@@ -118,7 +120,8 @@ function	DashboardTabsWrapper(props: {partnerID: string}): ReactElement {
 	const [selectedIndex, set_selectedIndex] = useState(0);
 	const [activeWindow, set_activeWindow] = useState('1 month');
 	const [windowValue, set_windowValue] = useState(29);
-	const [balanceTVLs, set_balanceTVLs] = useState<TDict<{name: string, balanceTVL: number}[]>>();
+	const [balanceTVLs, set_balanceTVLs] = useState<TDict<TChartBar[]>>();
+	const [wrapperTotals, set_wrapperTotals] = useState<TChartBar[]>();
 
 	const selectedVault = Object.values(vaults)[selectedIndex];
 
@@ -148,7 +151,8 @@ function	DashboardTabsWrapper(props: {partnerID: string}): ReactElement {
 
 		// reverse so requests resolve with first elements being the oldest
 		endpoints.reverse();
-		const partnerBalanceTVL: TDict<{name: string, balanceTVL: number}[]> = {};
+		const partnerBalanceTVL: TDict<TChartBar[]> = {};
+		const _wrapperTotals: TDict<TChartBar> = {};
 
 		Promise.all(endpoints.map(async (endpoint): Promise<AxiosResponse> => axios.get(endpoint))).then(
 			(responses): void => {
@@ -160,22 +164,52 @@ function	DashboardTabsWrapper(props: {partnerID: string}): ReactElement {
 
 						for (const [vaultAddress, currentVault] of Object.entries(vaultsForNetwork || {})) {
 							const vaultBalanceArray = partnerBalanceTVL[`${toAddress(vaultAddress)}_${chainID}`];
+							const date = unix(data.ts).format('MMM DD YYYY');
 							
-							const dataPoint = {name: unix(data.ts).format('MMM DD YYYY'), balanceTVL: currentVault.tvl};
+							const dataPoint = {name: date, data: {balanceTVL: currentVault.tvl}};
 
 							if(vaultBalanceArray){
 								partnerBalanceTVL[`${toAddress(vaultAddress)}_${chainID}`].push(dataPoint);
 							}else{
 								partnerBalanceTVL[`${toAddress(vaultAddress)}_${chainID}`] = [dataPoint];
 							}
+
+							// Sum TVLs by day for aggregate wrapper balance chart
+							const dailyTVL = _wrapperTotals[date];
+
+							if(dailyTVL){
+								_wrapperTotals[date] = {...dailyTVL, data: {totalTVL: dailyTVL.data.totalTVL + currentVault.tvl}};
+							}else{
+								_wrapperTotals[date] = {name: date, data: {totalTVL: currentVault.tvl}};
+							}
+							
 						}
 					}
 				});
 
+
+				// Assign profit share tiers based on contributed TVL
+				const wrapperData = Object.values(_wrapperTotals).map((item): TChartBar => {
+					const shareTiers = Object.keys(PROFIT_SHARE_TEIRS);
+					let partnerTier = 0;
+					
+					for (const tierPercent of shareTiers) {
+						if(item.data.totalTVL > PROFIT_SHARE_TEIRS[tierPercent]){
+							partnerTier = +tierPercent;
+						}else {
+							break;
+						}
+					}
+
+					return {...item, data: {...item.data, profitShare: partnerTier}};
+				});
+
 				set_balanceTVLs(partnerBalanceTVL);
+				set_wrapperTotals(wrapperData);
 			});
 
 	}, [partnerID, windowValue]);
+
 
 	return (
 		<div aria-label={'Vault Details'} className={'col-span-12 mb-4 flex flex-col bg-neutral-100'}>
@@ -236,12 +270,11 @@ function	DashboardTabsWrapper(props: {partnerID: string}): ReactElement {
 				/> : null;
 			})}
 
-			<OverviewChart
-				vaults={vaults || []}
-				partnerID={partnerID}
+			{selectedIndex === -1 ? <OverviewChart
 				activeWindow={activeWindow}
 				windowValue={windowValue}
-			/>
+				wrapperTotals={wrapperTotals ? wrapperTotals : []}
+			/> : null}
 		</div>
 	);
 }
