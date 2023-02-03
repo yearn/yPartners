@@ -7,7 +7,6 @@ import {Button} from '@yearn-finance/web-lib/components/Button';
 
 import type {GetStaticPathsResult, GetStaticPropsResult} from 'next';
 import type {ChangeEvent, FormEvent, ReactElement} from 'react';
-import type {TPartnerList} from 'types/types';
 
 const currentDate = new Date();
 const currentYear = currentDate.getFullYear();
@@ -26,7 +25,7 @@ function Index({partnerID}: {partnerID: string}): ReactElement {
 	const [reportStart, set_reportStart] = useState(firstDayLastMonth);
 	const [reportEnd, set_reportEnd] = useState(today);
 
-	const currentPartner = PARTNERS.find((e: TPartnerList): boolean => e.shortName === partnerID);
+	const currentPartner = PARTNERS[partnerID];
 	const currentPartnerName = currentPartner ? currentPartner.name : '';
 
 	useEffect((): void => {
@@ -143,7 +142,7 @@ function	PartnerDashboardWrapper({partnerID}: {partnerID: string}): ReactElement
 
 
 export async function getStaticPaths(): Promise<GetStaticPathsResult> {
-	const	partners = PARTNERS;
+	const	partners = Object.values(PARTNERS);
 	return {
 		paths: partners.map((partner): {params: {partnerID: string}} => ({params: {partnerID: partner.shortName}})),
 		fallback: false

@@ -19,10 +19,10 @@ export type TPartnerVaultsByNetwork = {
 	[network: string]: TDict<TPartnerVault>
 }
 
-export type TPartnerList = {
+export type TPartner = {
 	name: string;
 	shortName: string;
-	description: string;
+	description?: string;
 	logo: ReactElement;
 }
 

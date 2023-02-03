@@ -5,7 +5,7 @@ import IconForProtocols from 'components/icons/IconForProtocols';
 import {motion} from 'framer-motion';
 
 import type {ReactElement} from 'react';
-import type {TFramerTransition, TPartnerList} from 'types/types';
+import type {TFramerTransition, TPartner} from 'types/types';
 
 const variants = {
 	enter: (i: number): TFramerTransition => ({
@@ -20,7 +20,7 @@ const variants = {
 	initial: {y: 60, opacity: 0}
 };
 
-const	targets: TPartnerList[] = [
+const	targets: TPartner[] = [
 	{
 		name: 'For Protocols',
 		shortName: 'protocols',
@@ -40,10 +40,10 @@ const	targets: TPartnerList[] = [
 ];
 
 function	Targets(): ReactElement {
-	const	[targetList, set_targetList] = useState<TPartnerList[]>([]);
+	const	[targetList, set_targetList] = useState<TPartner[]>([]);
 
 	useEffect((): void => {
-		const	_targetList: TPartnerList[] = [...targets];
+		const	_targetList: TPartner[] = [...targets];
 		_targetList.sort((): number => Math.random() - 0.5);
 		set_targetList(_targetList);
 	}, []);
@@ -56,7 +56,7 @@ function	Targets(): ReactElement {
 					<p className={'text-xl'}>{'Permissionless DeFi base layer enabling infinite possibilities for buildooors.'}</p>
 				</div>
 				<div className={'mt-8 grid w-full max-w-5xl grid-cols-1 gap-8 md:grid-cols-3'}>
-					{targetList?.map((target: TPartnerList, i: number): ReactElement => (
+					{targetList?.map((target: TPartner, i: number): ReactElement => (
 						<motion.div
 							key={target.name}
 							custom={i % 3}
