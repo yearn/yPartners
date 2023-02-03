@@ -61,16 +61,6 @@ const	PARTNERS: TPartnerList[] = [
 
 ];
 
-const PARTNER_SHORT_NAMES: {[key: string]: string} = {
-	'QiDAO': 'qidao',
-	'Element Finance': 'element',
-	'Abracadabra': 'abracadabra',
-	'Ledger': 'ledger',
-	'Alchemix': 'alchemix',
-	'Gearbox': 'gearbox',
-	'Inverse Finance': 'inverse',
-	'ZooDAO': 'zoodao' //*
-};
 
 type TPartnerLogo = {
 	[key: string]: ReactElement
@@ -87,7 +77,6 @@ const LOGOS: TPartnerLogo = {
 	'Inverse Finance': <LogoInverse className={'text-900 h-3/4 w-3/4'} />,
 	'ZooDAO': <LogoZooDao className={'text-900 h-3/4 w-3/4'} />
 };
-
 
 
 type TProfitShareTier = {
@@ -109,5 +98,5 @@ const PROFIT_SHARE_TEIRS: TProfitShareTier = {
 };
 
 export {
-	LOGOS, PARTNER_SHORT_NAMES, PARTNERS, PROFIT_SHARE_TEIRS
+	LOGOS, PARTNERS, PROFIT_SHARE_TEIRS
 };
