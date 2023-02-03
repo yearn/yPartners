@@ -12,6 +12,7 @@ export type TPartnerVault = {
 	riskScore: number,
 	apy: number
 	chainID: number
+	totalPayout: number;
 };
 
 export type TPartnerVaultsByNetwork = {

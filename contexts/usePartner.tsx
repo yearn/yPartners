@@ -27,16 +27,30 @@ export const PartnerContextApp = ({
 	children
 }: {partnerID: string, children: ReactElement}): ReactElement => {
 	const	{vaults: yVaults} = useYearn();
-	const	{data: payouts, isLoading: isLoadingVaults} = useSWR(
+
+	const	{data: balances, isLoading: isLoadingBalances} = useSWR(
 		`${process.env.YVISION_BASE_URI}/partners/${partnerID}/balance`,
+		baseFetcher,
+		{revalidateOnFocus: false}
+	) as SWRResponse;
+	
+	const	{data: payouts, isLoading: isLoadingPayouts} = useSWR(
+		`${process.env.YVISION_BASE_URI}/partners/${partnerID}/payout_total`,
 		baseFetcher,
 		{revalidateOnFocus: false}
 	) as SWRResponse;
 
 	const	vaults = useMemo((): TDict<TPartnerVault> => {
-		const vaultsAllNetworksOject = Object.values(payouts || {})[0] as TPartnerVaultsByNetwork;
+		if(!balances || !payouts) {
+			return {};
+		}
+
+		const balancesAllNetworksOject = Object.values(balances || {})[0] as TPartnerVaultsByNetwork;
+		const payoutsAllNetworksOject = Object.values(payouts || {})[0] as TPartnerVaultsByNetwork;
+		
 		const partnerVaults: TDict<TPartnerVault> = {};
-		for (const [networkName, vaultsForNetwork] of Object.entries(vaultsAllNetworksOject || {})) {
+
+		for (const [networkName, vaultsForNetwork] of Object.entries(balancesAllNetworksOject || {})) {
 			const	chainID = NETWORK_CHAINID[networkName];
 			for (const [vaultAddress, currentVault] of Object.entries(vaultsForNetwork || {})) {
 				currentVault.chainID = chainID;
@@ -47,6 +61,7 @@ export const PartnerContextApp = ({
 					const {riskScore, apy} = yVaultData;
 					currentVault.riskScore = riskScore;
 					currentVault.apy = apy.net_apy * 100;
+					currentVault.totalPayout = payoutsAllNetworksOject[networkName][vaultAddress].tvl;
 					if (currentVault.balance > 0) {
 						partnerVaults[`${currentVault.address}_${chainID}`] = currentVault;
 					}
@@ -55,13 +70,13 @@ export const PartnerContextApp = ({
 		}
 
 		return partnerVaults;
-	}, [payouts, yVaults]);
+	}, [balances, payouts, yVaults]);
 
 	return (
 		<Partner.Provider
 			value={{
 				vaults: vaults,
-				isLoadingVaults
+				isLoadingVaults: isLoadingBalances || isLoadingPayouts
 			}}>
 			{children}
 		</Partner.Provider>

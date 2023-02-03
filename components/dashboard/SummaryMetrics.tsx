@@ -20,7 +20,7 @@ function SummaryMetrics(props: TProps): ReactElement {
 	const formatPercent = (n: number, min = 2, max = 2): string => `${formatAmount(n || 0, min, max)}%`;
 
 	const allVaultsTVL = Object.values(vaults).reduce(((acc, vault): number => acc + vault.tvl), 0);
-	const allVaultsFees = Object.values(vaults).reduce(((acc, vault): number => acc + vault.balance), 0);
+	const allVaultsFees = Object.values(vaults).reduce(((acc, vault): number => acc + vault.totalPayout), 0);
 	
 	return (
 		<div className={'my-20 flex w-[80%] justify-between bg-good-ol-grey-100'}>
@@ -30,8 +30,8 @@ function SummaryMetrics(props: TProps): ReactElement {
 			</div>
 
 			<div>
-				<p>{'Fees earned to date **'}</p>
-				<h1>{'$ '}{vault ? formatAmount(props.vault.balance, 0, 2) : formatAmount(allVaultsFees)}</h1>
+				<p>{'Fees earned to date'}</p>
+				<h1>{'$ '}{vault ? formatAmount(props.vault.totalPayout, 0, 2) : formatAmount(allVaultsFees)}</h1>
 			</div>
 
 			<div>
