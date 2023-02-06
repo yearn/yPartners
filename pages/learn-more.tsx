@@ -4,7 +4,7 @@ import IconLinkOut from '@yearn-finance/web-lib/icons/IconLinkOut';
 import type {ReactElement} from 'react';
 
 
-function	TeamUpPage(): ReactElement {
+function	LearnMorePage(): ReactElement {
 	return (
 		<div className={'mb-40 w-full bg-neutral-200 p-6'}>
 			<div className={'max-w-screen-md p-2'}>
@@ -43,4 +43,4 @@ function	TeamUpPage(): ReactElement {
 	);
 }
 
-export default TeamUpPage;
+export default LearnMorePage;
