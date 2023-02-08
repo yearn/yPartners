@@ -1,6 +1,7 @@
 import React, {Fragment, useMemo, useState} from 'react';
 import OverviewChart from 'components/graphs/OverviewChart';
-import dayjs, {unix} from 'dayjs';
+import dayjs, {extend, unix} from 'dayjs';
+import utc from 'dayjs/plugin/utc';
 import {getExplorerURL, NETWORK_CHAINID} from 'utils/b2b';
 import {PROFIT_SHARE_TEIRS} from 'utils/b2b/Partners';
 import axios from 'axios';
@@ -21,6 +22,8 @@ import type {MouseEvent, ReactElement} from 'react';
 import type {TChartBar} from 'types/chart';
 import type {TPartnerVaultsByNetwork} from 'types/types';
 import type {TDict} from '@yearn-finance/web-lib/utils/types';
+
+extend(utc);
 
 const dataWindows = [
 	{name: '1 week', value: 7},
@@ -140,7 +143,7 @@ function	DashboardTabsWrapper(props: {partnerID: string}): ReactElement {
 		const baseURI = `${process.env.YVISION_BASE_URI}/partners/${partnerID}/balance`;
 
 		const now = dayjs().unix();
-		const startOfToday = dayjs().startOf('D').unix();
+		const startOfToday = dayjs().utc().startOf('D').unix();
 
 		const endpoints = [`${baseURI}?ts=${now}`];
 			
