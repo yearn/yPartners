@@ -8,18 +8,17 @@ import {Button} from '@yearn-finance/web-lib/components/Button';
 import type {GetStaticPathsResult, GetStaticPropsResult} from 'next';
 import type {ChangeEvent, FormEvent, ReactElement} from 'react';
 
-const currentDate = new Date();
-const currentYear = currentDate.getFullYear();
-const lastMonth = currentDate.getMonth() - 1;
-
-const today = formatDate(currentDate);
-const firstDayLastMonth = formatDate(new Date(new Date().setFullYear(currentYear, lastMonth, 1)));
-
 function formatDate(date: Date): string {
 	return date.toLocaleDateString('en-CA');
 }
 
 function Index({partnerID}: {partnerID: string}): ReactElement {
+	const currentDate = new Date();
+	const currentYear = currentDate.getFullYear();
+	const lastMonth = currentDate.getMonth() - 1;
+	const today = formatDate(currentDate);
+	const firstDayLastMonth = formatDate(new Date(new Date().setFullYear(currentYear, lastMonth, 1)));
+
 	const {isLoadingVaults, vaults} = usePartner();
 	const [lastSync, set_lastSync] = useState('');
 	const [reportStart, set_reportStart] = useState(firstDayLastMonth);
