@@ -54,7 +54,7 @@ function SummaryMetrics(props: TProps): ReactElement {
 					</div>
 
 					<div>
-						<p>{'Fees earned to date **'}</p>
+						<p>{'Fees earned to date'}</p>
 						<h1>{'$ '}{vault ? formatAmount(props.vault.balance, 0, 2) : formatAmount(allVaultsFees)}</h1>
 					</div>
 				</div>
