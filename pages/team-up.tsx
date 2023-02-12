@@ -26,7 +26,7 @@ function	TeamUpPage(): ReactElement {
 						href={'https://yearnfinance.typeform.com/to/uP7xOJUN'}
 						target={'_blank'}
 						rel={'noreferrer'}
-						className={'flex max-w-[13rem] items-center justify-center bg-black p-2 text-base font-medium text-white '}>
+						className={'flex max-w-[13rem] items-center justify-center bg-neutral-900 p-2 text-base font-medium text-white'}>
 						{'Fill the form'}
 						<IconLinkOut className={'ml-3 h-4 w-4 text-white transition-colors md:h-4 md:w-4'} />
 					</a>

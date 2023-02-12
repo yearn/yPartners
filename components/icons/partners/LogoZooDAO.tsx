@@ -24,7 +24,7 @@ function	LogoZooDao(props: SVGProps<SVGSVGElement>): ReactElement {
 				y={'0'}
 				width={'40'}
 				height={'34'}>
-				<path d={'M0 0V9.63336H22.9133L0 24.3667V34H40V24.3667H17.0869L40 9.63336V0H0Z'} fill={'black'}/>
+				<path d={'M0 0V9.63336H22.9133L0 24.3667V34H40V24.3667H17.0869L40 9.63336V0H0Z'} fill={'#0c0c0c'}/>
 			</mask>
 			<g mask={'url(#mask0_1024_707)'}>
 				<path d={'M6.0885 -10.8679L23.1157 72.51L50.6492 61.3605L6.0885 -10.8679Z'} fill={'currentcolor'}/>
