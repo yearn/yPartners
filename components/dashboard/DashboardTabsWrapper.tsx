@@ -40,9 +40,12 @@ type TProps = {
 function	Tabs({selectedIndex, set_selectedIndex}: TProps): ReactElement {
 	const	{vaults} = usePartner();
 
+	const displayVaults = Object.values(vaults || []);
+	const vaultCount = displayVaults.length;
+
 	return (
 		<>
-			<nav className={'hidden flex-row items-center space-x-10 md:flex'}>
+			<nav className={`hidden flex-row items-center space-x-10 ${vaultCount > 5 ? '' : 'md:flex'}`}>
 				<button
 					onClick={(): void => set_selectedIndex(-1)}>
 					<p
@@ -52,7 +55,7 @@ function	Tabs({selectedIndex, set_selectedIndex}: TProps): ReactElement {
 						{'Overview'}
 					</p>
 				</button>
-				{Object.values(vaults || []).map((vault, idx): ReactElement => (
+				{displayVaults.map((vault, idx): ReactElement => (
 					<button
 						key={`desktop-${idx}`}
 						onClick={(): void => set_selectedIndex(idx)}>
@@ -74,9 +77,9 @@ function	Tabs({selectedIndex, set_selectedIndex}: TProps): ReactElement {
 					{({open}): ReactElement => (
 						<>
 							<Listbox.Button
-								className={'flex h-10 w-40 flex-row items-center border-0 border-b-2 border-neutral-900 bg-neutral-100 p-0 font-bold focus:border-neutral-900 md:hidden'}>
+								className={`flex h-10 w-40 flex-row items-center border-0 border-b-2 border-neutral-900 bg-neutral-100 p-0 font-bold focus:border-neutral-900 ${vaultCount > 5 ? '' : 'md:hidden'}`}>
 								<div className={'relative flex flex-row items-center'}>
-									{Object.values(vaults || [])[selectedIndex]?.token || 'Overview'}
+									{displayVaults[selectedIndex]?.token || 'Overview'}
 								</div>
 								<div className={'absolute right-0'}>
 									<Chevron
@@ -92,14 +95,14 @@ function	Tabs({selectedIndex, set_selectedIndex}: TProps): ReactElement {
 								leave={'transition duration-75 ease-out'}
 								leaveFrom={'transform scale-100 opacity-100'}
 								leaveTo={'transform scale-95 opacity-0'}>
-								<Listbox.Options className={'yearn--listbox-menu'}>
+								<Listbox.Options style={{scrollbarWidth: 'thin'}} className={'yearn--listbox-menu'}>
 									<Listbox.Option
 										className={'yearn--listbox-menu-item'}
 										value={-1}>
 										{'Overview'}
 									</Listbox.Option>
 
-									{Object.values(vaults || []).map((vault, idx): ReactElement => (
+									{displayVaults.map((vault, idx): ReactElement => (
 										<Listbox.Option
 											className={'yearn--listbox-menu-item'}
 											key={idx}
