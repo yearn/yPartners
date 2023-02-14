@@ -264,7 +264,6 @@ function	DashboardTabsWrapper(props: {partnerID: string}): ReactElement {
 			{Object.values(vaults || []).map((_, idx): ReactElement | null => {
 				return idx === selectedIndex ? <VaultChart
 					key={idx}
-					idx={idx}
 					address={selectedAddress}
 					token={selectedToken}
 					activeWindow={activeWindow}

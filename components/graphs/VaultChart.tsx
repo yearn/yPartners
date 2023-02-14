@@ -7,25 +7,27 @@ import Chart from '../charts/Chart';
 import type {ReactElement} from 'react';
 import type {TChartBar} from 'types/chart';
 
-const chartColors = [
-	'#8884d8', '#82ca9d', '#79A7D9', '#BB8FD9', '#D99F9A',
-	'#D9C76F', '#8555A6', '#A68855', '#C98581', '#43597D'
-];
+// const chartColors = [
+// 	'#79A7D9', '#BB8FD9', '#D99F9A', '#D9C76F', '#8555A6',
+// 	'#A68855', '#C98581', '#43597D'
+// ];
 
 
 type TVaultChartProps = {
 	address: string,
 	token: string,
-	idx: number,
 	windowValue: number,
 	activeWindow: string,
 	balanceTVL: TChartBar[]
 }
 
 function	VaultChart(props: TVaultChartProps): ReactElement {
-	const {address, token, idx, windowValue, activeWindow, balanceTVL} = props;
+	const {address, token, windowValue, activeWindow, balanceTVL} = props;
 	
-	const fillColor = chartColors[idx % chartColors.length] ;
+	// const fillColor = chartColors[idx % chartColors.length];
+	// Purple reserved for normal / aggregate wrapper balance for now
+	// Chart color array will be used in future charts
+	const fillColor = '#8884d8';
 
 	return (
 		<div className={'h-[400px]'}>
