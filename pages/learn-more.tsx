@@ -13,19 +13,16 @@ function	LearnMorePage(): ReactElement {
 				
 				<div className={'space-y-6 text-neutral-600'}>
 					<p>
-						{'Yearn’s Partnership Program is aimed at protocols that want to build on top of Yearn’s products. We firmly believe that the value a protocol brings to the community, and the ecosystem, is more than just funds parked in a vault.'}
+						{'Yearn’s Partnership Program is aimed at protocols that want to build on top of Yearn’s DeFi leading yield products.'}
 					</p>
-
 					<p>
-						{'To this end, we work closely with our partners to integrate and form a mutually beneficial relationship to add value to both protocols.'}
+						{'We firmly believe that the value a protocol brings to the community and ecosystem is far more than just funds parked in a vault. To this end, we work closely with our partners to integrate and form a mutually beneficial relationship to add value to both protocols.'}
 					</p>
-
 					<p>
-						{'There are multiple methods to integrate with yearn finance vaults, including deploying a wrapper contract or deploying a routing contract for each vault utilized.'}
+						{'There are multiple methods to integrate with Yearn Vaults, including deploying a wrapper or routing contract for each vault utilized.'}
 					</p>
-
 					<p>
-						{'To learn more about profit sharing, integration methods, and yearn products check out our docs!'}
+						{'Learn more about profit sharing, integration methods, and Yearn products with our docs!'}
 					</p>
 
 					<a
