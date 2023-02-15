@@ -4,11 +4,13 @@ import {getTickInterval} from 'utils/b2b/Chart';
 
 import type {ReactElement} from 'react';
 import type {TChartBar} from 'types/chart';
+import type {TDict} from '@yearn-finance/web-lib/utils/types';
 
 type TOverviewChartProps = {
 	windowValue: number,
 	activeWindow: string,
-	wrapperTotals: TChartBar[]
+	wrapperTotals: TChartBar[],
+	balanceTVLs: TDict<TChartBar[]>
 }
 
 const dummyLegendSingle = [
@@ -17,8 +19,10 @@ const dummyLegendSingle = [
 ];
 
 function	OverviewChart(props: TOverviewChartProps): ReactElement {
-	const {wrapperTotals, windowValue, activeWindow} = props;
+	const {wrapperTotals, balanceTVLs, windowValue, activeWindow} = props;
 
+	console.log(balanceTVLs);
+	
 	return (
 		<div className={'h-[400px]'}>
 			<Chart
@@ -32,6 +36,18 @@ function	OverviewChart(props: TOverviewChartProps): ReactElement {
 				xAxisOptions={{interval: getTickInterval(activeWindow)}}
 				tooltipItems={[{name: 'profit share', symbol: ''}, {name: 'balance', symbol: '$'}]}
 				legendItems={dummyLegendSingle}/>
+
+			{/* <Chart
+				title={'Wrapper Balance Distribution'}
+				type={'composed'}
+				className={'mb-20'}
+				windowValue={windowValue}
+				data={wrapperTotals}
+				bars={[{name: 'data.totalTVL', fill: '#8884d8'}, {name: 'data.profitShare', fill: '#82ca9d'}]}
+				yAxisOptions={{domain: [0, 'auto'], hideRightAxis: true}}
+				xAxisOptions={{interval: getTickInterval(activeWindow)}}
+				tooltipItems={[{name: 'profit share', symbol: ''}, {name: 'balance', symbol: '$'}]}
+				legendItems={dummyLegendSingle}/> */}
 		</div>
 	);
 }

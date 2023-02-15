@@ -279,6 +279,7 @@ function	DashboardTabsWrapper(props: {partnerID: string}): ReactElement {
 				activeWindow={activeWindow}
 				windowValue={windowValue}
 				wrapperTotals={wrapperTotals ? wrapperTotals : []}
+				balanceTVLs={balanceTVLs ? balanceTVLs : {}}
 			/> : null}
 		</div>
 	);
