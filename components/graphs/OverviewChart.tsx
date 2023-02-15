@@ -28,7 +28,7 @@ function	OverviewChart(props: TOverviewChartProps): ReactElement {
 				windowValue={windowValue}
 				data={wrapperTotals}
 				bars={[{name: 'data.totalTVL', fill: '#8884d8'}, {name: 'data.profitShare', fill: '#82ca9d'}]}
-				yAxisOptions={{domain: [0, 'auto']}}
+				yAxisOptions={{domain: [0, 'auto'], hideRightAxis: false}}
 				xAxisOptions={{interval: getTickInterval(activeWindow)}}
 				tooltipItems={[{name: 'profit share', symbol: ''}, {name: 'balance', symbol: '$'}]}
 				legendItems={dummyLegendSingle}/>

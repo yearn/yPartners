@@ -29,7 +29,8 @@ export type TChartProps = {
 		tickCount?: number,
 		ticks?: string[] | number[]	
 		// interval prop allows tick to be skipped, 0 - shows all, 1 - hides half (skips every other)
-		interval?: number
+		interval?: number,
+		hideRightAxis: boolean
 	}
 	xAxisOptions: {
 		interval?: number

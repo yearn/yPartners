@@ -62,7 +62,8 @@ function	Composed(props: TChartProps): ReactElement {
 					domain={yAxisOptions.domain}
 					tickCount={yAxisOptions.tickCount}
 					ticks={yAxisOptions.ticks} 
-					tickFormatter={(value): string => formatYAxis('%', value)} />
+					tickFormatter={(value): string => formatYAxis('%', value)}
+					hide={yAxisOptions.hideRightAxis} />
 
 				<Tooltip
 					cursor={{strokeWidth: `${100/(windowValue || 1)}%`}}

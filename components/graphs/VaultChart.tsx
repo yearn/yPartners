@@ -39,7 +39,7 @@ function	VaultChart(props: TVaultChartProps): ReactElement {
 				windowValue={windowValue}
 				data={balanceTVL}
 				bars={[{name: 'data.balanceTVL', fill: fillColor}]}
-				yAxisOptions={{domain: ['auto', 'auto']}}
+				yAxisOptions={{domain: ['auto', 'auto'], hideRightAxis: true}}
 				xAxisOptions={{interval: getTickInterval(activeWindow)}}
 				tooltipItems={[{name: 'balance', symbol: '$'}]}
 				legendItems={[{type: 'multi', details: [`${token}`, `Wrapper: ${truncateHex(address, 4)}`], color: fillColor}]}/>
