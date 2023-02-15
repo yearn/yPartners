@@ -73,7 +73,9 @@ function Index({partnerID}: {partnerID: string}): ReactElement {
 		<main>
 			<section aria-label={'hero'} className={'mt-[75px] mb-14 grid grid-cols-12'}>
 				<div className={'col-span-12 md:col-span-7'}>
-					<h1 className={'mb-2 text-6xl text-neutral-900 md:text-8xl'}>{currentPartner?.name}</h1>
+					<h1 className={'mb-2 text-6xl text-neutral-900 md:text-8xl'}>
+						{currentPartner?.name === 'Abracadabra.Money' ? 'Abracadabra': currentPartner?.name}
+					</h1>
 
 					<p className={'mb-10 w-3/4 text-neutral-500'}>{`Last updated ${lastSync}`}</p>
 
