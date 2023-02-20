@@ -171,8 +171,9 @@ function	DashboardTabsWrapper(props: {partnerID: string}): ReactElement {
 						for (const [vaultAddress, currentVault] of Object.entries(vaultsForNetwork || {})) {
 							const vaultBalanceArray = partnerBalanceTVL[`${toAddress(vaultAddress)}_${chainID}`];
 							const date = unix(data.ts).format('MMM DD YYYY');
+							const {token} = currentVault;
 							
-							const dataPoint = {name: date, data: {balanceTVL: currentVault.tvl}};
+							const dataPoint = {name: date, data: {balanceTVL: currentVault.tvl}, token};
 
 							if(vaultBalanceArray){
 								partnerBalanceTVL[`${toAddress(vaultAddress)}_${chainID}`].push(dataPoint);
