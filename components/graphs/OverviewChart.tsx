@@ -19,32 +19,34 @@ const dummyLegendSingle = [
 	{type: 'single', details: 'Profit Share', color: '#82ca9d'}
 ];
 
+const chartColors = [
+	'#79A7D9', '#BB8FD9', '#D99F9A', '#D9C76F', '#8555A6',
+	'#A68855', '#C98581', '#43597D'
+];
+
 function	OverviewChart(props: TOverviewChartProps): ReactElement {
 	const {wrapperTotals, balanceTVLs, windowValue, activeWindow} = props;
 
-	const wrapperPercentages = useMemo((): TDict<TChartBar[]> => {
-		const _percentages: TDict<TChartBar[]> = {};
+	const wrapperPercentages = useMemo((): TChartBar[] => {
+		const _data: TChartBar[] = wrapperTotals.map((item): TChartBar => {
+			return {...item, data: {}};
+		});
 
-		Object.keys(balanceTVLs).forEach((address): void => {
-			const asset = balanceTVLs[address];
-
-			const result = asset.map((dataPoint, i): TChartBar => {
+		Object.values(balanceTVLs).forEach((asset): void => {
+			asset.forEach((dataPoint, i): void => {
+				const {token} = dataPoint;
 				const {balanceTVL} = dataPoint.data;
 				const {totalTVL} = wrapperTotals[i].data;
 				const _percent = totalTVL === 0 ? 0 : +formatAmount((balanceTVL / totalTVL) * 100, 0, 2);
-				
-				return ({...dataPoint, data: {percentage: _percent, balanceTVL, totalTVL}});
-			});
 
-			_percentages[address] = result;
+				_data[i] = {..._data[i], data: {..._data[i].data, [`${token}`]: _percent}};
+			});
 		});
 
-		return _percentages;
+		return _data;
 
 	}, [wrapperTotals, balanceTVLs]);
 
-	console.log(wrapperPercentages);
-	
 	return (
 		<div className={'h-[400px]'}>
 			<Chart
@@ -59,17 +61,22 @@ function	OverviewChart(props: TOverviewChartProps): ReactElement {
 				tooltipItems={[{name: 'profit share', symbol: ''}, {name: 'balance', symbol: '$'}]}
 				legendItems={dummyLegendSingle}/>
 
-			{/* <Chart
+			<Chart
 				title={'Wrapper Balance Distribution'}
-				type={'composed'}
+				type={'stacked'}
 				className={'mb-20'}
 				windowValue={windowValue}
-				data={wrapperTotals}
-				bars={[{name: 'data.totalTVL', fill: '#8884d8'}, {name: 'data.profitShare', fill: '#82ca9d'}]}
+				data={wrapperPercentages}
+				bars={wrapperPercentages.map((item, idx): {name: string, fill: string} => {
+					const asset = Object.keys(item.data)[idx];
+					return {name: `data.${asset}`, fill: chartColors[idx % chartColors.length]};
+				})}
 				yAxisOptions={{domain: [0, 'auto'], hideRightAxis: true}}
 				xAxisOptions={{interval: getTickInterval(activeWindow)}}
-				tooltipItems={[{name: 'profit share', symbol: ''}, {name: 'balance', symbol: '$'}]}
-				legendItems={dummyLegendSingle}/> */}
+				tooltipItems={Object.keys(wrapperPercentages[0].data).map((asset): {name: string, symbol: string} => {
+					return {name: `${asset}`, symbol: '%'};
+				})}
+				legendItems={dummyLegendSingle}/>
 		</div>
 	);
 }
