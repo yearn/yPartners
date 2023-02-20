@@ -10,6 +10,7 @@ export type TLegendItem = {
 export type TChartBar = {
 	name: string;
 	data: { [prop: string]: number}; 
+	token?: string;
 }
 
 export type TChartProps = {
