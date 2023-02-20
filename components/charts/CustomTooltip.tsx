@@ -20,7 +20,22 @@ function ToolTip(props: TTooltip): ReactElement | null {
 	const {active: isActive, items, payload} = props;
 
 	if (isActive && payload) {
-		return (
+
+		return items.length > 2 ? (
+			<div className={'rounded bg-good-ol-grey-300 p-2 opacity-90'}>
+				<p>{`${payload[0].payload.name}`}</p>
+
+				{payload[1] ? 
+					<>
+						{items.map((item, idx): ReactElement => {
+							return (<p key={idx}><span className={'font-semibold'}>{`${item.name}:  `}</span>{`${item.symbol} ${formatAmount(payload[idx].value, 2, 2)}`}</p>);
+						})}
+					</>
+					: 
+					<p><span className={'font-semibold'}>{`${items[0].name}:  `}</span>{`${items[0].symbol} ${formatAmount(payload[0].value, 2, 2)}`}</p>}
+
+			</div>
+		) : (
 			<div className={'rounded bg-good-ol-grey-300 p-2 opacity-90'}>
 				<p>{`${payload[0].payload.name}`}</p>
 
