@@ -9,6 +9,7 @@ export type TLegendItem = {
 
 export type TChartBar = {
 	name: string;
+	shortDate: string;
 	data: { [prop: string]: number}; 
 	token?: string;
 }
@@ -23,7 +24,7 @@ export type TChartProps = {
 		symbol: string
 	}[],
 	windowValue: number | undefined,
-	data: TChartBar[] | undefined
+	data: TChartBar[]
 	bars: {name: string, fill: string}[]
 	yAxisOptions: {
 		domain?: string[] | number[] | [TAxisDomainItem, TAxisDomainItem] 
