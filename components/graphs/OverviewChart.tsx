@@ -1,5 +1,6 @@
 import	React, {useMemo}	from	'react';
 import Chart from 'components/charts/Chart';
+import {NETWORK_LABELS} from 'utils/b2b';
 import {getTickInterval} from 'utils/b2b/Chart';
 import {formatAmount} from '@yearn-finance/web-lib/utils/format.number';
 
@@ -34,14 +35,19 @@ function	OverviewChart(props: TOverviewChartProps): ReactElement {
 			return {...item, data: {}};
 		});
 
-		Object.values(balanceTVLs).forEach((asset): void => {
+		Object.keys(balanceTVLs).forEach((key): void => {
+			const asset = balanceTVLs[key]; 
+			const [address, network] = key.split('_');
+
 			asset.forEach((dataPoint, i): void => {
 				const {token} = dataPoint;
 				const {balanceTVL} = dataPoint.data;
 				const {totalTVL} = wrapperTotals[i].data;
 				const _percent = totalTVL === 0 ? 0 : +formatAmount((balanceTVL / totalTVL) * 100, 0, 2);
 
-				_data[i] = {..._data[i], data: {..._data[i].data, [`${token}`]: _percent}};
+				// Distinction by address required as some partners have equivalent asset vaults on the same network
+				// not separation this way causes later instances of the asset to override values for the first instances
+				_data[i] = {..._data[i], data: {..._data[i].data, [`${token}_${network}_${address}`]: _percent}};
 			});
 		});
 
@@ -76,7 +82,10 @@ function	OverviewChart(props: TOverviewChartProps): ReactElement {
 				yAxisOptions={{domain: [0, 'auto'], hideRightAxis: true}}
 				xAxisOptions={{interval: getTickInterval(activeWindow)}}
 				tooltipItems={Object.keys(wrapperPercentages[0].data).map((asset): {name: string, symbol: string} => {
-					return {name: `${asset}`, symbol: '%'};
+					const [name, network] = asset.split('_');
+					const networkShort = NETWORK_LABELS[+network];
+					
+					return {name: `${name} - ${networkShort}`, symbol: '%'};
 				})}
 				legendItems={dummyLegendSingle}/>
 		</div>
