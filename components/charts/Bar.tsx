@@ -1,6 +1,6 @@
 import React from 'react';
 import {Bar, BarChart, ResponsiveContainer, Tooltip, XAxis, YAxis} from 'recharts';
-import {formatXAxis, formatYAxis} from 'utils/b2b/Chart';
+import {formatYAxis} from 'utils/b2b/Chart';
 
 import CustomTooltip from './CustomTooltip';
 
@@ -25,7 +25,9 @@ function CustomBarChart(props: TChartProps): ReactElement {
 					bottom: 5
 				}}
 			>
-				<XAxis tickFormatter={formatXAxis} interval={xAxisOptions.interval}/>
+				<XAxis 
+					tickFormatter={(value): string => data[value].shortDate}
+					interval={xAxisOptions.interval}/>
 				<YAxis
 					domain={yAxisOptions.domain}
 					tickCount={yAxisOptions.tickCount}

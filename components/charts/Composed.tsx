@@ -1,7 +1,7 @@
 import React, {useState} from 'react';
 import CustomTooltip from 'components/charts/CustomTooltip';
 import {Bar, Cell, ComposedChart, ResponsiveContainer, Tooltip, XAxis, YAxis} from 'recharts';
-import {formatXAxis, formatYAxis} from 'utils/b2b/Chart';
+import {formatYAxis} from 'utils/b2b/Chart';
 
 import type {ReactElement} from 'react';
 import type {TChartProps} from 'types/chart';
@@ -43,8 +43,8 @@ function	Composed(props: TChartProps): ReactElement {
 				}}>
 				<XAxis
 					xAxisId={'main'}
-					tickFormatter={formatXAxis}
-					interval={xAxisOptions.interval} />
+					tickFormatter={(value): string => data[value].shortDate}
+					interval={xAxisOptions.interval}/>
 				<XAxis xAxisId={'hidden'} hide={true} />
 
 				<YAxis

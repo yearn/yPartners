@@ -171,9 +171,10 @@ function	DashboardTabsWrapper(props: {partnerID: string}): ReactElement {
 						for (const [vaultAddress, currentVault] of Object.entries(vaultsForNetwork || {})) {
 							const vaultBalanceArray = partnerBalanceTVL[`${toAddress(vaultAddress)}_${chainID}`];
 							const date = unix(data.ts).format('MMM DD YYYY');
+							const shortDate = unix(data.ts).format('MMM DD');
 							const {token} = currentVault;
 							
-							const dataPoint = {name: date, data: {balanceTVL: currentVault.tvl}, token};
+							const dataPoint = {name: date, shortDate, data: {balanceTVL: currentVault.tvl}, token};
 
 							if(vaultBalanceArray){
 								partnerBalanceTVL[`${toAddress(vaultAddress)}_${chainID}`].push(dataPoint);
@@ -187,7 +188,7 @@ function	DashboardTabsWrapper(props: {partnerID: string}): ReactElement {
 							if(dailyTVL){
 								_wrapperTotals[date] = {...dailyTVL, data: {totalTVL: dailyTVL.data.totalTVL + currentVault.tvl}};
 							}else{
-								_wrapperTotals[date] = {name: date, data: {totalTVL: currentVault.tvl}};
+								_wrapperTotals[date] = {name: date, shortDate, data: {totalTVL: currentVault.tvl}};
 							}
 							
 						}
@@ -275,15 +276,15 @@ function	DashboardTabsWrapper(props: {partnerID: string}): ReactElement {
 								token={selectedToken}
 								activeWindow={activeWindow}
 								windowValue={windowValue}
-								balanceTVL={balanceTVLs ? balanceTVLs[`${selectedAddress}_${selectedChainID}`] : []}
+								balanceTVL={balanceTVLs[`${selectedAddress}_${selectedChainID}`]}
 							/> : null;
 						})}
 
 						{selectedIndex === -1 ? <OverviewChart
 							activeWindow={activeWindow}
 							windowValue={windowValue}
-							wrapperTotals={wrapperTotals ? wrapperTotals : []}
-							balanceTVLs={balanceTVLs ? balanceTVLs : {}}
+							wrapperTotals={wrapperTotals}
+							balanceTVLs={balanceTVLs}
 						/> : null}
 					</>
 				)}
