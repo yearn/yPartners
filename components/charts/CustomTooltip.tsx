@@ -29,9 +29,9 @@ function ToolTip(props: TTooltip): ReactElement | null {
 					<>
 						{items.map((item, idx): ReactElement => {
 							return (
-								<>
+								<div key={idx}>
 									{payload[idx] && <p key={idx}><span className={'font-semibold'}>{`${item.name}:  `}</span>{`${item.symbol} ${formatAmount(payload[idx].value, 2, 2)}`}</p>}
-								</>
+								</div>
 							);
 						})}
 					</>
