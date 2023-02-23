@@ -20,9 +20,11 @@ const dummyLegendSingle = [
 ];
 
 const chartColors = [
-	'#79A7D9', '#BB8FD9', '#D99F9A', '#D9C76F', '#8555A6',
-	'#A68855', '#C98581', '#43597D'
+	'#79A7D9', '#D9AE64', '#89C977', '#8555A6', '#D99F9A',
+	'#A68855', '#C98581', '#7A94F0', '#7A75E6', '#E68F5E',
+	'#D9C76F', '#79A34B', '#59522E', '#4D3B59', '#43597D'
 ];
+
 
 function	OverviewChart(props: TOverviewChartProps): ReactElement {
 	const {wrapperTotals, balanceTVLs, windowValue, activeWindow} = props;
