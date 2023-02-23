@@ -123,7 +123,7 @@ function	Tabs({selectedIndex, set_selectedIndex}: TProps): ReactElement {
 function	DashboardTabsWrapper(props: {partnerID: string}): ReactElement {
 	const {partnerID} = props;
 	const {vaults} = usePartner();
-	const [selectedIndex, set_selectedIndex] = useState(0);
+	const [selectedIndex, set_selectedIndex] = useState(-1);
 	const [activeWindow, set_activeWindow] = useState('1 month');
 	const [windowValue, set_windowValue] = useState(29);
 	const [balanceTVLs, set_balanceTVLs] = useState<TDict<TChartBar[]>>();
@@ -265,23 +265,28 @@ function	DashboardTabsWrapper(props: {partnerID: string}): ReactElement {
 				vault={selectedVault}
 				selectedIndex={selectedIndex}/>
 
-			{Object.values(vaults || []).map((_, idx): ReactElement | null => {
-				return idx === selectedIndex ? <VaultChart
-					key={idx}
-					address={selectedAddress}
-					token={selectedToken}
-					activeWindow={activeWindow}
-					windowValue={windowValue}
-					balanceTVL={balanceTVLs ? balanceTVLs[`${selectedAddress}_${selectedChainID}`] : []}
-				/> : null;
-			})}
+			{ !balanceTVLs || !wrapperTotals ? 
+				<h1>{'Generating visuals...'}</h1> : (
+					<>			
+						{Object.values(vaults || []).map((_, idx): ReactElement | null => {
+							return idx === selectedIndex ? <VaultChart
+								key={idx}
+								address={selectedAddress}
+								token={selectedToken}
+								activeWindow={activeWindow}
+								windowValue={windowValue}
+								balanceTVL={balanceTVLs ? balanceTVLs[`${selectedAddress}_${selectedChainID}`] : []}
+							/> : null;
+						})}
 
-			{selectedIndex === -1 ? <OverviewChart
-				activeWindow={activeWindow}
-				windowValue={windowValue}
-				wrapperTotals={wrapperTotals ? wrapperTotals : []}
-				balanceTVLs={balanceTVLs ? balanceTVLs : {}}
-			/> : null}
+						{selectedIndex === -1 ? <OverviewChart
+							activeWindow={activeWindow}
+							windowValue={windowValue}
+							wrapperTotals={wrapperTotals ? wrapperTotals : []}
+							balanceTVLs={balanceTVLs ? balanceTVLs : {}}
+						/> : null}
+					</>
+				)}
 		</div>
 	);
 }
