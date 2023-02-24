@@ -1,5 +1,4 @@
 import	React		from	'react';
-import {getTickInterval} from 'utils/b2b/Chart';
 import {truncateHex} from '@yearn-finance/web-lib/utils/address';
 
 import Chart from '../charts/Chart';
@@ -16,7 +15,7 @@ type TVaultChartProps = {
 }
 
 function	VaultChart(props: TVaultChartProps): ReactElement {
-	const {address, token, windowValue, activeWindow, balanceTVL} = props;
+	const {address, token, windowValue, balanceTVL} = props;
 	const fillColor = '#8884d8';
 
 	return (
@@ -30,7 +29,7 @@ function	VaultChart(props: TVaultChartProps): ReactElement {
 				data={balanceTVL}
 				bars={[{name: 'data.balanceTVL', fill: fillColor}]}
 				yAxisOptions={{domain: ['auto', 'auto'], hideRightAxis: true}}
-				xAxisOptions={{interval: getTickInterval(activeWindow)}}
+				xAxisOptions={{interval: undefined}}
 				tooltipItems={[{name: 'balance', symbol: '$'}]}
 				legendItems={[{type: 'multi', details: [`${token}`, `Wrapper: ${truncateHex(address, 4)}`], color: fillColor}]}/>
 
@@ -41,7 +40,7 @@ function	VaultChart(props: TVaultChartProps): ReactElement {
 				data={dummyData}
 				bars={[{name: 'USDC', fill: '#82ca9d'}, {name: 'WBTC', fill: '#8884d8'}]}
 				yAxisOptions={{domain: [0, 'auto']}}
-				xAxisOptions={{interval: getTickInterval()}}
+				xAxisOptions={{interval: undefined}}
 				tooltipItems={[{name: 'USDC', symbol: 'K'}, {name: 'WBTC', symbol: 'K'}]}
 				legendItems={dummyLegendMulti}/>
 
@@ -52,7 +51,7 @@ function	VaultChart(props: TVaultChartProps): ReactElement {
 				data={dummyData}
 				bars={[{name: 'rsUSDC', fill: '#82ca9d'}, {name: 'rsWBTC', fill: '#8884d8'}]}
 				yAxisOptions={{domain: [0, 'auto']}}
-				xAxisOptions={{interval: getTickInterval()}}
+				xAxisOptions={{interval: undefined}}
 				tooltipItems={[{name: 'USDC', symbol: '%'}, {name: 'WBTC', symbol: '%'}]}
 				legendItems={dummyLegendMulti}/> */}
 
@@ -64,7 +63,7 @@ function	VaultChart(props: TVaultChartProps): ReactElement {
 				data={dummyData}
 				bars={[{name: 'rbdUSDC', fill: '#82ca9d'}, {name: 'rbdWBTC', fill: '#8884d8'}]}
 				yAxisOptions={{tickCount: 6}}
-				xAxisOptions={{interval: getTickInterval()}}
+				xAxisOptions={{interval: undefined}}
 				tooltipItems={[{name: 'USDC', symbol: '%'}, {name: 'WBTC', symbol: '%'}]}
 				legendItems={dummyLegendMulti}/> */}
 		</div>

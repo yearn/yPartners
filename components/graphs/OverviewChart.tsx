@@ -1,7 +1,6 @@
 import	React, {useMemo}	from	'react';
 import Chart from 'components/charts/Chart';
 import {NETWORK_LABELS} from 'utils/b2b';
-import {getTickInterval} from 'utils/b2b/Chart';
 import {formatAmount} from '@yearn-finance/web-lib/utils/format.number';
 
 import type {ReactElement} from 'react';
@@ -28,7 +27,7 @@ const chartColors = [
 
 
 function	OverviewChart(props: TOverviewChartProps): ReactElement {
-	const {wrapperTotals, balanceTVLs, windowValue, activeWindow} = props;
+	const {wrapperTotals, balanceTVLs, windowValue} = props;
 
 	const wrapperPercentages = useMemo((): TChartBar[] => {
 		const _data: TChartBar[] = wrapperTotals.map((item): TChartBar => {
@@ -65,7 +64,7 @@ function	OverviewChart(props: TOverviewChartProps): ReactElement {
 				data={wrapperTotals}
 				bars={[{name: 'data.totalTVL', fill: '#8884d8'}, {name: 'data.profitShare', fill: '#82ca9d'}]}
 				yAxisOptions={{domain: [0, 'auto'], hideRightAxis: false}}
-				xAxisOptions={{interval: getTickInterval(activeWindow)}}
+				xAxisOptions={{interval: undefined}}
 				tooltipItems={[{name: 'profit share', symbol: ''}, {name: 'balance', symbol: '$'}]}
 				legendItems={dummyLegendSingle}/>
 
@@ -80,7 +79,7 @@ function	OverviewChart(props: TOverviewChartProps): ReactElement {
 					return {name: `data.${asset}`, fill: chartColors[idx % chartColors.length]};
 				})}
 				yAxisOptions={{domain: [0, 'auto'], hideRightAxis: true}}
-				xAxisOptions={{interval: getTickInterval(activeWindow)}}
+				xAxisOptions={{interval: undefined}}
 				tooltipItems={Object.keys(wrapperPercentages[0].data).map((asset): {name: string, symbol: string} => {
 					const [name, network] = asset.split('_');
 					const networkShort = NETWORK_LABELS[+network];
