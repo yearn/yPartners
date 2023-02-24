@@ -1,10 +1,11 @@
 import	React, {useMemo}	from	'react';
 import Chart from 'components/charts/Chart';
 import {NETWORK_LABELS} from 'utils/b2b';
+import {truncateHex} from '@yearn-finance/web-lib/utils/address';
 import {formatAmount} from '@yearn-finance/web-lib/utils/format.number';
 
 import type {ReactElement} from 'react';
-import type {TChartBar} from 'types/chart';
+import type {TChartBar, TLegendItem} from 'types/chart';
 import type {TDict} from '@yearn-finance/web-lib/utils/types';
 
 type TOverviewChartProps = {
@@ -13,11 +14,6 @@ type TOverviewChartProps = {
 	wrapperTotals: TChartBar[],
 	balanceTVLs: TDict<TChartBar[]>
 }
-
-const dummyLegendSingle = [
-	{type: 'single', details: 'Aggregate Wrapper Balance', color: '#8884d8', isThin: true},
-	{type: 'single', details: 'Profit Share', color: '#82ca9d'}
-];
 
 const chartColors = [
 	'#79A7D9', '#D9AE64', '#89C977', '#8555A6', '#D99F9A',
@@ -66,27 +62,41 @@ function	OverviewChart(props: TOverviewChartProps): ReactElement {
 				yAxisOptions={{domain: [0, 'auto'], hideRightAxis: false}}
 				xAxisOptions={{interval: undefined}}
 				tooltipItems={[{name: 'profit share', symbol: ''}, {name: 'balance', symbol: '$'}]}
-				legendItems={dummyLegendSingle}/>
+				legendItems={[
+					{type: 'single', details: 'Aggregate Wrapper Balance', color: '#8884d8', isThin: true},
+					{type: 'single', details: 'Profit Share', color: '#82ca9d'}
+				]}/>
 
-			<Chart
-				title={'Wrapper Balance Distribution'}
-				type={'stacked'}
-				className={'mb-20'}
-				windowValue={windowValue}
-				data={wrapperPercentages}
-				bars={wrapperPercentages.map((item, idx): {name: string, fill: string} => {
-					const asset = Object.keys(item.data)[idx];
-					return {name: `data.${asset}`, fill: chartColors[idx % chartColors.length]};
-				})}
-				yAxisOptions={{domain: [0, 'auto'], hideRightAxis: true}}
-				xAxisOptions={{interval: undefined}}
-				tooltipItems={Object.keys(wrapperPercentages[0].data).map((asset): {name: string, symbol: string} => {
-					const [name, network] = asset.split('_');
-					const networkShort = NETWORK_LABELS[+network];
+			{wrapperPercentages && (			
+				<Chart
+					title={'Wrapper Balance Distribution'}
+					type={'stacked'}
+					className={'mb-20'}
+					windowValue={windowValue}
+					data={wrapperPercentages}
+					bars={wrapperPercentages.map((item, idx): {name: string, fill: string} => {
+						const asset = Object.keys(item.data)[idx];
+						return {name: `data.${asset}`, fill: chartColors[idx % chartColors.length]};
+					})}
+					yAxisOptions={{domain: [0, 'auto'], hideRightAxis: true}}
+					xAxisOptions={{interval: undefined}}
+					tooltipItems={Object.keys(wrapperPercentages[0].data).map((asset): {name: string, symbol: string} => {
+						const [name, network] = asset.split('_');
+						const networkShort = NETWORK_LABELS[+network];
 					
-					return {name: `${name} - ${networkShort}`, symbol: '%'};
-				})}
-				legendItems={dummyLegendSingle}/>
+						return {name: `${name} - ${networkShort}`, symbol: '%'};
+					})}
+					legendItems={Object.keys(wrapperPercentages[0].data).map((asset, idx): TLegendItem => {
+						const [token, ,address] = asset.split('_');
+
+						const legendItem = {
+							type: 'multi',
+							details: [`${token}`, `Wrapper: ${truncateHex(address, 4)}`],
+							color: chartColors[idx % chartColors.length]
+						};
+						return legendItem;
+					})} />)}
+
 		</div>
 	);
 }
