@@ -54,18 +54,6 @@ function	VaultChart(props: TVaultChartProps): ReactElement {
 				xAxisOptions={{interval: undefined}}
 				tooltipItems={[{name: 'USDC', symbol: '%'}, {name: 'WBTC', symbol: '%'}]}
 				legendItems={dummyLegendMulti}/> */}
-
-			{/* <Chart
-				title={'Wrapper Balance Distribution'}
-				type={'bar'}
-				className={'mb-20'}
-				windowValue={windowValue}
-				data={dummyData}
-				bars={[{name: 'rbdUSDC', fill: '#82ca9d'}, {name: 'rbdWBTC', fill: '#8884d8'}]}
-				yAxisOptions={{tickCount: 6}}
-				xAxisOptions={{interval: undefined}}
-				tooltipItems={[{name: 'USDC', symbol: '%'}, {name: 'WBTC', symbol: '%'}]}
-				legendItems={dummyLegendMulti}/> */}
 		</div>
 	);
 }
