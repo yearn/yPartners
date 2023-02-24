@@ -14,15 +14,18 @@ export type TChartBar = {
 	token?: string;
 }
 
+export type TTooltipItem = {
+	name: string
+	symbol: string
+	fill?: string
+}
+
 export type TChartProps = {
 	children?: React.ReactNode,
 	className?: string,
 	type: string,
 	title: string,
-	tooltipItems: {
-		name: string
-		symbol: string
-	}[],
+	tooltipItems: TTooltipItem[],
 	windowValue: number | undefined,
 	data: TChartBar[]
 	bars: {name: string, fill: string}[]
