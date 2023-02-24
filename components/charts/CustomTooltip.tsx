@@ -30,13 +30,20 @@ function ToolTip(props: TTooltip): ReactElement | null {
 						{items.map((item, idx): ReactElement => {
 							return (
 								<div key={idx}>
-									{payload[idx] && <p key={idx}><span className={'font-semibold'}>{`${item.name}:  `}</span>{`${item.symbol} ${formatAmount(payload[idx].value, 2, 2)}`}</p>}
+									{payload[idx] && 
+									<p key={idx}>
+										<span className={'font-semibold'}>{`${item.name}:  `}</span>
+										{`${item.symbol} ${formatAmount(payload[idx].value, 2, 2)}`}
+									</p>}
 								</div>
 							);
 						})}
 					</>
 					: 
-					<p><span className={'font-semibold'}>{`${items[0].name}:  `}</span>{`${items[0].symbol} ${formatAmount(payload[0].value, 2, 2)}`}</p>}
+					<p>
+						<span className={'font-semibold'}>{`${items[0].name}:  `}</span>
+						{`${items[0].symbol} ${formatAmount(payload[0].value, 2, 2)}`}
+					</p>}
 
 			</div>
 		) : (
@@ -46,13 +53,19 @@ function ToolTip(props: TTooltip): ReactElement | null {
 				{payload[1] ? 
 					<>
 						<p>
-							<span className={'font-semibold'}>{`${items[1].name}:  `}</span>{` ${items[1].symbol} ${formatAmount(payload[1].value, 2, 2)}`} 
+							<span className={'font-semibold'}>{`${items[1].name}:  `}</span>
+							{` ${items[1].symbol} ${formatAmount(payload[1].value, 2, 2)}`} 
 						</p>
-						<p><span className={'font-semibold'}>{`${items[0].name}:  `}</span>{`${payload[0].value} %`}</p>
+						<p>
+							<span className={'font-semibold'}>{`${items[0].name}:  `}</span>
+							{`${payload[0].value} %`}
+						</p>
 					</>
 					: 
-					<p><span className={'font-semibold'}>{`${items[0].name}:  `}</span>{`${items[0].symbol} ${formatAmount(payload[0].value, 2, 2)}`}</p>}
-
+					<p>
+						<span className={'font-semibold'}>{`${items[0].name}:  `}</span>
+						{`${items[0].symbol} ${formatAmount(payload[0].value, 2, 2)}`}
+					</p>}
 			</div>
 		);
 	}
