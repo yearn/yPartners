@@ -5,7 +5,7 @@ import {truncateHex} from '@yearn-finance/web-lib/utils/address';
 import {formatAmount} from '@yearn-finance/web-lib/utils/format.number';
 
 import type {ReactElement} from 'react';
-import type {TChartBar, TLegendItem} from 'types/chart';
+import type {TChartBar, TLegendItem, TTooltipItem} from 'types/chart';
 import type {TDict} from '@yearn-finance/web-lib/utils/types';
 
 type TOverviewChartProps = {
@@ -80,11 +80,12 @@ function	OverviewChart(props: TOverviewChartProps): ReactElement {
 					})}
 					yAxisOptions={{domain: [0, 'auto'], hideRightAxis: true}}
 					xAxisOptions={{interval: undefined}}
-					tooltipItems={Object.keys(wrapperPercentages[0].data).map((asset): {name: string, symbol: string} => {
+					tooltipItems={Object.keys(wrapperPercentages[0].data).map((asset, idx): TTooltipItem => {
 						const [name, network] = asset.split('_');
 						const networkShort = NETWORK_LABELS[+network];
+						const fill = chartColors[idx % chartColors.length];
 					
-						return {name: `${name} - ${networkShort}`, symbol: '%'};
+						return {name: `${name} - ${networkShort}`, symbol: '%', fill};
 					})}
 					legendItems={Object.keys(wrapperPercentages[0].data).map((asset, idx): TLegendItem => {
 						const [token, ,address] = asset.split('_');
