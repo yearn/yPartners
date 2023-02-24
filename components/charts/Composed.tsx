@@ -1,6 +1,5 @@
 import React, {useState} from 'react';
 import CustomTooltip from 'components/charts/CustomTooltip';
-import useWindowDimensions from 'hooks/useWindowDimensions';
 import {Bar, Cell, ComposedChart, ResponsiveContainer, Tooltip, XAxis, YAxis} from 'recharts';
 import {formatYAxis} from 'utils/b2b/Chart';
 
@@ -8,8 +7,7 @@ import type {ReactElement} from 'react';
 import type {TChartProps} from 'types/chart';
 
 function	Composed(props: TChartProps): ReactElement {
-	const {width} = useWindowDimensions();
-	const {tooltipItems, data, bars, windowValue, yAxisOptions, xAxisOptions} = props;
+	const {tooltipItems, data, bars, windowValue, yAxisOptions} = props;
 	const firstSymbol = tooltipItems[0].symbol;
 	// const secondSymbol = tooltipItems[1].symbol;
 
@@ -44,10 +42,8 @@ function	Composed(props: TChartProps): ReactElement {
 					bottom: 5
 				}}>
 				<XAxis
-					hide={width < 950}
 					xAxisId={'main'}
-					tickFormatter={(value): string => data[value].shortDate}
-					interval={xAxisOptions.interval}/>
+					tickFormatter={(value): string => data[value].shortDate} />
 				<XAxis xAxisId={'hidden'} hide={true} />
 
 				<YAxis
@@ -56,7 +52,7 @@ function	Composed(props: TChartProps): ReactElement {
 					domain={yAxisOptions.domain}
 					tickCount={yAxisOptions.tickCount}
 					ticks={yAxisOptions.ticks}
-					tickFormatter={(value): string => formatYAxis(firstSymbol, value)}/>
+					tickFormatter={(value): string => formatYAxis(firstSymbol, value)} />
 
 				<YAxis
 					yAxisId={'right'}

@@ -1,5 +1,4 @@
 import React from 'react';
-import useWindowDimensions from 'hooks/useWindowDimensions';
 import {Bar, BarChart, ResponsiveContainer, Tooltip, XAxis, YAxis} from 'recharts';
 import {formatYAxis} from 'utils/b2b/Chart';
 
@@ -10,8 +9,7 @@ import type {TChartProps} from 'types/chart';
 
 
 function CustomBarChart(props: TChartProps): ReactElement {
-	const {width} = useWindowDimensions();
-	const {tooltipItems, data, bars, yAxisOptions, xAxisOptions} = props;
+	const {tooltipItems, data, bars, yAxisOptions} = props;
 	const tooltipSymbol = tooltipItems[0].symbol;
 
 	return (
@@ -28,16 +26,14 @@ function CustomBarChart(props: TChartProps): ReactElement {
 				}}
 			>
 				<XAxis 
-					hide={width < 950}
-					tickFormatter={(value): string => data[value].shortDate}
-					interval={xAxisOptions.interval}/>
+					tickFormatter={(value): string => data[value].shortDate} />
 				<YAxis
 					domain={yAxisOptions.domain}
 					tickCount={yAxisOptions.tickCount}
 					ticks={yAxisOptions.ticks}
 					tickFormatter={(value): string => formatYAxis(tooltipSymbol, value)}
 					interval={yAxisOptions.interval} />
-				<Tooltip content={<CustomTooltip items={tooltipItems} />}/>
+				<Tooltip content={<CustomTooltip items={tooltipItems} />} />
 
 				{bars.map((bar): ReactElement => {
 					return (
