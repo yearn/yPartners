@@ -8,7 +8,7 @@ import type {ReactElement} from 'react';
 import type {TChartProps} from 'types/chart';
 
 function StackedChart(props: TChartProps): ReactElement {
-	const {tooltipItems, data, bars, yAxisOptions} = props;
+	const {tooltipItems, data, bars, yAxisOptions, type} = props;
 	const tooltipSymbol = tooltipItems[0].symbol;
 
 	return (
@@ -32,7 +32,7 @@ function StackedChart(props: TChartProps): ReactElement {
 					ticks={yAxisOptions.ticks}
 					tickFormatter={(value): string => formatYAxis(tooltipSymbol, value)}
 					interval={yAxisOptions.interval} />
-				<Tooltip content={<CustomTooltip items={tooltipItems} />} />
+				<Tooltip content={<CustomTooltip items={tooltipItems} type={type} />} />
 
 				{bars.map((bar): ReactElement => {
 					return (

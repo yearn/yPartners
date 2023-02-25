@@ -10,14 +10,15 @@ type TTooltip = {
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	payload?: any
 	label?: number
+	type?: string
 };
 
 function ToolTip(props: TTooltip): ReactElement | null {
-	const {active: isActive, items, payload} = props;
+	const {active: isActive, items, payload, type} = props;
 
 	if (isActive && payload) {
 
-		return items.length > 2 ? (
+		return type === 'stacked' ? (
 			<div className={'rounded bg-good-ol-grey-300 p-2 opacity-90'}>
 				<p className={'mb-1'}>{`${payload[0].payload.name}`}</p>
 
