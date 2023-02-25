@@ -5,6 +5,7 @@ export type TLegendItem = {
 	color: string
 	details: string | string[],
 	isThin?: boolean
+	isCondensed?: boolean
 };
 
 export type TChartBar = {

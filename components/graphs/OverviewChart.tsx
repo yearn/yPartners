@@ -91,7 +91,8 @@ function	OverviewChart(props: TOverviewChartProps): ReactElement {
 						const legendItem = {
 							type: 'single',
 							details: `${token}`,
-							color: chartColors[idx % chartColors.length]
+							color: chartColors[idx % chartColors.length],
+							isCondensed: true
 						};
 						return legendItem;
 					}).reverse()} />)}
