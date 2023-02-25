@@ -26,7 +26,7 @@ function CustomBarChart(props: TChartProps): ReactElement {
 				}}
 			>
 				<XAxis 
-					tickFormatter={(value): string => data[value].shortDate} />
+					tickFormatter={(value): string => data[value] ? data[value].shortDate : '-'} />
 				<YAxis
 					domain={yAxisOptions.domain}
 					tickCount={yAxisOptions.tickCount}
