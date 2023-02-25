@@ -127,6 +127,7 @@ function	DashboardTabsWrapper(props: {partnerID: string}): ReactElement {
 	const [windowValue, set_windowValue] = useState(29);
 	const [balanceTVLs, set_balanceTVLs] = useState<TDict<TChartBar[]>>();
 	const [wrapperTotals, set_wrapperTotals] = useState<TChartBar[]>();
+	const [payoutTotals, set_payoutTotals] = useState<TDict<TChartBar[]>>();
 
 	const selectedVault = Object.values(vaults)[selectedIndex];
 
@@ -142,24 +143,29 @@ function	DashboardTabsWrapper(props: {partnerID: string}): ReactElement {
 
 
 	useMemo((): void => {
-		const baseURI = `${process.env.YVISION_BASE_URI}/partners/${partnerID}/balance`;
+		const baseBalanceURI = `${process.env.YVISION_BASE_URI}/partners/${partnerID}/balance`;
+		const basePayoutURI = `${process.env.YVISION_BASE_URI}/partners/${partnerID}/payout_total`;
 
 		const now = dayjs().unix();
 		const startOfToday = dayjs().utc().startOf('D').unix();
 
-		const endpoints = [`${baseURI}?ts=${now}`];
+		const balanceEndpoints = [`${baseBalanceURI}?ts=${now}`];
+		const payoutEndpoints = [`${basePayoutURI}?ts=${now}`];
 			
 		for (let i = 1; i < windowValue; i++) {
 			const ts = startOfToday - (86400 * i);
-			endpoints.push(`${baseURI}?ts=${ts}`);
+			balanceEndpoints.push(`${baseBalanceURI}?ts=${ts}`);
+			payoutEndpoints.push(`${basePayoutURI}?ts=${ts}`);
 		}
 
 		// reverse so requests resolve with first elements being the oldest
-		endpoints.reverse();
+		balanceEndpoints.reverse();
+		payoutEndpoints.reverse();
+
 		const partnerBalanceTVL: TDict<TChartBar[]> = {};
 		const _wrapperTotals: TDict<TChartBar> = {};
 
-		Promise.all(endpoints.map(async (endpoint): Promise<AxiosResponse> => axios.get(endpoint))).then(
+		Promise.all(balanceEndpoints.map(async (endpoint): Promise<AxiosResponse> => axios.get(endpoint))).then(
 			(responses): void => {
 				responses.forEach(({data}): void => {
 					const vaultsAllNetworksOject = Object.values(data || {})[0] as TPartnerVaultsByNetwork;
@@ -217,6 +223,49 @@ function	DashboardTabsWrapper(props: {partnerID: string}): ReactElement {
 				set_wrapperTotals(wrapperData);
 			});
 
+			
+		const partnerFeePayouts: TDict<TChartBar[]> = {};
+
+		Promise.all(payoutEndpoints.map(async (endpoint): Promise<AxiosResponse> => axios.get(endpoint))).then(
+			(responses): void => {
+				responses.forEach(({data}): void => {
+					const vaultsAllNetworksOject = Object.values(data || {})[0] as TPartnerVaultsByNetwork;
+
+					for (const [networkName, vaultsForNetwork] of Object.entries(vaultsAllNetworksOject || {})) {
+						const	chainID = NETWORK_CHAINID[networkName];
+
+						for (const [vaultAddress, currentVault] of Object.entries(vaultsForNetwork || {})) {
+							const vaultPayoutArray = partnerFeePayouts[`${toAddress(vaultAddress)}_${chainID}`];
+							const date = unix(data.ts).format('MMM DD YYYY');
+							const shortDate = unix(data.ts).format('MMM DD');
+							const {token} = currentVault;
+							
+							if (currentVault.tvl > 0) {
+								const dataPoint = {name: date, shortDate, data: {feePayout: currentVault.tvl}, token};
+
+								if(vaultPayoutArray){
+									partnerFeePayouts[`${toAddress(vaultAddress)}_${chainID}`].push(dataPoint);
+								}else{
+									partnerFeePayouts[`${toAddress(vaultAddress)}_${chainID}`] = [dataPoint];
+								}
+	
+								// // Sum TVLs by day for aggregate wrapper balance chart
+								// const dailyTVL = _wrapperTotals[date];
+	
+								// if(dailyTVL){
+								// 	_wrapperTotals[date] = {...dailyTVL, data: {totalTVL: dailyTVL.data.totalTVL + currentVault.tvl}};
+								// }else{
+								// 	_wrapperTotals[date] = {name: date, shortDate, data: {totalTVL: currentVault.tvl}};
+								// }
+							}
+
+						}
+					}
+				});
+
+				set_payoutTotals(partnerFeePayouts);
+			});
+
 	}, [partnerID, windowValue]);
 
 
@@ -267,7 +316,7 @@ function	DashboardTabsWrapper(props: {partnerID: string}): ReactElement {
 				vault={selectedVault}
 				selectedIndex={selectedIndex}/>
 
-			{ !balanceTVLs || !wrapperTotals ? 
+			{ !balanceTVLs || !wrapperTotals || !payoutTotals ? 
 				<h1>{'Generating visuals...'}</h1> : (
 					<>			
 						{Object.values(vaults || []).map((_, idx): ReactElement | null => {
@@ -278,6 +327,7 @@ function	DashboardTabsWrapper(props: {partnerID: string}): ReactElement {
 								activeWindow={activeWindow}
 								windowValue={windowValue}
 								balanceTVL={balanceTVLs[`${selectedAddress}_${selectedChainID}`]}
+								payoutTotal={payoutTotals[`${selectedAddress}_${selectedChainID}`]}
 							/> : null;
 						})}
 
