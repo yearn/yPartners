@@ -1,4 +1,4 @@
-import	React		from	'react';
+import	React, {useMemo}		from	'react';
 import {truncateHex} from '@yearn-finance/web-lib/utils/address';
 
 import Chart from '../charts/Chart';
@@ -19,8 +19,76 @@ function	VaultChart(props: TVaultChartProps): ReactElement {
 	const {address, token, windowValue, balanceTVL, payoutTotal} = props;
 	const fillColor = '#8884d8';
 
+	const cumulativePayouts = useMemo((): TChartBar[] => {
+		const _data: TChartBar[] = [];
+
+		let lastPayout = 0;
+		Object.values(payoutTotal).forEach((dailyPayoutTotal, idx): void => {
+			if(idx === 0){
+				lastPayout = dailyPayoutTotal.data.feePayout;
+			}else {
+				const _currentPayout = dailyPayoutTotal.data.feePayout;
+				const payoutDiff = _currentPayout - lastPayout;
+				if(payoutDiff > 0){
+					const harvestEvent: TChartBar = {...dailyPayoutTotal, data: {harvestAmount : payoutDiff}};
+					_data.push(harvestEvent);
+
+				}
+			}
+		});
+
+		return _data;
+
+	}, [payoutTotal]);
+
+	const payouts = useMemo((): TChartBar[] => {
+		const _data: TChartBar[] = [];
+
+		let lastPayout = 0;
+		Object.values(payoutTotal).forEach((dailyPayoutTotal, idx): void => {
+			if(idx === 0){
+				lastPayout = dailyPayoutTotal.data.feePayout;
+			}else {
+				const _currentPayout = dailyPayoutTotal.data.feePayout;
+				const payoutDiff = _currentPayout - lastPayout;
+				if(payoutDiff > 0){
+					lastPayout = _currentPayout;
+					const harvestEvent: TChartBar = {...dailyPayoutTotal, data: {harvestAmount : payoutDiff}};
+					_data.push(harvestEvent);
+				}
+			}
+		});
+
+		return _data;
+
+	}, [payoutTotal]);
+
 	return (
 		<div className={'h-[400px]'}>
+
+			<Chart
+				title={'Harvest Events (USD)'}
+				type={'bar'}
+				className={'mb-20'}
+				windowValue={windowValue}
+				data={payouts}
+				bars={[{name: 'data.harvestAmount', fill: fillColor}]}
+				yAxisOptions={{domain: ['auto', 'auto'], hideRightAxis: true}}
+				xAxisOptions={{interval: undefined}}
+				tooltipItems={[{name: 'harvested', symbol: '$'}]}
+				legendItems={[{type: 'multi', details: [`${token}`, `Wrapper: ${truncateHex(address, 4)}`], color: fillColor}]}/>
+
+			<Chart
+				title={'Cumulative Payouts (USD) ** only payouts within the window'}
+				type={'bar'}
+				className={'mb-20'}
+				windowValue={windowValue}
+				data={cumulativePayouts}
+				bars={[{name: 'data.harvestAmount', fill: fillColor}]}
+				yAxisOptions={{domain: ['auto', 'auto'], hideRightAxis: true}}
+				xAxisOptions={{interval: undefined}}
+				tooltipItems={[{name: 'harvested', symbol: '$'}]}
+				legendItems={[{type: 'multi', details: [`${token}`, `Wrapper: ${truncateHex(address, 4)}`], color: fillColor}]}/>
 
 			<Chart
 				title={'Total Fees Earned (USD)'}
