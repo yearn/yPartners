@@ -22,14 +22,15 @@ function ToolTip(props: TTooltip): ReactElement | null {
 				<p className={'mb-1'}>{`${payload[0].payload.name}`}</p>
 
 				{items.map((item, idx): ReactElement => {
+					const negativeIndex = payload.length - (idx+1);
+
 					return (
 						<div key={idx}>
 							{payload[idx] && 
 								<p>
-									
 									<span style={{backgroundColor: `${item.fill}`}} className={'mr-4 inline-block h-4 w-4'}></span>
 									<span >{`${item.name}:  `}</span>
-									<span className={'ml-2 font-semibold'}>{`${formatAmount(payload[idx].value, 2, 2)} ${item.symbol} `}</span>
+									<span className={'ml-2 font-semibold'}>{`${formatAmount(payload[negativeIndex].value, 2, 2)} ${item.symbol} `}</span>
 									
 								</p>
 							}

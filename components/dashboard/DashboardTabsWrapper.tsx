@@ -220,7 +220,6 @@ function	DashboardTabsWrapper(props: {partnerID: string}): ReactElement {
 
 	}, [partnerID, windowValue]);
 
-	console.log(selectedVault);
 
 	return (
 		<div aria-label={'Vault Details'} className={'col-span-12 mb-4 flex flex-col bg-neutral-100'}>

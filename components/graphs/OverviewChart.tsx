@@ -1,7 +1,6 @@
 import	React, {useMemo}	from	'react';
 import Chart from 'components/charts/Chart';
 import {NETWORK_LABELS} from 'utils/b2b';
-import {truncateHex} from '@yearn-finance/web-lib/utils/address';
 import {formatAmount} from '@yearn-finance/web-lib/utils/format.number';
 
 import type {ReactElement} from 'react';
@@ -74,8 +73,7 @@ function	OverviewChart(props: TOverviewChartProps): ReactElement {
 					className={'mb-20'}
 					windowValue={windowValue}
 					data={wrapperPercentages}
-					bars={wrapperPercentages.map((item, idx): {name: string, fill: string} => {
-						const asset = Object.keys(item.data)[idx];
+					bars={Object.keys(wrapperPercentages[0].data).map((asset, idx): {name: string, fill: string} => {
 						return {name: `data.${asset}`, fill: chartColors[idx % chartColors.length]};
 					})}
 					yAxisOptions={{domain: [0, 'auto'], hideRightAxis: true}}
@@ -86,17 +84,17 @@ function	OverviewChart(props: TOverviewChartProps): ReactElement {
 						const fill = chartColors[idx % chartColors.length];
 					
 						return {name: `${name} - ${networkShort}`, symbol: '%', fill};
-					})}
+					}).reverse()}
 					legendItems={Object.keys(wrapperPercentages[0].data).map((asset, idx): TLegendItem => {
-						const [token, ,address] = asset.split('_');
+						const [token, ,] = asset.split('_');
 
 						const legendItem = {
-							type: 'multi',
-							details: [`${token}`, `Wrapper: ${truncateHex(address, 4)}`],
+							type: 'single',
+							details: `${token}`,
 							color: chartColors[idx % chartColors.length]
 						};
 						return legendItem;
-					})} />)}
+					}).reverse()} />)}
 
 		</div>
 	);
