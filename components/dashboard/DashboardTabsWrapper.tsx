@@ -174,23 +174,25 @@ function	DashboardTabsWrapper(props: {partnerID: string}): ReactElement {
 							const shortDate = unix(data.ts).format('MMM DD');
 							const {token} = currentVault;
 							
-							const dataPoint = {name: date, shortDate, data: {balanceTVL: currentVault.tvl}, token};
+							if (currentVault.tvl > 0) {
+								const dataPoint = {name: date, shortDate, data: {balanceTVL: currentVault.tvl}, token};
 
-							if(vaultBalanceArray){
-								partnerBalanceTVL[`${toAddress(vaultAddress)}_${chainID}`].push(dataPoint);
-							}else{
-								partnerBalanceTVL[`${toAddress(vaultAddress)}_${chainID}`] = [dataPoint];
+								if(vaultBalanceArray){
+									partnerBalanceTVL[`${toAddress(vaultAddress)}_${chainID}`].push(dataPoint);
+								}else{
+									partnerBalanceTVL[`${toAddress(vaultAddress)}_${chainID}`] = [dataPoint];
+								}
+	
+								// Sum TVLs by day for aggregate wrapper balance chart
+								const dailyTVL = _wrapperTotals[date];
+	
+								if(dailyTVL){
+									_wrapperTotals[date] = {...dailyTVL, data: {totalTVL: dailyTVL.data.totalTVL + currentVault.tvl}};
+								}else{
+									_wrapperTotals[date] = {name: date, shortDate, data: {totalTVL: currentVault.tvl}};
+								}
 							}
 
-							// Sum TVLs by day for aggregate wrapper balance chart
-							const dailyTVL = _wrapperTotals[date];
-
-							if(dailyTVL){
-								_wrapperTotals[date] = {...dailyTVL, data: {totalTVL: dailyTVL.data.totalTVL + currentVault.tvl}};
-							}else{
-								_wrapperTotals[date] = {name: date, shortDate, data: {totalTVL: currentVault.tvl}};
-							}
-							
 						}
 					}
 				});
@@ -218,6 +220,7 @@ function	DashboardTabsWrapper(props: {partnerID: string}): ReactElement {
 
 	}, [partnerID, windowValue]);
 
+	console.log(selectedVault);
 
 	return (
 		<div aria-label={'Vault Details'} className={'col-span-12 mb-4 flex flex-col bg-neutral-100'}>

@@ -62,8 +62,9 @@ export const PartnerContextApp = ({
 					currentVault.riskScore = riskScore;
 					currentVault.apy = apy.net_apy * 100;
 					currentVault.totalPayout = payoutsAllNetworksOject[networkName][vaultAddress].tvl;
-					partnerVaults[`${currentVault.address}_${chainID}`] = currentVault;
-					
+					if (currentVault.tvl > 0) {
+						partnerVaults[`${currentVault.address}_${chainID}`] = currentVault;
+					}
 				}
 			}
 		}
