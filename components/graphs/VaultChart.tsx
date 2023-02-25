@@ -12,14 +12,27 @@ type TVaultChartProps = {
 	windowValue: number,
 	activeWindow: string,
 	balanceTVL: TChartBar[]
+	payoutTotal: TChartBar[]
 }
 
 function	VaultChart(props: TVaultChartProps): ReactElement {
-	const {address, token, windowValue, balanceTVL} = props;
+	const {address, token, windowValue, balanceTVL, payoutTotal} = props;
 	const fillColor = '#8884d8';
 
 	return (
 		<div className={'h-[400px]'}>
+
+			<Chart
+				title={'Total Fees Earned (USD)'}
+				type={'bar'}
+				className={'mb-20'}
+				windowValue={windowValue}
+				data={payoutTotal}
+				bars={[{name: 'data.feePayout', fill: fillColor}]}
+				yAxisOptions={{domain: ['auto', 'auto'], hideRightAxis: true}}
+				xAxisOptions={{interval: undefined}}
+				tooltipItems={[{name: 'payouts total', symbol: '$'}]}
+				legendItems={[{type: 'multi', details: [`${token}`, `Wrapper: ${truncateHex(address, 4)}`], color: fillColor}]}/>
 
 			<Chart
 				title={'Wrapper Balance (USD)'}
@@ -34,17 +47,6 @@ function	VaultChart(props: TVaultChartProps): ReactElement {
 				legendItems={[{type: 'multi', details: [`${token}`, `Wrapper: ${truncateHex(address, 4)}`], color: fillColor}]}/>
 
 			{/* <Chart
-				title={'Fees Earned'}
-				type={'bar'}
-				windowValue={windowValue}
-				data={dummyData}
-				bars={[{name: 'USDC', fill: '#82ca9d'}, {name: 'WBTC', fill: '#8884d8'}]}
-				yAxisOptions={{domain: [0, 'auto']}}
-				xAxisOptions={{interval: undefined}}
-				tooltipItems={[{name: 'USDC', symbol: 'K'}, {name: 'WBTC', symbol: 'K'}]}
-				legendItems={dummyLegendMulti}/>
-
-			<Chart
 				title={'Revenue Shared'}
 				type={'bar'}
 				windowValue={windowValue}
