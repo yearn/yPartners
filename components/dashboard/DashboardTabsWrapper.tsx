@@ -248,17 +248,7 @@ function	DashboardTabsWrapper(props: {partnerID: string}): ReactElement {
 								}else{
 									partnerFeePayouts[`${toAddress(vaultAddress)}_${chainID}`] = [dataPoint];
 								}
-	
-								// // Sum TVLs by day for aggregate wrapper balance chart
-								// const dailyTVL = _wrapperTotals[date];
-	
-								// if(dailyTVL){
-								// 	_wrapperTotals[date] = {...dailyTVL, data: {totalTVL: dailyTVL.data.totalTVL + currentVault.tvl}};
-								// }else{
-								// 	_wrapperTotals[date] = {name: date, shortDate, data: {totalTVL: currentVault.tvl}};
-								// }
 							}
-
 						}
 					}
 				});
