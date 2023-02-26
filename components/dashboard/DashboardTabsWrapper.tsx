@@ -129,7 +129,6 @@ function	DashboardTabsWrapper(props: {partnerID: string}): ReactElement {
 	const [wrapperTotals, set_wrapperTotals] = useState<TChartBar[]>();
 	const [feePayouts, set_feePayouts] = useState<TDict<TChartBar[]>>();
 	const [aggregatedPayouts, set_aggregatedPayouts] = useState<TChartBar[]>();
-	const [payoutTotals, set_payoutTotals] = useState<TChartBar[]>();
 
 	const selectedVault = Object.values(vaults)[selectedIndex];
 
@@ -227,7 +226,6 @@ function	DashboardTabsWrapper(props: {partnerID: string}): ReactElement {
 
 			
 		const partnerFeePayouts: TDict<TChartBar[]> = {};
-		const payoutTotals: TDict<TChartBar> = {};
 
 		Promise.all(payoutEndpoints.map(async (endpoint): Promise<AxiosResponse> => axios.get(endpoint))).then(
 			(responses): void => {
@@ -251,21 +249,10 @@ function	DashboardTabsWrapper(props: {partnerID: string}): ReactElement {
 								}else{
 									partnerFeePayouts[`${toAddress(vaultAddress)}_${chainID}`] = [dataPoint];
 								}
-
-									
-								// Sum total payouts by day for aggregate payout totals chart
-								const dailyPayoutTotal = payoutTotals[date];
-	
-								if(dailyPayoutTotal){
-									payoutTotals[date] = {...dailyPayoutTotal, data: {totalPayout: dailyPayoutTotal.data.totalPayout + currentVault.tvl}};
-								}else{
-									payoutTotals[date] = {name: date, shortDate, data: {totalPayout: currentVault.tvl}};
-								}	
 							}
 						}
 					}
 				});
-
 
 				// generate clean structure for TChartBars which we will fill with aggregated payout data
 				const _data: TChartBar[] = Object.values(partnerFeePayouts)[0].map((item): TChartBar => {
@@ -288,7 +275,6 @@ function	DashboardTabsWrapper(props: {partnerID: string}): ReactElement {
 
 				set_feePayouts(partnerFeePayouts);
 				set_aggregatedPayouts(_data);
-				set_payoutTotals(Object.values(payoutTotals));
 			});
 
 	}, [partnerID, windowValue]);
@@ -340,7 +326,7 @@ function	DashboardTabsWrapper(props: {partnerID: string}): ReactElement {
 				vault={selectedVault}
 				selectedIndex={selectedIndex}/>
 
-			{ !balanceTVLs || !wrapperTotals || !feePayouts || !aggregatedPayouts || !payoutTotals ? 
+			{ !balanceTVLs || !wrapperTotals || !feePayouts || !aggregatedPayouts ? 
 				<h1>{'Generating visuals...'}</h1> : (
 					<>			
 						{Object.values(vaults || []).map((_, idx): ReactElement | null => {
@@ -361,7 +347,6 @@ function	DashboardTabsWrapper(props: {partnerID: string}): ReactElement {
 							wrapperTotals={wrapperTotals}
 							balanceTVLs={balanceTVLs}
 							aggregatedPayouts={aggregatedPayouts}
-							payoutTotals={payoutTotals}
 						/> : null}
 					</>
 				)}

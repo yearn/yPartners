@@ -13,7 +13,6 @@ type TOverviewChartProps = {
 	wrapperTotals: TChartBar[],
 	balanceTVLs: TDict<TChartBar[]>
 	aggregatedPayouts: TChartBar[]
-	payoutTotals: TChartBar[]
 }
 
 const chartColors = [
@@ -24,7 +23,7 @@ const chartColors = [
 
 
 function	OverviewChart(props: TOverviewChartProps): ReactElement {
-	const {wrapperTotals, balanceTVLs, windowValue, aggregatedPayouts, payoutTotals} = props;
+	const {wrapperTotals, balanceTVLs, windowValue, aggregatedPayouts} = props;
 
 	const wrapperPercentages = useMemo((): TChartBar[] => {
 		const _data: TChartBar[] = wrapperTotals.map((item): TChartBar => {
@@ -50,24 +49,6 @@ function	OverviewChart(props: TOverviewChartProps): ReactElement {
 		return _data;
 
 	}, [wrapperTotals, balanceTVLs]);
-
-
-	const payoutPercentages = useMemo((): TChartBar[] => {
-		const _percentages: TChartBar[] = aggregatedPayouts.map((item, idx): TChartBar => {
-			let _itemData = {};
-			const feesEarnedToDate = payoutTotals[idx].data.totalPayout;
-
-			Object.keys(item.data).forEach((key): any => {
-				const assetFeePercentage = +formatAmount((item.data[key] / feesEarnedToDate) * 100, 0, 2);
-				_itemData = {..._itemData, [key]: assetFeePercentage};
-			});
-
-			return {...item, data: {..._itemData}};
-		});
-
-		return _percentages;
-		
-	}, [payoutTotals, aggregatedPayouts]);
 	
 	return (
 		<div className={'h-[400px]'}>
@@ -90,36 +71,6 @@ function	OverviewChart(props: TOverviewChartProps): ReactElement {
 					return {name: `${name} - ${networkShort}`, symbol: {pre: '$', post: ''}, fill};
 				}).reverse()}
 				legendItems={Object.keys(aggregatedPayouts[0].data).map((asset, idx): TLegendItem => {
-					const [token, ,] = asset.split('_');
-
-					const legendItem = {
-						type: 'single',
-						details: `${token}`,
-						color: chartColors[idx % chartColors.length],
-						isCondensed: true
-					};
-					return legendItem;
-				}).reverse()} />
-				
-			<Chart
-				title={'Payout Distribution'}
-				type={'stacked'}
-				className={'mb-10'}
-				windowValue={windowValue}
-				data={payoutPercentages}
-				bars={Object.keys(payoutPercentages[0].data).map((asset, idx): {name: string, fill: string} => {
-					return {name: `data.${asset}`, fill: chartColors[idx % chartColors.length]};
-				})}
-				yAxisOptions={{domain: [0, 'auto'], hideRightAxis: false}}
-				xAxisOptions={{interval: undefined}}
-				tooltipItems={Object.keys(payoutPercentages[0].data).map((asset, idx): TTooltipItem => {
-					const [name, network] = asset.split('_');
-					const networkShort = NETWORK_LABELS[+network];
-					const fill = chartColors[idx % chartColors.length];
-				
-					return {name: `${name} - ${networkShort}`, symbol: {pre: '', post: '%'}, fill};
-				}).reverse()}
-				legendItems={Object.keys(payoutPercentages[0].data).map((asset, idx): TLegendItem => {
 					const [token, ,] = asset.split('_');
 
 					const legendItem = {
