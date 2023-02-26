@@ -317,7 +317,7 @@ function	DashboardTabsWrapper(props: {partnerID: string}): ReactElement {
 								activeWindow={activeWindow}
 								windowValue={windowValue}
 								balanceTVL={balanceTVLs[`${selectedAddress}_${selectedChainID}`]}
-								payoutTotal={payoutTotals[`${selectedAddress}_${selectedChainID}`]}
+								payoutTotal={payoutTotals[`${selectedAddress}_${selectedChainID}`] || []}
 							/> : null;
 						})}
 
