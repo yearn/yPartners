@@ -129,6 +129,7 @@ function	DashboardTabsWrapper(props: {partnerID: string}): ReactElement {
 	const [wrapperTotals, set_wrapperTotals] = useState<TChartBar[]>();
 	const [feePayouts, set_feePayouts] = useState<TDict<TChartBar[]>>();
 	const [aggregatedPayouts, set_aggregatedPayouts] = useState<TChartBar[]>();
+	const [payoutTotals, set_payoutTotals] = useState<TChartBar[]>();
 
 	const selectedVault = Object.values(vaults)[selectedIndex];
 
@@ -226,7 +227,7 @@ function	DashboardTabsWrapper(props: {partnerID: string}): ReactElement {
 
 			
 		const partnerFeePayouts: TDict<TChartBar[]> = {};
-		const _dailyPayoutTotals: TDict<TChartBar> = {};
+		const payoutTotals: TDict<TChartBar> = {};
 
 		Promise.all(payoutEndpoints.map(async (endpoint): Promise<AxiosResponse> => axios.get(endpoint))).then(
 			(responses): void => {
@@ -253,13 +254,13 @@ function	DashboardTabsWrapper(props: {partnerID: string}): ReactElement {
 
 									
 								// Sum total payouts by day for aggregate payout totals chart
-								const dailyPayoutTotal = _dailyPayoutTotals[date];
+								const dailyPayoutTotal = payoutTotals[date];
 	
 								if(dailyPayoutTotal){
-									_dailyPayoutTotals[date] = {...dailyPayoutTotal, data: {totalPayout: dailyPayoutTotal.data.totalPayout + currentVault.tvl}};
+									payoutTotals[date] = {...dailyPayoutTotal, data: {totalPayout: dailyPayoutTotal.data.totalPayout + currentVault.tvl}};
 								}else{
-									_dailyPayoutTotals[date] = {name: date, shortDate, data: {totalPayout: currentVault.tvl}};
-								}		
+									payoutTotals[date] = {name: date, shortDate, data: {totalPayout: currentVault.tvl}};
+								}	
 							}
 						}
 					}
@@ -276,18 +277,18 @@ function	DashboardTabsWrapper(props: {partnerID: string}): ReactElement {
 					const [address, network] = key.split('_');
 
 					asset.forEach((dataPoint, i): void => {
-						const {token, name} = dataPoint;
+						const {token} = dataPoint;
 						const {feePayout} = dataPoint.data;
-						const dailyTotal = _dailyPayoutTotals[name].data.totalPayout;
 	
 						// Distinction by address required as some partners have equivalent asset vaults on the same network
 						// not separation this way causes later instances of the asset to override values for the first instances
-						_data[i] = {..._data[i], data: {..._data[i].data, [`${token}_${network}_${address}`]: feePayout, dailyTotal}};
+						_data[i] = {..._data[i], data: {..._data[i].data, [`${token}_${network}_${address}`]: feePayout}};
 					});
 				});
 
 				set_feePayouts(partnerFeePayouts);
 				set_aggregatedPayouts(_data);
+				set_payoutTotals(Object.values(payoutTotals));
 			});
 
 	}, [partnerID, windowValue]);
@@ -339,7 +340,7 @@ function	DashboardTabsWrapper(props: {partnerID: string}): ReactElement {
 				vault={selectedVault}
 				selectedIndex={selectedIndex}/>
 
-			{ !balanceTVLs || !wrapperTotals || !feePayouts || !aggregatedPayouts ? 
+			{ !balanceTVLs || !wrapperTotals || !feePayouts || !aggregatedPayouts || !payoutTotals ? 
 				<h1>{'Generating visuals...'}</h1> : (
 					<>			
 						{Object.values(vaults || []).map((_, idx): ReactElement | null => {
@@ -360,6 +361,7 @@ function	DashboardTabsWrapper(props: {partnerID: string}): ReactElement {
 							wrapperTotals={wrapperTotals}
 							balanceTVLs={balanceTVLs}
 							aggregatedPayouts={aggregatedPayouts}
+							payoutTotals={payoutTotals}
 						/> : null}
 					</>
 				)}
