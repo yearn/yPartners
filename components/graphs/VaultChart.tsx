@@ -91,18 +91,6 @@ function	VaultChart(props: TVaultChartProps): ReactElement {
 				legendItems={[{type: 'multi', details: [`${token}`, `Wrapper: ${truncateHex(address, 4)}`], color: fillColor}]}/>
 
 			<Chart
-				title={'Total Fees Earned (USD)'}
-				type={'bar'}
-				className={'mb-20'}
-				windowValue={windowValue}
-				data={payoutTotal}
-				bars={[{name: 'data.feePayout', fill: fillColor}]}
-				yAxisOptions={{domain: ['auto', 'auto'], hideRightAxis: true}}
-				xAxisOptions={{interval: undefined}}
-				tooltipItems={[{name: 'payouts total', symbol: {pre: '$', post: ''}}]}
-				legendItems={[{type: 'multi', details: [`${token}`, `Wrapper: ${truncateHex(address, 4)}`], color: fillColor}]}/>
-
-			<Chart
 				title={'Wrapper Balance (USD)'}
 				type={'bar'}
 				className={'mb-20'}
