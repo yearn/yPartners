@@ -68,7 +68,7 @@ function	OverviewChart(props: TOverviewChartProps): ReactElement {
 					const networkShort = NETWORK_LABELS[+network];
 					const fill = chartColors[idx % chartColors.length];
 				
-					return {name: `${name} - ${networkShort}`, symbol: '$', fill};
+					return {name: `${name} - ${networkShort}`, symbol: {pre: '$', post: ''}, fill};
 				}).reverse()}
 				legendItems={Object.keys(aggregatedPayouts[0].data).map((asset, idx): TLegendItem => {
 					const [token, ,] = asset.split('_');
@@ -91,11 +91,11 @@ function	OverviewChart(props: TOverviewChartProps): ReactElement {
 				bars={[{name: 'data.totalTVL', fill: '#8884d8'}, {name: 'data.profitShare', fill: '#82ca9d'}]}
 				yAxisOptions={{domain: [0, 'auto'], hideRightAxis: false}}
 				xAxisOptions={{interval: undefined}}
-				tooltipItems={[{name: 'profit share', symbol: ''}, {name: 'balance', symbol: '$'}]}
+				tooltipItems={[{name: 'profit share', symbol: {pre: '', post: '%'}}, {name: 'balance', symbol: {pre: '$', post: ''}}].reverse()}
 				legendItems={[
 					{type: 'single', details: 'Aggregate Wrapper Balance', color: '#8884d8', isThin: true},
 					{type: 'single', details: 'Profit Share', color: '#82ca9d'}
-				]}/>
+				].reverse()}/>
 
 			{wrapperPercentages && (			
 				<Chart
@@ -114,7 +114,7 @@ function	OverviewChart(props: TOverviewChartProps): ReactElement {
 						const networkShort = NETWORK_LABELS[+network];
 						const fill = chartColors[idx % chartColors.length];
 					
-						return {name: `${name} - ${networkShort}`, symbol: '%', fill};
+						return {name: `${name} - ${networkShort}`, symbol: {pre: '', post: '%'}, fill};
 					}).reverse()}
 					legendItems={Object.keys(wrapperPercentages[0].data).map((asset, idx): TLegendItem => {
 						const [token, ,] = asset.split('_');

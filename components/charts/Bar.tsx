@@ -10,7 +10,9 @@ import type {TChartProps} from 'types/chart';
 
 function CustomBarChart(props: TChartProps): ReactElement {
 	const {tooltipItems, data, bars, yAxisOptions} = props;
-	const tooltipSymbol = tooltipItems[0].symbol;
+
+	const ttSymbol = tooltipItems[0].symbol;
+	const tooltipSymbol = ttSymbol.pre === '' ? ttSymbol.post : ttSymbol.pre;
 
 	return (
 		<ResponsiveContainer width={'85%'} height={'100%'}>

@@ -17,7 +17,10 @@ export type TChartBar = {
 
 export type TTooltipItem = {
 	name: string
-	symbol: string
+	symbol: {
+		pre: string,
+		post: string,
+	}
 	fill?: string
 }
 

@@ -8,8 +8,9 @@ import type {TChartProps} from 'types/chart';
 
 function	Composed(props: TChartProps): ReactElement {
 	const {tooltipItems, data, bars, windowValue, yAxisOptions} = props;
-	const firstSymbol = tooltipItems[0].symbol;
-	// const secondSymbol = tooltipItems[1].symbol;
+
+	const ttSymbol = tooltipItems[0].symbol;
+	const tooltipSymbol = ttSymbol.pre === '' ? ttSymbol.post : ttSymbol.pre;
 
 	const [focusBar, set_focusBar] = useState(-1);
 
@@ -52,7 +53,7 @@ function	Composed(props: TChartProps): ReactElement {
 					domain={yAxisOptions.domain}
 					tickCount={yAxisOptions.tickCount}
 					ticks={yAxisOptions.ticks}
-					tickFormatter={(value): string => formatYAxis(firstSymbol, value)} />
+					tickFormatter={(value): string => formatYAxis(tooltipSymbol, value)} />
 
 				<YAxis
 					yAxisId={'right'}

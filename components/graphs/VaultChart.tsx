@@ -75,7 +75,7 @@ function	VaultChart(props: TVaultChartProps): ReactElement {
 				bars={[{name: 'data.harvestAmount', fill: fillColor}]}
 				yAxisOptions={{domain: ['auto', 'auto'], hideRightAxis: true}}
 				xAxisOptions={{interval: undefined}}
-				tooltipItems={[{name: 'harvested', symbol: '$'}]}
+				tooltipItems={[{name: 'harvested', symbol: {pre: '$', post: ''}}]}
 				legendItems={[{type: 'multi', details: [`${token}`, `Wrapper: ${truncateHex(address, 4)}`], color: fillColor}]}/>
 
 			<Chart
@@ -87,7 +87,7 @@ function	VaultChart(props: TVaultChartProps): ReactElement {
 				bars={[{name: 'data.harvestAmount', fill: fillColor}]}
 				yAxisOptions={{domain: ['auto', 'auto'], hideRightAxis: true}}
 				xAxisOptions={{interval: undefined}}
-				tooltipItems={[{name: 'harvested', symbol: '$'}]}
+				tooltipItems={[{name: 'harvested', symbol: {pre: '$', post: ''}}]}
 				legendItems={[{type: 'multi', details: [`${token}`, `Wrapper: ${truncateHex(address, 4)}`], color: fillColor}]}/>
 
 			<Chart
@@ -99,7 +99,7 @@ function	VaultChart(props: TVaultChartProps): ReactElement {
 				bars={[{name: 'data.feePayout', fill: fillColor}]}
 				yAxisOptions={{domain: ['auto', 'auto'], hideRightAxis: true}}
 				xAxisOptions={{interval: undefined}}
-				tooltipItems={[{name: 'payouts total', symbol: '$'}]}
+				tooltipItems={[{name: 'payouts total', symbol: {pre: '$', post: ''}}]}
 				legendItems={[{type: 'multi', details: [`${token}`, `Wrapper: ${truncateHex(address, 4)}`], color: fillColor}]}/>
 
 			<Chart
@@ -111,7 +111,7 @@ function	VaultChart(props: TVaultChartProps): ReactElement {
 				bars={[{name: 'data.balanceTVL', fill: fillColor}]}
 				yAxisOptions={{domain: ['auto', 'auto'], hideRightAxis: true}}
 				xAxisOptions={{interval: undefined}}
-				tooltipItems={[{name: 'balance', symbol: '$'}]}
+				tooltipItems={[{name: 'balance', symbol: {pre: '$', post: ''}}]}
 				legendItems={[{type: 'multi', details: [`${token}`, `Wrapper: ${truncateHex(address, 4)}`], color: fillColor}]}/>
 
 			{/* <Chart
