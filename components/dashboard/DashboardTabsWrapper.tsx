@@ -123,11 +123,12 @@ function	DashboardTabsWrapper(props: {partnerID: string}): ReactElement {
 	const {partnerID} = props;
 	const {vaults} = usePartner();
 	const [selectedIndex, set_selectedIndex] = useState(-1);
-	const [activeWindow, set_activeWindow] = useState('1 month');
-	const [windowValue, set_windowValue] = useState(29);
+	const [activeWindow, set_activeWindow] = useState('1 week');
+	const [windowValue, set_windowValue] = useState(7);
 	const [balanceTVLs, set_balanceTVLs] = useState<TDict<TChartBar[]>>();
 	const [wrapperTotals, set_wrapperTotals] = useState<TChartBar[]>();
-	const [payoutTotals, set_payoutTotals] = useState<TDict<TChartBar[]>>();
+	const [feePayouts, set_feePayouts] = useState<TDict<TChartBar[]>>();
+	const [aggregatedPayouts, set_aggregatedPayouts] = useState<TChartBar[]>();
 
 	const selectedVault = Object.values(vaults)[selectedIndex];
 
@@ -225,6 +226,7 @@ function	DashboardTabsWrapper(props: {partnerID: string}): ReactElement {
 
 			
 		const partnerFeePayouts: TDict<TChartBar[]> = {};
+		const _dailyPayoutTotals: TDict<TChartBar> = {};
 
 		Promise.all(payoutEndpoints.map(async (endpoint): Promise<AxiosResponse> => axios.get(endpoint))).then(
 			(responses): void => {
@@ -248,16 +250,47 @@ function	DashboardTabsWrapper(props: {partnerID: string}): ReactElement {
 								}else{
 									partnerFeePayouts[`${toAddress(vaultAddress)}_${chainID}`] = [dataPoint];
 								}
+
+									
+								// Sum total payouts by day for aggregate payout totals chart
+								const dailyPayoutTotal = _dailyPayoutTotals[date];
+	
+								if(dailyPayoutTotal){
+									_dailyPayoutTotals[date] = {...dailyPayoutTotal, data: {totalPayout: dailyPayoutTotal.data.totalPayout + currentVault.tvl}};
+								}else{
+									_dailyPayoutTotals[date] = {name: date, shortDate, data: {totalPayout: currentVault.tvl}};
+								}		
 							}
 						}
 					}
 				});
 
-				set_payoutTotals(partnerFeePayouts);
+
+				// generate clean structure for TChartBars which we will fill with aggregated payout data
+				const _data: TChartBar[] = Object.values(partnerFeePayouts)[0].map((item): TChartBar => {
+					return {...item, data: {}};
+				});
+				
+				Object.keys(partnerFeePayouts).map((key): void => {
+					const asset = partnerFeePayouts[key]; 
+					const [address, network] = key.split('_');
+
+					asset.forEach((dataPoint, i): void => {
+						const {token, name} = dataPoint;
+						const {feePayout} = dataPoint.data;
+						const dailyTotal = _dailyPayoutTotals[name].data.totalPayout;
+	
+						// Distinction by address required as some partners have equivalent asset vaults on the same network
+						// not separation this way causes later instances of the asset to override values for the first instances
+						_data[i] = {..._data[i], data: {..._data[i].data, [`${token}_${network}_${address}`]: feePayout, dailyTotal}};
+					});
+				});
+
+				set_feePayouts(partnerFeePayouts);
+				set_aggregatedPayouts(_data);
 			});
 
 	}, [partnerID, windowValue]);
-
 
 	return (
 		<div aria-label={'Vault Details'} className={'col-span-12 mb-4 flex flex-col bg-neutral-100'}>
@@ -306,7 +339,7 @@ function	DashboardTabsWrapper(props: {partnerID: string}): ReactElement {
 				vault={selectedVault}
 				selectedIndex={selectedIndex}/>
 
-			{ !balanceTVLs || !wrapperTotals || !payoutTotals ? 
+			{ !balanceTVLs || !wrapperTotals || !feePayouts || !aggregatedPayouts ? 
 				<h1>{'Generating visuals...'}</h1> : (
 					<>			
 						{Object.values(vaults || []).map((_, idx): ReactElement | null => {
@@ -317,7 +350,7 @@ function	DashboardTabsWrapper(props: {partnerID: string}): ReactElement {
 								activeWindow={activeWindow}
 								windowValue={windowValue}
 								balanceTVL={balanceTVLs[`${selectedAddress}_${selectedChainID}`]}
-								payoutTotal={payoutTotals[`${selectedAddress}_${selectedChainID}`] || []}
+								payoutTotal={feePayouts[`${selectedAddress}_${selectedChainID}`] || []}
 							/> : null;
 						})}
 
@@ -326,6 +359,7 @@ function	DashboardTabsWrapper(props: {partnerID: string}): ReactElement {
 							windowValue={windowValue}
 							wrapperTotals={wrapperTotals}
 							balanceTVLs={balanceTVLs}
+							aggregatedPayouts={aggregatedPayouts}
 						/> : null}
 					</>
 				)}

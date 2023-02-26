@@ -12,6 +12,7 @@ type TOverviewChartProps = {
 	activeWindow: string,
 	wrapperTotals: TChartBar[],
 	balanceTVLs: TDict<TChartBar[]>
+	aggregatedPayouts: TChartBar[]
 }
 
 const chartColors = [
@@ -22,7 +23,7 @@ const chartColors = [
 
 
 function	OverviewChart(props: TOverviewChartProps): ReactElement {
-	const {wrapperTotals, balanceTVLs, windowValue} = props;
+	const {wrapperTotals, balanceTVLs, windowValue, aggregatedPayouts} = props;
 
 	const wrapperPercentages = useMemo((): TChartBar[] => {
 		const _data: TChartBar[] = wrapperTotals.map((item): TChartBar => {
@@ -51,6 +52,36 @@ function	OverviewChart(props: TOverviewChartProps): ReactElement {
 
 	return (
 		<div className={'h-[400px]'}>
+			<Chart
+				title={'Aggregate Payouts (USD)'}
+				type={'stacked'}
+				className={'mb-10'}
+				windowValue={windowValue}
+				data={aggregatedPayouts}
+				bars={Object.keys(aggregatedPayouts[0].data).map((asset, idx): {name: string, fill: string} => {
+					return {name: `data.${asset}`, fill: chartColors[idx % chartColors.length]};
+				})}
+				yAxisOptions={{domain: [0, 'auto'], hideRightAxis: false}}
+				xAxisOptions={{interval: undefined}}
+				tooltipItems={Object.keys(aggregatedPayouts[0].data).map((asset, idx): TTooltipItem => {
+					const [name, network] = asset.split('_');
+					const networkShort = NETWORK_LABELS[+network];
+					const fill = chartColors[idx % chartColors.length];
+				
+					return {name: `${name} - ${networkShort}`, symbol: '$', fill};
+				}).reverse()}
+				legendItems={Object.keys(aggregatedPayouts[0].data).map((asset, idx): TLegendItem => {
+					const [token, ,] = asset.split('_');
+
+					const legendItem = {
+						type: 'single',
+						details: `${token}`,
+						color: chartColors[idx % chartColors.length],
+						isCondensed: true
+					};
+					return legendItem;
+				}).reverse()} />
+
 			<Chart
 				title={'Aggregate Wrapper Balance (USD)'}
 				type={'composed'}
