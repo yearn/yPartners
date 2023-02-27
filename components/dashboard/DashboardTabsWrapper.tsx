@@ -123,8 +123,8 @@ function	DashboardTabsWrapper(props: {partnerID: string}): ReactElement {
 	const {partnerID} = props;
 	const {vaults} = usePartner();
 	const [selectedIndex, set_selectedIndex] = useState(-1);
-	const [activeWindow, set_activeWindow] = useState('1 week');
-	const [windowValue, set_windowValue] = useState(7);
+	const [activeWindow, set_activeWindow] = useState('1 month');
+	const [windowValue, set_windowValue] = useState(29);
 	const [balanceTVLs, set_balanceTVLs] = useState<TDict<TChartBar[]>>();
 	const [wrapperTotals, set_wrapperTotals] = useState<TChartBar[]>();
 	const [payoutTotals, set_payoutTotals] = useState<TDict<TChartBar[]>>();
