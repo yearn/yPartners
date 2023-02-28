@@ -7,10 +7,9 @@ import CustomTooltip from './CustomTooltip';
 import type {ReactElement} from 'react';
 import type {TChartProps} from 'types/chart';
 
-
-function CustomBarChart(props: TChartProps): ReactElement {
-	const {tooltipItems, data, bars, yAxisOptions} = props;
-
+function StackedChart(props: TChartProps): ReactElement {
+	const {tooltipItems, data, bars, yAxisOptions, type} = props;
+	
 	const ttSymbol = tooltipItems[0].symbol;
 	const tooltipSymbol = ttSymbol.pre === '' ? ttSymbol.post : ttSymbol.pre;
 
@@ -28,14 +27,14 @@ function CustomBarChart(props: TChartProps): ReactElement {
 				}}
 			>
 				<XAxis 
-					tickFormatter={(value): string => data[value] ? data[value].shortDate : '-'} />
+					tickFormatter={(value): string => data[value].shortDate} />
 				<YAxis
 					domain={yAxisOptions.domain}
 					tickCount={yAxisOptions.tickCount}
 					ticks={yAxisOptions.ticks}
 					tickFormatter={(value): string => formatYAxis(tooltipSymbol, value)}
 					interval={yAxisOptions.interval} />
-				<Tooltip content={<CustomTooltip items={tooltipItems} />} />
+				<Tooltip content={<CustomTooltip items={tooltipItems} type={type} />} />
 
 				{bars.map((bar): ReactElement => {
 					return (
@@ -52,4 +51,4 @@ function CustomBarChart(props: TChartProps): ReactElement {
 	);
 }
 
-export default CustomBarChart;
+export default StackedChart;

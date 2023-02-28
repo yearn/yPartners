@@ -1,5 +1,4 @@
-import	React		from	'react';
-import {getTickInterval} from 'utils/b2b/Chart';
+import	React, {useMemo}		from	'react';
 import {truncateHex} from '@yearn-finance/web-lib/utils/address';
 
 import Chart from '../charts/Chart';
@@ -7,28 +6,89 @@ import Chart from '../charts/Chart';
 import type {ReactElement} from 'react';
 import type {TChartBar} from 'types/chart';
 
-const chartColors = [
-	'#8884d8', '#82ca9d', '#79A7D9', '#BB8FD9', '#D99F9A',
-	'#D9C76F', '#8555A6', '#A68855', '#C98581', '#43597D'
-];
-
-
 type TVaultChartProps = {
 	address: string,
 	token: string,
-	idx: number,
 	windowValue: number,
 	activeWindow: string,
 	balanceTVL: TChartBar[]
+	payoutTotal: TChartBar[]
 }
 
 function	VaultChart(props: TVaultChartProps): ReactElement {
-	const {address, token, idx, windowValue, activeWindow, balanceTVL} = props;
-	
-	const fillColor = chartColors[idx % chartColors.length] ;
+	const {address, token, windowValue, balanceTVL, payoutTotal} = props;
+	const fillColor = '#8884d8';
+
+	const cumulativePayouts = useMemo((): TChartBar[] => {
+		const _data: TChartBar[] = [];
+
+		let lastPayout = 0;
+		Object.values(payoutTotal).forEach((dailyPayoutTotal, idx): void => {
+			if(idx === 0){
+				lastPayout = dailyPayoutTotal.data.feePayout;
+			}else {
+				const _currentPayout = dailyPayoutTotal.data.feePayout;
+				const payoutDiff = _currentPayout - lastPayout;
+				if(payoutDiff > 0){
+					const harvestEvent: TChartBar = {...dailyPayoutTotal, data: {harvestAmount : payoutDiff}};
+					_data.push(harvestEvent);
+
+				}
+			}
+		});
+
+		return _data;
+
+	}, [payoutTotal]);
+
+	const payouts = useMemo((): TChartBar[] => {
+		const _data: TChartBar[] = [];
+
+		let lastPayout = 0;
+		Object.values(payoutTotal).forEach((dailyPayoutTotal, idx): void => {
+			if(idx === 0){
+				lastPayout = dailyPayoutTotal.data.feePayout;
+			}else {
+				const _currentPayout = dailyPayoutTotal.data.feePayout;
+				const payoutDiff = _currentPayout - lastPayout;
+				if(payoutDiff > 0){
+					lastPayout = _currentPayout;
+					const harvestEvent: TChartBar = {...dailyPayoutTotal, data: {harvestAmount : payoutDiff}};
+					_data.push(harvestEvent);
+				}
+			}
+		});
+
+		return _data;
+
+	}, [payoutTotal]);
 
 	return (
 		<div className={'h-[400px]'}>
+
+			<Chart
+				title={'Harvest Events (USD)'}
+				type={'bar'}
+				className={'mb-20'}
+				windowValue={windowValue}
+				data={payouts}
+				bars={[{name: 'data.harvestAmount', fill: fillColor}]}
+				yAxisOptions={{domain: ['auto', 'auto'], hideRightAxis: true}}
+				xAxisOptions={{interval: undefined}}
+				tooltipItems={[{name: 'harvested', symbol: {pre: '$', post: ''}}]}
+				legendItems={[{type: 'multi', details: [`${token}`, `Wrapper: ${truncateHex(address, 4)}`], color: fillColor}]}/>
+
+			<Chart
+				title={'Cumulative Payouts (USD) ** only payouts within the window'}
+				type={'bar'}
+				className={'mb-20'}
+				windowValue={windowValue}
+				data={cumulativePayouts}
+				bars={[{name: 'data.harvestAmount', fill: fillColor}]}
+				yAxisOptions={{domain: ['auto', 'auto'], hideRightAxis: true}}
+				xAxisOptions={{interval: undefined}}
+				tooltipItems={[{name: 'harvested', symbol: {pre: '$', post: ''}}]}
+				legendItems={[{type: 'multi', details: [`${token}`, `Wrapper: ${truncateHex(address, 4)}`], color: fillColor}]}/>
 
 			<Chart
 				title={'Wrapper Balance (USD)'}
@@ -37,42 +97,19 @@ function	VaultChart(props: TVaultChartProps): ReactElement {
 				windowValue={windowValue}
 				data={balanceTVL}
 				bars={[{name: 'data.balanceTVL', fill: fillColor}]}
-				yAxisOptions={{domain: ['auto', 'auto']}}
-				xAxisOptions={{interval: getTickInterval(activeWindow)}}
-				tooltipItems={[{name: 'balance', symbol: '$'}]}
+				yAxisOptions={{domain: ['auto', 'auto'], hideRightAxis: true}}
+				xAxisOptions={{interval: undefined}}
+				tooltipItems={[{name: 'balance', symbol: {pre: '$', post: ''}}]}
 				legendItems={[{type: 'multi', details: [`${token}`, `Wrapper: ${truncateHex(address, 4)}`], color: fillColor}]}/>
 
 			{/* <Chart
-				title={'Fees Earned'}
-				type={'bar'}
-				windowValue={windowValue}
-				data={dummyData}
-				bars={[{name: 'USDC', fill: '#82ca9d'}, {name: 'WBTC', fill: '#8884d8'}]}
-				yAxisOptions={{domain: [0, 'auto']}}
-				xAxisOptions={{interval: getTickInterval()}}
-				tooltipItems={[{name: 'USDC', symbol: 'K'}, {name: 'WBTC', symbol: 'K'}]}
-				legendItems={dummyLegendMulti}/>
-
-			<Chart
 				title={'Revenue Shared'}
 				type={'bar'}
 				windowValue={windowValue}
 				data={dummyData}
 				bars={[{name: 'rsUSDC', fill: '#82ca9d'}, {name: 'rsWBTC', fill: '#8884d8'}]}
 				yAxisOptions={{domain: [0, 'auto']}}
-				xAxisOptions={{interval: getTickInterval()}}
-				tooltipItems={[{name: 'USDC', symbol: '%'}, {name: 'WBTC', symbol: '%'}]}
-				legendItems={dummyLegendMulti}/> */}
-
-			{/* <Chart
-				title={'Wrapper Balance Distribution'}
-				type={'bar'}
-				className={'mb-20'}
-				windowValue={windowValue}
-				data={dummyData}
-				bars={[{name: 'rbdUSDC', fill: '#82ca9d'}, {name: 'rbdWBTC', fill: '#8884d8'}]}
-				yAxisOptions={{tickCount: 6}}
-				xAxisOptions={{interval: getTickInterval()}}
+				xAxisOptions={{interval: undefined}}
 				tooltipItems={[{name: 'USDC', symbol: '%'}, {name: 'WBTC', symbol: '%'}]}
 				legendItems={dummyLegendMulti}/> */}
 		</div>

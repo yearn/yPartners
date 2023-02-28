@@ -1,10 +1,17 @@
-import React, {useEffect, useState} from 'react';
+import React, {useMemo, useState} from 'react';
 import Link from 'next/link';
 import {PARTNERS} from 'utils/b2b/Partners';
+import useSWR from 'swr';
 import {motion} from 'framer-motion';
+import {useSettings} from '@yearn-finance/web-lib/contexts/useSettings';
+import {baseFetcher} from '@yearn-finance/web-lib/utils/fetchers';
+
+import LogoYearn from './icons/LogoYearn';
 
 import type {ReactElement} from 'react';
-import type {TFramerTransition, TPartnerList} from 'types/types';
+import type {SWRResponse} from 'swr';
+import type {TFramerTransition, TPartner} from 'types/types';
+import type {TDict} from '@yearn-finance/web-lib/utils/types';
 
 const variants = {
 	enter: (i: number): TFramerTransition => ({
@@ -20,13 +27,41 @@ const variants = {
 };
 
 function	Partners(): ReactElement {
-	const	[partnerList, set_partnerList] = useState<TPartnerList[]>([]);
+	const {settings: baseAPISettings} = useSettings();
+	const	[partnerList, set_partnerList] = useState<TPartner[]>([]);
 
-	useEffect((): void => {
-		const	_partnerList: TPartnerList[] = [...PARTNERS];
-		_partnerList.sort((): number => Math.random() - 0.5);
-		set_partnerList(_partnerList);
-	}, []);
+	const	{data: partners} = useSWR(
+		`${baseAPISettings.yDaemonBaseURI}/partners/all`,
+		baseFetcher,
+		{revalidateOnFocus: false}
+	) as SWRResponse;
+
+
+	useMemo((): void => {
+		const _partners: TDict<TPartner> = {};
+
+		for (const [, vaultsForNetwork] of Object.entries(partners || {})) {
+			for (const [, currentVault] of Object.entries(vaultsForNetwork || {})) {
+				const shortName = currentVault.name.toLowerCase();
+				const {description} = currentVault;
+				const logo = PARTNERS[shortName] ? PARTNERS[shortName].logo : <LogoYearn className={'text-900'} />;
+
+				_partners[shortName] = {name: currentVault.full_name, shortName, description, logo};
+			}
+		}
+		
+		const	_partnerList = Object.values(_partners);
+
+		// Fisher Yates shuffle - for "random" order
+		for (let i = _partnerList.length -1; i > 0; i--) {
+			const j = Math.floor(Math.random() * i);
+			const k = _partnerList[i];
+			_partnerList[i] = _partnerList[j];
+			_partnerList[j] = k;
+		}
+		
+		set_partnerList(_partnerList.slice(0, 9));
+	}, [partners]);
 
 
 	return (
@@ -36,7 +71,7 @@ function	Partners(): ReactElement {
 					<h2 className={'text-3xl font-bold'}>{'Built on Yearn'}</h2>
 				</div>
 				<div className={'mt-8 grid w-full max-w-5xl grid-cols-1 gap-8 md:grid-cols-3'}>
-					{partnerList?.map((partner: TPartnerList, i: number): ReactElement => (
+					{partnerList?.map((partner: TPartner, i: number): ReactElement => (
 						<Link key={partner.name} href={`/dashboard/${partner.shortName}`}>
 							<motion.div
 								custom={i % 3}

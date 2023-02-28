@@ -1,15 +1,16 @@
 import React, {useState} from 'react';
 import CustomTooltip from 'components/charts/CustomTooltip';
 import {Bar, Cell, ComposedChart, ResponsiveContainer, Tooltip, XAxis, YAxis} from 'recharts';
-import {formatXAxis, formatYAxis} from 'utils/b2b/Chart';
+import {formatYAxis} from 'utils/b2b/Chart';
 
 import type {ReactElement} from 'react';
 import type {TChartProps} from 'types/chart';
 
 function	Composed(props: TChartProps): ReactElement {
-	const {tooltipItems, data, bars, windowValue, yAxisOptions, xAxisOptions} = props;
-	const firstSymbol = tooltipItems[0].symbol;
-	// const secondSymbol = tooltipItems[1].symbol;
+	const {tooltipItems, data, bars, windowValue, yAxisOptions} = props;
+
+	const ttSymbol = tooltipItems[0].symbol;
+	const tooltipSymbol = ttSymbol.pre === '' ? ttSymbol.post : ttSymbol.pre;
 
 	const [focusBar, set_focusBar] = useState(-1);
 
@@ -43,8 +44,7 @@ function	Composed(props: TChartProps): ReactElement {
 				}}>
 				<XAxis
 					xAxisId={'main'}
-					tickFormatter={formatXAxis}
-					interval={xAxisOptions.interval} />
+					tickFormatter={(value): string => data[value].shortDate} />
 				<XAxis xAxisId={'hidden'} hide={true} />
 
 				<YAxis
@@ -53,7 +53,7 @@ function	Composed(props: TChartProps): ReactElement {
 					domain={yAxisOptions.domain}
 					tickCount={yAxisOptions.tickCount}
 					ticks={yAxisOptions.ticks}
-					tickFormatter={(value): string => formatYAxis(firstSymbol, value)}/>
+					tickFormatter={(value): string => formatYAxis(tooltipSymbol, value)} />
 
 				<YAxis
 					yAxisId={'right'}
@@ -62,7 +62,8 @@ function	Composed(props: TChartProps): ReactElement {
 					domain={yAxisOptions.domain}
 					tickCount={yAxisOptions.tickCount}
 					ticks={yAxisOptions.ticks} 
-					tickFormatter={(value): string => formatYAxis('%', value)} />
+					tickFormatter={(value): string => formatYAxis('%', value)}
+					hide={yAxisOptions.hideRightAxis} />
 
 				<Tooltip
 					cursor={{strokeWidth: `${100/(windowValue || 1)}%`}}

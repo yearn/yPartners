@@ -21,13 +21,14 @@ function MultiItem(props: {details: string[], color: string, isThin?: boolean}):
 }
 
 
-function SingleItem(props: {details: string, color: string, isThin?: boolean}): ReactElement {
+function SingleItem(props: {details: string, color: string, isThin?: boolean, isCondensed?: boolean}): ReactElement {
 	const itemName = props.details;
 	const itemWidth = props.isThin ? '0.5rem' : '1rem';
+	const marginBottom = props.isCondensed ? '0.5rem' : '2rem';
 
 	return (
-		<div className={'mb-8 -ml-8 flex flex-row'}>
-			<div className={'h-5 w-4'} style={{width: itemWidth, backgroundColor: props.color}} />
+		<div className={'-ml-8 flex flex-row'} style={{marginBottom}}>
+			<div className={'h-4'} style={{width: itemWidth, backgroundColor: props.color}} />
 			<p className={'ml-2 text-xs underline md:text-sm'}>{itemName}</p>
 		</div>
 	);
@@ -35,10 +36,12 @@ function SingleItem(props: {details: string, color: string, isThin?: boolean}): 
 
 
 function ChartLegend(props: {items: TLegendItem[] }): ReactElement {
+	const marginTop = props.items[0].isCondensed ? '0rem' : '-2rem';
+
 	return (
-		<div className={'-mt-8 ml-4 flex h-full w-[15%] flex-col items-start justify-center'}>
+		<div className={'ml-4 flex h-full w-[15%] flex-col items-start justify-center'} style={{marginTop}}>
 			{props.items.map((item: TLegendItem, idx: number): ReactElement => {
-				const {type, details, color, isThin} = item;
+				const {type, details, color, isThin, isCondensed} = item;
 
 				return (type === 'multi' ?
 					<MultiItem
@@ -50,7 +53,8 @@ function ChartLegend(props: {items: TLegendItem[] }): ReactElement {
 						key={idx}
 						color={color}
 						details={details as string}
-						isThin={isThin} /> );
+						isThin={isThin}
+						isCondensed={isCondensed} /> );
 			})}
 		</div>
 	);

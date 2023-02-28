@@ -20,28 +20,57 @@ function SummaryMetrics(props: TProps): ReactElement {
 	const formatPercent = (n: number, min = 2, max = 2): string => `${formatAmount(n || 0, min, max)}%`;
 
 	const allVaultsTVL = Object.values(vaults).reduce(((acc, vault): number => acc + vault.tvl), 0);
-	const allVaultsFees = Object.values(vaults).reduce(((acc, vault): number => acc + vault.balance), 0);
+	const allVaultsFees = Object.values(vaults).reduce(((acc, vault): number => acc + vault.totalPayout), 0);
 	
 	return (
-		<div className={'my-20 flex w-[80%] justify-between bg-good-ol-grey-100'}>
-			<div>
-				<p>{'TVL'}</p>
-				<h1>{'$ '}{vault ? formatAmount(props.vault.tvl) : formatAmount(allVaultsTVL)}</h1>
+		<div>
+			<div className={'my-20 hidden w-[80%] justify-between bg-good-ol-grey-100 md:flex'}>
+				<div>
+					<p>{'TVL'}</p>
+					<h1>{'$ '}{vault ? formatAmount(props.vault.tvl) : formatAmount(allVaultsTVL)}</h1>
+				</div>
+
+				<div>
+					<p>{'Fees earned to date'}</p>
+					<h1>{'$ '}{vault ? formatAmount(props.vault.totalPayout, 0, 2) : formatAmount(allVaultsFees)}</h1>
+				</div>
+
+				<div>
+					<p>{'Annual Yield'}</p>
+					<h1>{vault ? formatPercent(props.vault.apy) : '-'}</h1>
+				</div>
+
+				<div>
+					<p>{'Risk Score'}</p>
+					<h1>{vault ? formatAmount(props.vault.riskScore, 0, 2) : '-'}</h1>
+				</div>
 			</div>
 
-			<div>
-				<p>{'Fees earned to date **'}</p>
-				<h1>{'$ '}{vault ? formatAmount(props.vault.balance, 0, 2) : formatAmount(allVaultsFees)}</h1>
-			</div>
+			<div className={'my-20 flex w-[60%] justify-between bg-good-ol-grey-100 md:hidden'}>
+				<div>
+					<div className={'mb-5'}>
+						<p>{'TVL'}</p>
+						<h1>{'$ '}{vault ? formatAmount(props.vault.tvl) : formatAmount(allVaultsTVL)}</h1>
+					</div>
 
-			<div>
-				<p>{'Annual Yield'}</p>
-				<h1>{vault ? formatPercent(props.vault.apy) : '-'}</h1>
-			</div>
+					<div>
+						<p>{'Fees earned to date'}</p>
+						<h1>{'$ '}{vault ? formatAmount(props.vault.balance, 0, 2) : formatAmount(allVaultsFees)}</h1>
+					</div>
+				</div>
 
-			<div>
-				<p>{'Risk Score'}</p>
-				<h1>{vault ? formatAmount(props.vault.riskScore, 0, 2) : '-'}</h1>
+				<div>
+					<div className={'mb-5'}>
+						<p>{'Annual Yield'}</p>
+						<h1>{vault ? formatPercent(props.vault.apy) : '-'}</h1>
+					</div>
+
+					<div>
+						<p>{'Risk Score'}</p>
+						<h1>{vault ? formatAmount(props.vault.riskScore, 0, 2) : '-'}</h1>
+					</div>
+				</div>
+
 			</div>
 		</div>
 	);

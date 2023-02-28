@@ -7,26 +7,24 @@ import {Button} from '@yearn-finance/web-lib/components/Button';
 
 import type {GetStaticPathsResult, GetStaticPropsResult} from 'next';
 import type {ChangeEvent, FormEvent, ReactElement} from 'react';
-import type {TPartnerList} from 'types/types';
-
-const currentDate = new Date();
-const currentYear = currentDate.getFullYear();
-const lastMonth = currentDate.getMonth() - 1;
-
-const today = formatDate(currentDate);
-const firstDayLastMonth = formatDate(new Date(new Date().setFullYear(currentYear, lastMonth, 1)));
 
 function formatDate(date: Date): string {
 	return date.toLocaleDateString('en-CA');
 }
 
 function Index({partnerID}: {partnerID: string}): ReactElement {
+	const currentDate = new Date();
+	const currentYear = currentDate.getFullYear();
+	const lastMonth = currentDate.getMonth() - 1;
+	const today = formatDate(currentDate);
+	const firstDayLastMonth = formatDate(new Date(new Date().setFullYear(currentYear, lastMonth, 1)));
+
 	const {isLoadingVaults, vaults} = usePartner();
 	const [lastSync, set_lastSync] = useState('');
 	const [reportStart, set_reportStart] = useState(firstDayLastMonth);
 	const [reportEnd, set_reportEnd] = useState(today);
 
-	const currentPartner = PARTNERS.find((e: TPartnerList): boolean => e.shortName === partnerID);
+	const currentPartner = PARTNERS[partnerID];
 	const currentPartnerName = currentPartner ? currentPartner.name : '';
 
 	useEffect((): void => {
@@ -75,7 +73,9 @@ function Index({partnerID}: {partnerID: string}): ReactElement {
 		<main>
 			<section aria-label={'hero'} className={'mt-[75px] mb-14 grid grid-cols-12'}>
 				<div className={'col-span-12 md:col-span-7'}>
-					<h1 className={'mb-2 text-6xl text-neutral-900 md:text-8xl'}>{currentPartner?.name}</h1>
+					<h1 className={'mb-2 text-6xl text-neutral-900 md:text-8xl'}>
+						{currentPartner?.name === 'Abracadabra.Money' ? 'Abracadabra': currentPartner?.name}
+					</h1>
 
 					<p className={'mb-10 w-3/4 text-neutral-500'}>{`Last updated ${lastSync}`}</p>
 
@@ -143,7 +143,7 @@ function	PartnerDashboardWrapper({partnerID}: {partnerID: string}): ReactElement
 
 
 export async function getStaticPaths(): Promise<GetStaticPathsResult> {
-	const	partners = PARTNERS;
+	const	partners = Object.values(PARTNERS);
 	return {
 		paths: partners.map((partner): {params: {partnerID: string}} => ({params: {partnerID: partner.shortName}})),
 		fallback: false

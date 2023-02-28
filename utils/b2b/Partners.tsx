@@ -1,3 +1,4 @@
+import LogoYearn from 'components/icons/LogoYearn';
 import	LogoAlchemix			from	'components/icons/partners/LogoAlchemix';
 import	LogoElement				from	'components/icons/partners/LogoElement';
 import	LogoGearbox				from	'components/icons/partners/LogoGearbox';
@@ -9,68 +10,172 @@ import	LogoSpool				from	'components/icons/partners/LogoSpool';
 import	LogoZooDao				from	'components/icons/partners/LogoZooDAO';
 
 import type {ReactElement} from 'react';
-import	type {TPartnerList}		from	'types/types';
+import	type {TPartner}		from	'types/types';
+import type {TDict} from '@yearn-finance/web-lib/utils/types';
 
-const	PARTNERS: TPartnerList[] = [
-	{
+const	PARTNERS: TDict<TPartner> = {
+	'qidao' : {
 		name: 'QiDAO',
 		shortName: 'qidao',
-		description: 'A stablecoin protocol utilizing collateralized debt positions',
 		logo: <LogoQiDAO className={'text-900'} />
-	}, {
+	},
+	'element':  {
 		name: 'Element Finance',
 		shortName: 'element',
-		description: 'An open source protocl for fixed and variable yield markets',
 		logo: <LogoElement className={'text-900'} />
-	}, {
-		name: 'Spool',
-		shortName: 'spool',
-		description: 'A non-custodial permissionless middleware that allows users to earn DeFi returns',
+	},
+	'spoolfi':  {
+		name: 'SpoolFi',
+		shortName: 'spoolfi',
 		logo: <LogoSpool className={'text-900'} />
-	}, {
-		name: 'Abracadabra',
+	},
+	'abracadabra':  {
+		name: 'Abracadabra.Money',
 		shortName: 'abracadabra',
-		description: 'A decentralized crypto lending platform ',
 		logo: <LogoMIM className={'text-900'} />
-	}, {
+	},
+	'ledger':  {
 		name: 'Ledger',
 		shortName: 'ledger',
-		description: 'An application to quickly and securely manage their assets',
 		logo: <LogoLedger className={'text-900'} />
-	}, {
-		name: 'Alchemix',
+	},
+	'alchemix':  {
+		name: 'Alchemix Finance',
 		shortName: 'alchemix',
-		description: 'Self-repaying loans without risk of liquidation',
 		logo: <LogoAlchemix className={'text-900'} />
-	}, {
+	},
+	'gearbox':  {
 		name: 'Gearbox',
 		shortName: 'gearbox',
-		description: 'A generalized leverage protocol',
 		logo: <LogoGearbox className={'text-900'} />
-	}, {
+	},
+	'inverse':  {
 		name: 'Inverse Finance',
 		shortName: 'inverse',
-		description: 'An open source protocol for borrowing and lending assets',
 		logo: <LogoInverse className={'text-900'} />
-	}, {
+	},
+	'zoodao':  {
 		name: 'ZooDAO',
 		shortName: 'zoodao',
-		description: 'A platform that allows users to earn passive income from NFTs',
 		logo: <LogoZooDao className={'text-900'} />
+	},
+	'pickle':  {
+		name: 'Pickle Finance',
+		shortName: 'pickle',
+		logo: <LogoYearn className={'text-900'} />
+	},
+	'phuture':  {
+		name: 'Phuture',
+		shortName: 'phuture',
+		logo: <LogoYearn className={'text-900'} />
+	},
+	'yieldster':  {
+		name: 'Yieldster',
+		shortName: 'yieldster',
+		logo: <LogoYearn className={'text-900'} />
+	},
+	'chfry':  {
+		name: 'Cheese Fry Finance',
+		shortName: 'chfry',
+		logo: <LogoYearn className={'text-900'} />
+	},
+	'popcorndao':  {
+		name: 'Popcorn DAO',
+		shortName: 'popcorndao',
+		logo: <LogoYearn className={'text-900'} />
+	},
+	'deus':  {
+		name: 'DEUS Finance DAO',
+		shortName: 'deus',
+		logo: <LogoYearn className={'text-900'} />
+	},
+	'rhino.fi':  {
+		name: 'rhino.fi',
+		shortName: 'rhino.fi',
+		logo: <LogoYearn className={'text-900'} />
+	},
+	'wido':  {
+		name: 'Wido',
+		shortName: 'wido',
+		logo: <LogoYearn className={'text-900'} />
+	},
+	'gb':  {
+		name: 'gb',
+		shortName: 'gb',
+		logo: <LogoYearn className={'text-900'} />
+	},
+	'basketdao':  {
+		name: 'BasketDAO',
+		shortName: 'basketdao',
+		logo: <LogoYearn className={'text-900'} />
+	},
+	'frax':  {
+		name: 'Frax Finance',
+		shortName: 'frax',
+		logo: <LogoYearn className={'text-900'} />
+	},
+	'shapeshiftdao':  {
+		name: 'ShapeShift DAO',
+		shortName: 'shapeshiftdao',
+		logo: <LogoYearn className={'text-900'} />
+	},
+	'cofi':  {
+		name: 'CoFi',
+		shortName: 'cofi',
+		logo: <LogoYearn className={'text-900'} />
+	},
+	'donutapp':  {
+		name: 'Donut',
+		shortName: 'donutapp',
+		logo: <LogoYearn className={'text-900'} />
+	},
+	'ambire':  {
+		name: 'Ambire Wallet',
+		shortName: 'ambire',
+		logo: <LogoYearn className={'text-900'} />
+	},
+	'tempus':  {
+		name: 'Tempus',
+		shortName: 'tempus',
+		logo: <LogoYearn className={'text-900'} />
+	},
+	'akropolis':  {
+		name: 'Akropolis',
+		shortName: 'akropolis',
+		logo: <LogoYearn className={'text-900'} />
+	},
+	'badger':  {
+		name: 'BadgerDAO',
+		shortName: 'badger',
+		logo: <LogoYearn className={'text-900'} />
+	},
+	'coinomo':  {
+		name: 'Coinomo',
+		shortName: 'coinomo',
+		logo: <LogoYearn className={'text-900'} />
+	},
+	'mover':  {
+		name: 'Mover',
+		shortName: 'mover',
+		logo: <LogoYearn className={'text-900'} />
+	},
+	'beethovenx':  {
+		name: 'Beethoven X',
+		shortName: 'beethovenx',
+		logo: <LogoYearn className={'text-900'} />
+	},
+	'sturdy':  {
+		name: 'Sturdy',
+		shortName: 'sturdy',
+		logo: <LogoYearn className={'text-900'} />
+	},
+	'yapeswap':  {
+		name: 'yApeSwap',
+		shortName: 'yapeswap',
+		logo: <LogoYearn className={'text-900'} />
 	}
-
-];
-
-const PARTNER_SHORT_NAMES: {[key: string]: string} = {
-	'QiDAO': 'qidao',
-	'Element Finance': 'element',
-	'Abracadabra': 'abracadabra',
-	'Ledger': 'ledger',
-	'Alchemix': 'alchemix',
-	'Gearbox': 'gearbox',
-	'Inverse Finance': 'inverse',
-	'ZooDAO': 'zoodao' //*
 };
+
 
 type TPartnerLogo = {
 	[key: string]: ReactElement
@@ -79,15 +184,37 @@ type TPartnerLogo = {
 const LOGOS: TPartnerLogo = {
 	'QiDAO': <LogoQiDAO className={'text-900 h-3/4 w-3/4'} />,
 	'Element Finance': <LogoElement className={'text-900 h-3/4 w-3/4'} />,
-	'Spool': <LogoSpool className={'text-900 h-3/4 w-3/4'} />,
-	'Abracadabra': <LogoMIM className={'text-900 h-3/4 w-3/4'} />,
+	'SpoolFi': <LogoSpool className={'text-900 h-3/4 w-3/4'} />,
+	'Abracadabra.Money': <LogoMIM className={'text-900 h-3/4 w-3/4'} />,
 	'Ledger': <LogoLedger className={'text-900 h-3/4 w-3/4'} />,
-	'Alchemix': <LogoAlchemix className={'text-900 h-3/4 w-3/4'} />,
+	'Alchemix Finance': <LogoAlchemix className={'text-900 h-3/4 w-3/4'} />,
 	'Gearbox': <LogoGearbox className={'text-900 h-3/4 w-3/4'} />,
 	'Inverse Finance': <LogoInverse className={'text-900 h-3/4 w-3/4'} />,
-	'ZooDAO': <LogoZooDao className={'text-900 h-3/4 w-3/4'} />
+	'ZooDAO': <LogoZooDao className={'text-900 h-3/4 w-3/4'} />,
+	'Pickle Finance': <LogoYearn className={'text-900 h-3/4 w-3/4'} />,
+	'Phuture': <LogoYearn className={'text-900 h-3/4 w-3/4'} />,
+	'Yieldster': <LogoYearn className={'text-900 h-3/4 w-3/4'} />,
+	'Cheese Fry Finance': <LogoYearn className={'text-900 h-3/4 w-3/4'} />,
+	'Popcorn DAO': <LogoYearn className={'text-900 h-3/4 w-3/4'} />,
+	'DEUS Finance DAO': <LogoYearn className={'text-900 h-3/4 w-3/4'} />,
+	'rhino.fi': <LogoYearn className={'text-900 h-3/4 w-3/4'} />,
+	'Wido': <LogoYearn className={'text-900 h-3/4 w-3/4'} />,
+	'gb': <LogoYearn className={'text-900 h-3/4 w-3/4'} />,
+	'BasketDAO': <LogoYearn className={'text-900 h-3/4 w-3/4'} />,
+	'Frax Finance': <LogoYearn className={'text-900 h-3/4 w-3/4'} />,
+	'ShapeShift DAO': <LogoYearn className={'text-900 h-3/4 w-3/4'} />,
+	'CoFi': <LogoYearn className={'text-900 h-3/4 w-3/4'} />,
+	'Donut': <LogoYearn className={'text-900 h-3/4 w-3/4'} />,
+	'Ambire Wallet': <LogoYearn className={'text-900 h-3/4 w-3/4'} />,
+	'Tempus': <LogoYearn className={'text-900 h-3/4 w-3/4'} />,
+	'Akropolis': <LogoYearn className={'text-900 h-3/4 w-3/4'} />,
+	'BadgerDAO': <LogoYearn className={'text-900 h-3/4 w-3/4'} />,
+	'Coinomi': <LogoYearn className={'text-900 h-3/4 w-3/4'} />,
+	'Mover': <LogoYearn className={'text-900 h-3/4 w-3/4'} />,
+	'Beethoven X': <LogoYearn className={'text-900 h-3/4 w-3/4'} />,
+	'Sturdy': <LogoYearn className={'text-900 h-3/4 w-3/4'} />,
+	'yApeSwap': <LogoYearn className={'text-900 h-3/4 w-3/4'} />
 };
-
 
 
 type TProfitShareTier = {
@@ -109,5 +236,5 @@ const PROFIT_SHARE_TEIRS: TProfitShareTier = {
 };
 
 export {
-	LOGOS, PARTNER_SHORT_NAMES, PARTNERS, PROFIT_SHARE_TEIRS
+	LOGOS, PARTNERS, PROFIT_SHARE_TEIRS
 };

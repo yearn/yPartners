@@ -1,4 +1,5 @@
 import React from 'react';
+import Link from 'next/link';
 import B2BMeme from 'components/B2BMeme';
 import SectionPartner from 'components/SectionPartners';
 import SectionStats from 'components/SectionStats';
@@ -15,13 +16,16 @@ function	Index(): ReactElement {
 					<h1 className={'mb-6 text-6xl text-neutral-900 md:text-8xl'}>{'Yearn Partners'}</h1>
 					<p className={'text-lg'}>{'Integrate Yearn vaults to earn up to 50% profit share'}</p>
 					<div className={'mt-4 flex flex-row space-x-4'}>
-						<Button className={'w-[200px]'}>
-							{'Apply'}
-						</Button>
-						<Button className={'w-[200px]'} variant={'outlined'}>
-							{'Learn More'}
-						</Button>
-
+						<Link href={'/team-up'}>
+							<Button className={'w-[200px]'}>
+								{'Apply'}
+							</Button>
+						</Link>
+						<Link href={'/learn-more'}>
+							<Button className={'w-[200px]'} variant={'outlined'}>
+								{'Learn More'}
+							</Button>
+						</Link>
 					</div>
 				</div>
 				<div className={'col-span-4 hidden md:block'}>

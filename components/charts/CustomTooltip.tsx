@@ -2,6 +2,7 @@ import React from 'react';
 import {formatAmount} from '@yearn-finance/web-lib/utils/format.number';
 
 import type {ReactElement} from 'react';
+import type {TTooltipItem} from 'types/chart';
 
 type TTooltip = {
 	active?: boolean,
@@ -9,31 +10,34 @@ type TTooltip = {
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	payload?: any
 	label?: number
+	type?: string
 };
-
-type TTooltipItem = {
-	name: string,
-	symbol: string
-}
 
 function ToolTip(props: TTooltip): ReactElement | null {
 	const {active: isActive, items, payload} = props;
 
 	if (isActive && payload) {
+
 		return (
 			<div className={'rounded bg-good-ol-grey-300 p-2 opacity-90'}>
-				<p>{`${payload[0].payload.name}`}</p>
+				<p className={'mb-1'}>{`${payload[0].payload.name}`}</p>
 
-				{payload[1] ? 
-					<>
-						<p>
-							<span className={'font-semibold'}>{`${items[1].name}:  `}</span>{` ${items[1].symbol} ${formatAmount(payload[1].value, 2, 2)}`} 
-						</p>
-						<p><span className={'font-semibold'}>{`${items[0].name}:  `}</span>{`${payload[0].value} %`}</p>
-					</>
-					: 
-					<p><span className={'font-semibold'}>{`${items[0].name}:  `}</span>{`${items[0].symbol} ${formatAmount(payload[0].value, 2, 2)}`}</p>}
+				{items.map((item, idx): ReactElement => {
+					const negativeIndex = payload.length - (idx+1);
+					const {symbol} = item;
 
+					return (
+						<div key={idx}>
+							{payload[idx] && 
+								<p>
+									<span style={{backgroundColor: `${item.fill}`}} className={'mr-4 inline-block h-4 w-4'}></span>
+									<span >{`${item.name}:  `}</span>
+									<span className={'ml-2 font-semibold'}>{`${symbol.pre} ${formatAmount(payload[negativeIndex].value, 0, 2)} ${symbol.post}`}</span>
+								</p>
+							}
+						</div>
+					);
+				})}
 			</div>
 		);
 	}
