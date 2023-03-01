@@ -2,7 +2,7 @@ import React, {Fragment, useMemo, useState} from 'react';
 import OverviewChart from 'components/graphs/OverviewChart';
 import dayjs, {extend, unix} from 'dayjs';
 import utc from 'dayjs/plugin/utc';
-import {getExplorerURL, NETWORK_CHAINID} from 'utils/b2b';
+import {getExplorerURL, NETWORK_CHAINID, NETWORK_LABELS} from 'utils/b2b';
 import {PROFIT_SHARE_TEIRS} from 'utils/b2b/Partners';
 import axios from 'axios';
 import {Listbox, Transition} from '@headlessui/react';
@@ -62,7 +62,7 @@ function	Tabs({selectedIndex, set_selectedIndex}: TProps): ReactElement {
 						<p
 							aria-selected={selectedIndex === idx}
 							className={'hover-fix tab'}>
-							{vault.token}
+							{`${vault.token} - ${NETWORK_LABELS[vault.chainID]}`}
 						</p>
 					</button>
 				))}
@@ -78,7 +78,9 @@ function	Tabs({selectedIndex, set_selectedIndex}: TProps): ReactElement {
 							<Listbox.Button
 								className={`flex h-10 w-40 flex-row items-center border-0 border-b-2 border-neutral-900 bg-neutral-100 p-0 font-bold focus:border-neutral-900 ${vaultCount > 5 ? '' : 'md:hidden'}`}>
 								<div className={'relative flex flex-row items-center'}>
-									{displayVaults[selectedIndex]?.token || 'Overview'}
+									{displayVaults[selectedIndex] ? 
+										`${displayVaults[selectedIndex].token} - ${NETWORK_LABELS[displayVaults[selectedIndex]?.chainID]}` 
+										: 'Overview'}
 								</div>
 								<div className={'absolute right-0'}>
 									<Chevron
@@ -106,7 +108,7 @@ function	Tabs({selectedIndex, set_selectedIndex}: TProps): ReactElement {
 											className={'yearn--listbox-menu-item'}
 											key={idx}
 											value={idx}>
-											{vault.token}
+											{`${vault.token} - ${NETWORK_LABELS[vault.chainID]}`}
 										</Listbox.Option>
 									))}
 								</Listbox.Options>
