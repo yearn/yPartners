@@ -7,7 +7,6 @@ import	LogoLedger				from	'components/icons/partners/LogoLedger';
 import	LogoMIM					from	'components/icons/partners/LogoMIM';
 import	LogoQiDAO				from	'components/icons/partners/LogoQiDAO';
 import	LogoSpool				from	'components/icons/partners/LogoSpool';
-import	LogoZooDao				from	'components/icons/partners/LogoZooDAO';
 
 import type {ReactElement} from 'react';
 import	type {TPartner}		from	'types/types';
@@ -53,11 +52,6 @@ const	PARTNERS: TDict<TPartner> = {
 		name: 'Inverse Finance',
 		shortName: 'inverse',
 		logo: <LogoInverse className={'text-900'} />
-	},
-	'zoodao':  {
-		name: 'ZooDAO',
-		shortName: 'zoodao',
-		logo: <LogoZooDao className={'text-900'} />
 	},
 	'pickle':  {
 		name: 'Pickle Finance',
@@ -190,7 +184,6 @@ const LOGOS: TPartnerLogo = {
 	'Alchemix Finance': <LogoAlchemix className={'text-900 h-3/4 w-3/4'} />,
 	'Gearbox': <LogoGearbox className={'text-900 h-3/4 w-3/4'} />,
 	'Inverse Finance': <LogoInverse className={'text-900 h-3/4 w-3/4'} />,
-	'ZooDAO': <LogoZooDao className={'text-900 h-3/4 w-3/4'} />,
 	'Pickle Finance': <LogoYearn className={'text-900 h-3/4 w-3/4'} />,
 	'Phuture': <LogoYearn className={'text-900 h-3/4 w-3/4'} />,
 	'Yieldster': <LogoYearn className={'text-900 h-3/4 w-3/4'} />,
