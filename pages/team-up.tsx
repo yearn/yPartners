@@ -13,16 +13,13 @@ function	TeamUpPage(): ReactElement {
 				
 				<div className={'space-y-6 text-neutral-600'}>
 					<p>
-						{'Yearn’s Partnership Program lets developers easily integrate yield-generation into whatever they’re building.'}
+						{'Have you ever found yourself thinking “Wow! Yearn’s yield generating vaults are a work of DeFi art. I WISH I could integrate them into what we’re building.” Well friend, you’ve come to the right place.'}
 					</p>
 					<p>
-						{'yVaults are designed to be integrated into virtually any service, making them accessible from anywhere. Plus, any protocol that integrates yVaults can earn up to 50% profit share from their contributed TVL. Nice!'}
+						{'Yearn’s Partnership Program lets developers easily integrate yield-generation into their products and earn up to 50% profit share from their contributed TVL. As the kids say… “LFG!”.'}
 					</p>
 					<p>
-						{'Our partnership program has been battle tested by a wide range of partners since it launched in early 2021.'}
-					</p>
-					<p>
-						{'If you’d like to team up, we’d love to hear from you! Simply reach out using the Yearn Partners form below.'}
+						{'Our partnership program has been battle tested by a wide range of partners since it launched in early 2021. If you’d like to team up, we’d love to hear from you! Simply reach out using the Yearn Partners form below.'}
 					</p>
 
 					<a
