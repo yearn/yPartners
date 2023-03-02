@@ -1,5 +1,4 @@
 import React from 'react';
-import Chevron from '@yearn-finance/web-lib/icons/IconChevron';
 
 import Bar from './Bar';
 import ChartLegend from './ChartLegend';
@@ -12,9 +11,9 @@ import type {TChartProps} from '../../types/chart';
 function Chart(props: TChartProps): ReactElement {
 	const {type, data} = props; 
 
-	function chartNavigation(): void {
-		alert('Feature currently unavailable');
-	}
+	// function chartNavigation(): void {
+	// 	alert('Feature currently unavailable');
+	// }
 
 	return (
 		<div className={props.className}>
@@ -38,15 +37,15 @@ function Chart(props: TChartProps): ReactElement {
 				{data.length > 0 && <ChartLegend items={props.legendItems}/> }
 			</div>
 
-			{data.length > 0 && 
+			{/* {data.length > 0 && 
 				<div className={'ml-10 flex w-3/4 items-center justify-center' }>
 					<Chevron className={'mx-20 cursor-pointer'} onClick={chartNavigation} />
-					{/* <span className={'mx-10 text-neutral-500'}>{'Prev'}</span>
+					<span className={'mx-10 text-neutral-500'}>{'Prev'}</span>
 					<span className={'mx-10 font-semibold'}>{'June'}</span>
-					<span className={'mx-10 text-neutral-500'}>{'Next'}</span> */}
+					<span className={'mx-10 text-neutral-500'}>{'Next'}</span>
 					<Chevron className={'mx-20 rotate-180 cursor-pointer'} onClick={chartNavigation} />
 				</div> 
-			}
+			} */}
 
 		</div>
 	);

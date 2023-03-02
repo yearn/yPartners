@@ -78,7 +78,7 @@ function	OverviewChart(props: TOverviewChartProps): ReactElement {
 				const {balanceTVL} = dataPoint.data;
 				const {totalTVL} = wrapperTotals[i].data;
 				const _percent = totalTVL === 0 ? 0 : +formatAmount((balanceTVL / totalTVL) * 100, 0, 4).slice(0, -1);
-				
+
 				// Distinction by address required as some partners have equivalent asset vaults on the same network
 				// not separation this way causes later instances of the asset to override values for the first instances
 				_data[i] = {..._data[i], data: {..._data[i].data, [`${token}_${network}_${address}`]: _percent}};
@@ -127,7 +127,7 @@ function	OverviewChart(props: TOverviewChartProps): ReactElement {
 			<Chart
 				title={'Aggregate Total Payouts (USD)'}
 				type={'stacked'}
-				className={'mb-10'}
+				className={'mb-20'}
 				windowValue={windowValue}
 				data={aggregatedPayouts}
 				bars={Object.keys(aggregatedPayouts[0].data).map((asset, idx): {name: string, fill: string} => {
@@ -157,7 +157,7 @@ function	OverviewChart(props: TOverviewChartProps): ReactElement {
 			<Chart
 				title={'Aggregate Wrapper Balance (USD)'}
 				type={'composed'}
-				className={'mb-10'}
+				className={'mb-20'}
 				windowValue={windowValue}
 				data={wrapperTotals}
 				bars={[{name: 'data.totalTVL', fill: '#8884d8'}, {name: 'data.profitShare', fill: '#82ca9d'}]}
