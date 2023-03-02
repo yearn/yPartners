@@ -77,8 +77,8 @@ function	OverviewChart(props: TOverviewChartProps): ReactElement {
 				const {token} = dataPoint;
 				const {balanceTVL} = dataPoint.data;
 				const {totalTVL} = wrapperTotals[i].data;
-				const _percent = totalTVL === 0 ? 0 : +formatAmount((balanceTVL / totalTVL) * 100, 0, 2);
-
+				const _percent = totalTVL === 0 ? 0 : +formatAmount((balanceTVL / totalTVL) * 100, 0, 4).slice(0, -1);
+				
 				// Distinction by address required as some partners have equivalent asset vaults on the same network
 				// not separation this way causes later instances of the asset to override values for the first instances
 				_data[i] = {..._data[i], data: {..._data[i].data, [`${token}_${network}_${address}`]: _percent}};
