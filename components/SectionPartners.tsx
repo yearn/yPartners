@@ -79,10 +79,10 @@ function	Partners(): ReactElement {
 								whileInView={'enter'}
 								className={'flex h-66 cursor-pointer flex-col justify-between border-2 border-neutral-200 bg-neutral-200 p-6'}
 								variants={variants}>
-								<div className={'h-14'}>
+								<div className={'min-h-10 max-height-10 mb-5'}>
 									{partner.logo}
 								</div>
-								<div className={'space-y-2'}>
+								<div className={'min-h-full space-y-2'}>
 									<b className={'text-lg'}>{partner.name}</b>
 									<p>{partner.description}</p>
 								</div>
