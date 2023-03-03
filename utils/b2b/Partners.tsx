@@ -80,11 +80,11 @@ const	PARTNERS: TDict<TPartner> = {
 		shortName: 'chfry',
 		logo: <LogoYearn className={'text-900'} />
 	},
-	'popcorndao':  {
-		name: 'Popcorn DAO',
-		shortName: 'popcorndao',
-		logo: <LogoYearn className={'text-900'} />
-	},
+	// 'popcorndao':  {
+	// 	name: 'Popcorn DAO',
+	// 	shortName: 'popcorndao',
+	// 	logo: <LogoYearn className={'text-900'} />
+	// },
 	'deus':  {
 		name: 'DEUS Finance DAO',
 		shortName: 'deus',
@@ -110,41 +110,41 @@ const	PARTNERS: TDict<TPartner> = {
 		shortName: 'basketdao',
 		logo: <LogoYearn className={'text-900'} />
 	},
-	'frax':  {
-		name: 'Frax Finance',
-		shortName: 'frax',
-		logo: <LogoYearn className={'text-900'} />
-	},
-	'shapeshiftdao':  {
-		name: 'ShapeShift DAO',
-		shortName: 'shapeshiftdao',
-		logo: <LogoYearn className={'text-900'} />
-	},
+	// 'frax':  {
+	// 	name: 'Frax Finance',
+	// 	shortName: 'frax',
+	// 	logo: <LogoYearn className={'text-900'} />
+	// },
+	// 'shapeshiftdao':  {
+	// 	name: 'ShapeShift DAO',
+	// 	shortName: 'shapeshiftdao',
+	// 	logo: <LogoYearn className={'text-900'} />
+	// },
 	'cofi':  {
 		name: 'CoFi',
 		shortName: 'cofi',
 		logo: <LogoYearn className={'text-900'} />
 	},
-	'donutapp':  {
-		name: 'Donut',
-		shortName: 'donutapp',
-		logo: <LogoYearn className={'text-900'} />
-	},
-	'ambire':  {
-		name: 'Ambire Wallet',
-		shortName: 'ambire',
-		logo: <LogoYearn className={'text-900'} />
-	},
+	// 'donutapp':  {
+	// 	name: 'Donut',
+	// 	shortName: 'donutapp',
+	// 	logo: <LogoYearn className={'text-900'} />
+	// },
+	// 'ambire':  {
+	// 	name: 'Ambire Wallet',
+	// 	shortName: 'ambire',
+	// 	logo: <LogoYearn className={'text-900'} />
+	// },
 	'tempus':  {
 		name: 'Tempus',
 		shortName: 'tempus',
 		logo: <LogoYearn className={'text-900'} />
 	},
-	'akropolis':  {
-		name: 'Akropolis',
-		shortName: 'akropolis',
-		logo: <LogoYearn className={'text-900'} />
-	},
+	// 'akropolis':  {
+	// 	name: 'Akropolis',
+	// 	shortName: 'akropolis',
+	// 	logo: <LogoYearn className={'text-900'} />
+	// },
 	'badger':  {
 		name: 'BadgerDAO',
 		shortName: 'badger',
@@ -195,19 +195,19 @@ const LOGOS: TPartnerLogo = {
 	'Phuture': <LogoPhuture className={'text-900 h-3/4 w-3/4'} />,
 	'Yieldster': <LogoYearn className={'text-900 h-3/4 w-3/4'} />,
 	'Cheese Fry Finance': <LogoYearn className={'text-900 h-3/4 w-3/4'} />,
-	'Popcorn DAO': <LogoYearn className={'text-900 h-3/4 w-3/4'} />,
+	// 'Popcorn DAO': <LogoYearn className={'text-900 h-3/4 w-3/4'} />,
 	'DEUS Finance DAO': <LogoYearn className={'text-900 h-3/4 w-3/4'} />,
 	'rhino.fi': <LogoRhino className={'text-900 h-3/4 w-3/4'} />,
 	'Wido': <LogoYearn className={'text-900 h-3/4 w-3/4'} />,
 	'gb': <LogoYearn className={'text-900 h-3/4 w-3/4'} />,
 	'BasketDAO': <LogoYearn className={'text-900 h-3/4 w-3/4'} />,
-	'Frax Finance': <LogoYearn className={'text-900 h-3/4 w-3/4'} />,
-	'ShapeShift DAO': <LogoYearn className={'text-900 h-3/4 w-3/4'} />,
+	// 'Frax Finance': <LogoYearn className={'text-900 h-3/4 w-3/4'} />,
+	// 'ShapeShift DAO': <LogoYearn className={'text-900 h-3/4 w-3/4'} />,
 	'CoFi': <LogoYearn className={'text-900 h-3/4 w-3/4'} />,
-	'Donut': <LogoYearn className={'text-900 h-3/4 w-3/4'} />,
-	'Ambire Wallet': <LogoYearn className={'text-900 h-3/4 w-3/4'} />,
+	// 'Donut': <LogoYearn className={'text-900 h-3/4 w-3/4'} />,
+	// 'Ambire Wallet': <LogoYearn className={'text-900 h-3/4 w-3/4'} />,
 	'Tempus': <LogoYearn className={'text-900 h-3/4 w-3/4'} />,
-	'Akropolis': <LogoYearn className={'text-900 h-3/4 w-3/4'} />,
+	// 'Akropolis': <LogoYearn className={'text-900 h-3/4 w-3/4'} />,
 	'BadgerDAO': <LogoBadger className={'text-900 h-3/4 w-3/4'} />,
 	'Coinomi': <LogoYearn className={'text-900 h-3/4 w-3/4'} />,
 	'Mover': <LogoMover className={'text-900 h-3/4 w-3/4'} />,
