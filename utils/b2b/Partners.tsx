@@ -1,12 +1,19 @@
 import LogoYearn from 'components/icons/LogoYearn';
 import	LogoAlchemix			from	'components/icons/partners/LogoAlchemix';
+import	LogoBadger				from	'components/icons/partners/LogoBadger';
+import	LogoBeethoven				from	'components/icons/partners/LogoBeethoven';
 import	LogoElement				from	'components/icons/partners/LogoElement';
 import	LogoGearbox				from	'components/icons/partners/LogoGearbox';
 import	LogoInverse				from	'components/icons/partners/LogoInverse';
 import	LogoLedger				from	'components/icons/partners/LogoLedger';
 import	LogoMIM					from	'components/icons/partners/LogoMIM';
+import	LogoMover				from	'components/icons/partners/LogoMover';
+import	LogoPhuture				from	'components/icons/partners/LogoPhuture';
+import	LogoPickle				from	'components/icons/partners/LogoPickle';
 import	LogoQiDAO				from	'components/icons/partners/LogoQiDAO';
+import	LogoRhino				from	'components/icons/partners/LogoRhino';
 import	LogoSpool				from	'components/icons/partners/LogoSpool';
+import	LogoSturdy				from	'components/icons/partners/LogoSturdy';
 
 import type {ReactElement} from 'react';
 import	type {TPartner}		from	'types/types';
@@ -56,12 +63,12 @@ const	PARTNERS: TDict<TPartner> = {
 	'pickle':  {
 		name: 'Pickle Finance',
 		shortName: 'pickle',
-		logo: <LogoYearn className={'text-900'} />
+		logo: <LogoPickle className={'text-900'} />
 	},
 	'phuture':  {
 		name: 'Phuture',
 		shortName: 'phuture',
-		logo: <LogoYearn className={'text-900'} />
+		logo: <LogoPhuture className={'text-900'} />
 	},
 	'yieldster':  {
 		name: 'Yieldster',
@@ -86,7 +93,7 @@ const	PARTNERS: TDict<TPartner> = {
 	'rhino.fi':  {
 		name: 'rhino.fi',
 		shortName: 'rhino.fi',
-		logo: <LogoYearn className={'text-900'} />
+		logo: <LogoRhino className={'text-900'} />
 	},
 	'wido':  {
 		name: 'Wido',
@@ -141,7 +148,7 @@ const	PARTNERS: TDict<TPartner> = {
 	'badger':  {
 		name: 'BadgerDAO',
 		shortName: 'badger',
-		logo: <LogoYearn className={'text-900'} />
+		logo: <LogoBadger className={'text-900'} />
 	},
 	'coinomo':  {
 		name: 'Coinomo',
@@ -151,17 +158,17 @@ const	PARTNERS: TDict<TPartner> = {
 	'mover':  {
 		name: 'Mover',
 		shortName: 'mover',
-		logo: <LogoYearn className={'text-900'} />
+		logo: <LogoMover className={'text-900'} />
 	},
 	'beethovenx':  {
 		name: 'Beethoven X',
 		shortName: 'beethovenx',
-		logo: <LogoYearn className={'text-900'} />
+		logo: <LogoBeethoven className={'text-900'} />
 	},
 	'sturdy':  {
 		name: 'Sturdy',
 		shortName: 'sturdy',
-		logo: <LogoYearn className={'text-900'} />
+		logo: <LogoSturdy className={'text-900'} />
 	},
 	'yapeswap':  {
 		name: 'yApeSwap',
@@ -184,13 +191,13 @@ const LOGOS: TPartnerLogo = {
 	'Alchemix Finance': <LogoAlchemix className={'text-900 h-3/4 w-3/4'} />,
 	'Gearbox': <LogoGearbox className={'text-900 h-3/4 w-3/4'} />,
 	'Inverse Finance': <LogoInverse className={'text-900 h-3/4 w-3/4'} />,
-	'Pickle Finance': <LogoYearn className={'text-900 h-3/4 w-3/4'} />,
-	'Phuture': <LogoYearn className={'text-900 h-3/4 w-3/4'} />,
+	'Pickle Finance': <LogoPickle className={'text-900 h-3/4 w-3/4'} />,
+	'Phuture': <LogoPhuture className={'text-900 h-3/4 w-3/4'} />,
 	'Yieldster': <LogoYearn className={'text-900 h-3/4 w-3/4'} />,
 	'Cheese Fry Finance': <LogoYearn className={'text-900 h-3/4 w-3/4'} />,
 	'Popcorn DAO': <LogoYearn className={'text-900 h-3/4 w-3/4'} />,
 	'DEUS Finance DAO': <LogoYearn className={'text-900 h-3/4 w-3/4'} />,
-	'rhino.fi': <LogoYearn className={'text-900 h-3/4 w-3/4'} />,
+	'rhino.fi': <LogoRhino className={'text-900 h-3/4 w-3/4'} />,
 	'Wido': <LogoYearn className={'text-900 h-3/4 w-3/4'} />,
 	'gb': <LogoYearn className={'text-900 h-3/4 w-3/4'} />,
 	'BasketDAO': <LogoYearn className={'text-900 h-3/4 w-3/4'} />,
@@ -201,11 +208,11 @@ const LOGOS: TPartnerLogo = {
 	'Ambire Wallet': <LogoYearn className={'text-900 h-3/4 w-3/4'} />,
 	'Tempus': <LogoYearn className={'text-900 h-3/4 w-3/4'} />,
 	'Akropolis': <LogoYearn className={'text-900 h-3/4 w-3/4'} />,
-	'BadgerDAO': <LogoYearn className={'text-900 h-3/4 w-3/4'} />,
+	'BadgerDAO': <LogoBadger className={'text-900 h-3/4 w-3/4'} />,
 	'Coinomi': <LogoYearn className={'text-900 h-3/4 w-3/4'} />,
-	'Mover': <LogoYearn className={'text-900 h-3/4 w-3/4'} />,
-	'Beethoven X': <LogoYearn className={'text-900 h-3/4 w-3/4'} />,
-	'Sturdy': <LogoYearn className={'text-900 h-3/4 w-3/4'} />,
+	'Mover': <LogoMover className={'text-900 h-3/4 w-3/4'} />,
+	'Beethoven X': <LogoBeethoven className={'text-900 h-3/4 w-3/4'} />,
+	'Sturdy': <LogoSturdy className={'text-900 h-3/4 w-3/4'} />,
 	'yApeSwap': <LogoYearn className={'text-900 h-3/4 w-3/4'} />
 };
 
