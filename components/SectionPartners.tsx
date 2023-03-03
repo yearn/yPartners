@@ -46,7 +46,9 @@ function	Partners(): ReactElement {
 				const {description} = currentVault;
 				const logo = PARTNERS[shortName] ? PARTNERS[shortName].logo : <LogoYearn className={'text-900'} />;
 
-				_partners[shortName] = {name: currentVault.full_name, shortName, description, logo};
+				if(PARTNERS[shortName]){
+					_partners[shortName] = {name: currentVault.full_name, shortName, description, logo};
+				}
 			}
 		}
 		
