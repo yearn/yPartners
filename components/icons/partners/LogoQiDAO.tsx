@@ -5,7 +5,7 @@ import type {ReactElement, SVGProps} from 'react';
 function	LogoQiDAO(props: SVGProps<SVGSVGElement>): ReactElement {
 	const defaultProps = {
 		width: 40,
-		height: 55
+		height: 40
 	};
 
 	props = {...defaultProps, ...props};
