@@ -3,6 +3,7 @@ import Head from 'next/head';
 import Link from 'next/link';
 import {useRouter} from 'next/router';
 import {DefaultSeo} from 'next-seo';
+import {AuthContextApp, useAuth} from 'contexts/useAuth';
 import {YearnContextApp} from 'contexts/useYearn';
 import {PARTNERS} from 'utils/b2b/Partners';
 import {Button} from '@yearn-finance/web-lib/components/Button';
@@ -90,10 +91,9 @@ function	AppHead(): ReactElement {
 
 function	AppHeader(): ReactElement {
 	const	router = useRouter();
-	const	[hasModal, set_hasModal] = useState(false);
+	const	{hasModal, isLoggedIn, isLoading, set_hasModal, set_isLoggedIn, set_isLoading} = useAuth();
 	const	[authOption, set_authOption] = useState('Log in');
 	const	[address, set_address] = useState('');
-	const	[isLoggedIn, set_isLoggedIn] = useState(true);
 
 	return (
 		<header>
@@ -150,29 +150,40 @@ function	AppHeader(): ReactElement {
 
 			<Modal
 				isOpen={hasModal}
-				onClose={(): void => set_hasModal(false)}>
+				onClose={(): void => {
+					if(!isLoading){
+						set_hasModal(false);
+					}
+				}}>
 				<Card>
-					<h1 className={'mb-5'}>{'View Dashboard'}</h1>
+					{isLoading ? (<h1 className={'mb-5'}>{'Loading Dashboard...'}</h1>) : (
+						<>
+							<h1 className={'mb-5'}>{'View Dashboard'}</h1>
+							<WrappedInput
+								title={'enter treasury address'}
+								initialValue={''}
+								onSave={(address): void => {
+									Object.values(PARTNERS).forEach((partner): void => {
+										if (partner.treasury?.includes(address)) {
+											const idx = partner.treasury?.indexOf(address);
 
-					<WrappedInput
-						title={'enter treasury address'}
-						initialValue={''}
-						onSave={(address): void => {
+											console.log(partner.treasury[idx]);
+											
+											set_isLoading(true);
+											set_address(partner.treasury[idx]);
+											set_isLoggedIn(true);
+											set_authOption('Log out');
+											router.push(`dashboard/${partner.shortName}`).then((): void => {
+												set_hasModal(false);
+												setTimeout((): void => set_isLoading(false), 1000);
+											});
+										}
+									});
 
-							Object.values(PARTNERS).forEach((partner): void => {
-								if(partner.treasury?.includes(address)){
-									const idx = partner.treasury?.indexOf(address);
-									// isLoading , and put text within the dashboard 
-									console.log(partner.treasury[idx]);
-									set_address(partner.treasury[idx]);
-									set_isLoggedIn(true);
-									set_hasModal(false);
-									set_authOption('Log out');
-									router.push(`dashboard/${partner.shortName}`);
-								}
-							});
+								} } />
+						</>
+					)}
 
-						}} />
 				</Card>
 			</Modal>
 		</header>
@@ -214,10 +225,12 @@ function	MyApp(props: AppProps): ReactElement {
 				}
 			}}>
 			<YearnContextApp>
-				<AppWrapper
-					Component={Component}
-					pageProps={pageProps}
-					router={props.router} />
+				<AuthContextApp>
+					<AppWrapper
+						Component={Component}
+						pageProps={pageProps}
+						router={props.router} />
+				</AuthContextApp>
 			</YearnContextApp>
 		</WithYearn>
 	);
