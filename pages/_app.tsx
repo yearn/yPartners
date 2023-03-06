@@ -1,15 +1,14 @@
-import React, {useState} from 'react';
+import React, {useMemo, useState} from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
 import {useRouter} from 'next/router';
-import {SessionProvider, useSession} from 'next-auth/react';
 import {DefaultSeo} from 'next-seo';
 import {YearnContextApp} from 'contexts/useYearn';
+import {PARTNERS} from 'utils/b2b/Partners';
 import {Button} from '@yearn-finance/web-lib/components/Button';
-import {useWeb3} from '@yearn-finance/web-lib/contexts/useWeb3';
+import {Card} from '@yearn-finance/web-lib/components/Card';
+import {Modal} from '@yearn-finance/web-lib/components/Modal';
 import {WithYearn} from '@yearn-finance/web-lib/contexts/WithYearn';
-import {useClientEffect} from '@yearn-finance/web-lib/hooks';
-import {truncateHex} from '@yearn-finance/web-lib/utils/address';
 
 import type {AppProps} from 'next/app';
 import type {ReactElement} from 'react';
@@ -91,59 +90,10 @@ function	AppHead(): ReactElement {
 
 function	AppHeader(): ReactElement {
 	const	router = useRouter();
-	const	{isActive, address, ens, openLoginModal, onSwitchChain, onDesactivate} = useWeb3();
-	const	{data: session} = useSession();
-	const	[walletIdentity, set_walletIdentity] = useState('Log in');
-
-	// const	hasPendingSignature = useRef(false);
-
-	// const authenticate = useCallback(async (_ens: string): Promise<void> => {
-	// 	if (hasPendingSignature.current) {
-	// 		return;
-	// 	}
-
-	// 	hasPendingSignature.current = true;
-	// 	const	signer = provider.getSigner();
-	// 	const	signature = await signer.signMessage('YOU CAN\'T BUILD TRUSTLESS SYSTEMS WITHOUT TRUST.');
-	// 	const	result = await signIn('web3', {redirect: false, address, signature});
-	// 	hasPendingSignature.current = false;
-	// 	if (result?.ok) {
-	// 		set_walletIdentity(_ens ? _ens : truncateHex(address, 4));
-	// 		if (router.query.callbackUrl) {
-	// 			const	callbackUrl = (router.query.callbackUrl as string).replace(window.location.origin, '');
-	// 			router.push(callbackUrl);
-	// 		}
-	// 	}
-
-	// }, [provider, address, router]);
-
-	useClientEffect((): void => {
-		if (address) {
-			set_walletIdentity(ens ? ens : truncateHex(address, 6));
-		} else {
-			set_walletIdentity('Log in');
-		}
-	}, [ens, address, isActive, session]);
-
-	useClientEffect((): void => {
-		if (session) {
-			console.log(`Hello ${session.user?.name}`);
-		}
-	}, [session]);
-
-
-	async function	onLogIn(): Promise<void> {
-		if (isActive) {
-			await onDesactivate();
-			// if (session) {
-			// 	await signOut({redirect: false});
-			// }
-		} else if (!isActive && address) {
-			onSwitchChain(1, true);
-		} else {
-			openLoginModal();
-		}
-	}
+	const	[hasModal, set_hasModal] = useState(false);
+	const	[authOption, set_authOption] = useState('Log in');
+	const	[address, set_address] = useState('');
+	const	[isLoggedIn, set_isLoggedIn] = useState(true);
 
 	return (
 		<header>
@@ -182,18 +132,56 @@ function	AppHeader(): ReactElement {
 					<Button
 						variant={'filled'}
 						className={'!h-[30px]'}
-						onClick={onLogIn}>
-						{walletIdentity}
+						onClick={(): void => {
+							if(isLoggedIn && address){
+								set_address('');
+								set_isLoggedIn(false);
+								set_authOption('Log in');
+								router.push('/');
+							} else {
+								set_hasModal(!hasModal);
+							}
+						}}>
+						{authOption}
 					</Button>
 				</div>
 
 			</div>
+
+			<Modal
+				isOpen={hasModal}
+				onClose={(): void => set_hasModal(false)}>
+				<Card>
+					<h1 className={'mb-5'}>{'View Dashboard'}</h1>
+
+					<WrappedInput
+						title={'enter treasury address'}
+						initialValue={''}
+						onSave={(address): void => {
+
+							Object.values(PARTNERS).forEach((partner): void => {
+								if(partner.treasury?.includes(address)){
+									const idx = partner.treasury?.indexOf(address);
+									// isLoading , and put text within the dashboard 
+									console.log(partner.treasury[idx]);
+									set_address(partner.treasury[idx]);
+									set_isLoggedIn(true);
+									set_hasModal(false);
+									set_authOption('Log out');
+									router.push(`dashboard/${partner.shortName}`);
+								}
+							});
+
+						}} />
+				</Card>
+			</Modal>
 		</header>
 	);
 }
 
 function	AppWrapper(props: AppProps): ReactElement {
 	const	{Component, pageProps, router} = props;
+
 
 	return (
 		<>
@@ -226,15 +214,50 @@ function	MyApp(props: AppProps): ReactElement {
 				}
 			}}>
 			<YearnContextApp>
-				<SessionProvider /*session={pageProps.session} */ >
-					<AppWrapper
-						Component={Component}
-						pageProps={pageProps}
-						router={props.router} />
-				</SessionProvider>
+				<AppWrapper
+					Component={Component}
+					pageProps={pageProps}
+					router={props.router} />
 			</YearnContextApp>
 		</WithYearn>
 	);
 }
 
 export default MyApp;
+
+type TWrappedInput = {
+	title: string;
+	initialValue: string;
+	onSave: (value: string) => void;
+}
+
+function	WrappedInput({title, initialValue, onSave}: TWrappedInput): ReactElement {
+	const	[isFocused, set_isFocused] = useState(false);
+	const	[value, set_value] = useState(initialValue);
+	const	isInitialValue = useMemo((): boolean => value === initialValue, [value, initialValue]);
+
+	return (
+		<label>
+			<p className={'pb-1 text-neutral-900'}>{title}</p>
+			<div className={'flex flex-row space-x-2'}>
+				<div data-focused={isFocused} className={'yearn--input relative w-full'}>
+					<input
+						onFocus={(): void => set_isFocused(true)}
+						onBlur={(): void => set_isFocused(false)}
+						className={'h-10 w-full overflow-x-scroll border-2 border-neutral-700 bg-neutral-0 p-2 outline-none scrollbar-none'}
+						placeholder={'0x'}
+						value={value}
+						type={'text'}
+						onChange={(e): void => set_value(e.target.value)}
+					/>
+				</div>
+				<Button
+					disabled={isInitialValue || value.length !== 42}
+					className={'w-full md:w-48'}
+					onClick={(): void => onSave(value)}>
+					{'Submit'}
+				</Button>
+			</div>
+		</label>
+	);
+}
