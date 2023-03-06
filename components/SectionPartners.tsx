@@ -1,5 +1,4 @@
 import React, {useMemo, useState} from 'react';
-import Link from 'next/link';
 import {PARTNERS} from 'utils/b2b/Partners';
 import useSWR from 'swr';
 import {motion} from 'framer-motion';
@@ -74,22 +73,21 @@ function	Partners(): ReactElement {
 				</div>
 				<div className={'mt-8 grid w-full max-w-5xl grid-cols-1 gap-8 md:grid-cols-3'}>
 					{partnerList?.map((partner: TPartner, i: number): ReactElement => (
-						<Link key={partner.name} href={`/dashboard/${partner.shortName}`}>
-							<motion.div
-								custom={i % 3}
-								initial={'initial'}
-								whileInView={'enter'}
-								className={'flex h-66 cursor-pointer flex-col justify-between border-2 border-neutral-200 bg-neutral-200 p-6'}
-								variants={variants}>
-								<div className={'min-h-10 max-height-10 mb-5'}>
-									{partner.logo}
-								</div>
-								<div className={'min-h-full space-y-2'}>
-									<b className={'text-lg'}>{partner.name}</b>
-									<p>{partner.description}</p>
-								</div>
-							</motion.div>
-						</Link>
+						<motion.div
+							key={partner.name}
+							custom={i % 3}
+							initial={'initial'}
+							whileInView={'enter'}
+							className={'flex h-66 flex-col justify-between border-2 border-neutral-200 bg-neutral-200 p-6'}
+							variants={variants}>
+							<div className={'min-h-10 max-height-10 mb-5'}>
+								{partner.logo}
+							</div>
+							<div className={'min-h-full space-y-2'}>
+								<b className={'text-lg'}>{partner.name}</b>
+								<p>{partner.description}</p>
+							</div>
+						</motion.div>
 					))}
 				</div>
 			</div>
