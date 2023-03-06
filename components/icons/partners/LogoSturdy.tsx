@@ -2,7 +2,9 @@ import	React		from	'react';
 
 import type {ReactElement, SVGProps} from 'react';
 
-function	LogoSturdy(props: SVGProps<SVGSVGElement>): ReactElement {
+type TLogo = SVGProps<SVGSVGElement> & {isColored?: boolean};
+
+function	LogoSturdy(props: TLogo): ReactElement {
 	const defaultProps = {
 		width: 28,
 		height: 40
@@ -10,7 +12,19 @@ function	LogoSturdy(props: SVGProps<SVGSVGElement>): ReactElement {
 
 	props = {...defaultProps, ...props};
 
-	return (
+	return props.isColored ? (
+		<svg
+			viewBox={'0 0 272 272'}
+			fill={'none'}
+			xmlns={'http://www.w3.org/2000/svg'}>
+			<circle
+				cx={'136'}
+				cy={'136'}
+				r={'136'}
+				fill={'#0D142D'}/>
+			<path d={'M106.556 195.294L124.079 213L165.157 171.493L147.634 153.786L106.556 195.294ZM153.954 147.401L171.477 165.107L189 147.401L171.477 129.695L153.954 147.401ZM165.157 75.706L147.634 58L106.556 99.5075L124.079 117.214L165.157 75.706ZM124.079 165.107L165.157 123.599L147.634 105.893L106.556 147.401L124.079 165.107ZM100.523 105.893L83 123.599L100.523 141.305L118.046 123.599L100.523 105.893Z'} fill={'white'}/>
+		</svg>
+	) : (
 		<svg
 			viewBox={'0 0 28 40'}
 			fill={'none'}
