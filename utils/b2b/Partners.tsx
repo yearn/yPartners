@@ -1,7 +1,7 @@
 import LogoYearn from 'components/icons/LogoYearn';
 import	LogoAlchemix			from	'components/icons/partners/LogoAlchemix';
 import	LogoBadger				from	'components/icons/partners/LogoBadger';
-import	LogoBeethoven				from	'components/icons/partners/LogoBeethoven';
+import	LogoBeethoven			from	'components/icons/partners/LogoBeethoven';
 import	LogoElement				from	'components/icons/partners/LogoElement';
 import	LogoGearbox				from	'components/icons/partners/LogoGearbox';
 import	LogoInverse				from	'components/icons/partners/LogoInverse';
@@ -72,13 +72,13 @@ const	PARTNERS: TDict<TPartner> = {
 		name: 'Pickle Finance',
 		shortName: 'pickle',
 		treasury: ['0x066419EaEf5DE53cc5da0d8702b990c5bc7D1AB3'],
-		logo: <LogoYearn className={'text-900'} />
+		logo: <LogoPickle className={'text-900'} />
 	},
 	'phuture':  {
 		name: 'Phuture',
 		shortName: 'phuture',
 		treasury: ['0x237a4d2166Eb65cB3f9fabBe55ef2eb5ed56bdb9'],
-		logo: <LogoYearn className={'text-900'} />
+		logo: <LogoPhuture className={'text-900'} />
 	},
 	'yieldster':  {
 		name: 'Yieldster',
@@ -108,7 +108,7 @@ const	PARTNERS: TDict<TPartner> = {
 		name: 'rhino.fi',
 		shortName: 'rhino.fi',
 		treasury: ['0x520Cf70a2D0B3dfB7386A2Bc9F800321F62a5c3a'],
-		logo: <LogoYearn className={'text-900'} />
+		logo: <LogoRhino className={'text-900'} />
 	},
 	'wido':  {
 		name: 'Wido',
@@ -174,7 +174,7 @@ const	PARTNERS: TDict<TPartner> = {
 		name: 'BadgerDAO',
 		shortName: 'badger',
 		treasury: ['0xD0A7A8B98957b9CD3cFB9c0425AbE44551158e9e'],
-		logo: <LogoYearn className={'text-900'} />
+		logo: <LogoBadger className={'text-900'} />
 	},
 	'coinomo':  {
 		name: 'Coinomo',
@@ -186,19 +186,19 @@ const	PARTNERS: TDict<TPartner> = {
 		name: 'Mover',
 		shortName: 'mover',
 		treasury: ['0xf6A0307cb6aA05D7C19d080A0DA9B14eAB1050b7'],
-		logo: <LogoYearn className={'text-900'} />
+		logo: <LogoMover className={'text-900'} />
 	},
 	'beethovenx':  {
 		name: 'Beethoven X',
 		shortName: 'beethovenx',
 		treasury: ['0xa1E849B1d6c2Fd31c63EEf7822e9E0632411ada7'],
-		logo: <LogoYearn className={'text-900'} />
+		logo: <LogoBeethoven className={'text-900'} />
 	},
 	'sturdy':  {
 		name: 'Sturdy',
 		shortName: 'sturdy',
 		treasury: ['0xFd1D36995d76c0F75bbe4637C84C06E4A68bBB3a'],
-		logo: <LogoYearn className={'text-900'} />
+		logo: <LogoSturdy className={'text-900'} />
 	},
 	'yapeswap':  {
 		name: 'yApeSwap',
