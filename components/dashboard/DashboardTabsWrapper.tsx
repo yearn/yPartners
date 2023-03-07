@@ -130,7 +130,6 @@ function	DashboardTabsWrapper(props: {partnerID: string}): ReactElement {
 	const [balanceTVLs, set_balanceTVLs] = useState<TDict<TChartBar[]>>();
 	const [wrapperTotals, set_wrapperTotals] = useState<TChartBar[]>();
 	const [payoutTotals, set_payoutTotals] = useState<TDict<TChartBar[]>>();
-	const [aggregatedPayouts, set_aggregatedPayouts] = useState<TChartBar[]>();
 
 	const selectedVault = Object.values(vaults)[selectedIndex];
 
@@ -256,27 +255,7 @@ function	DashboardTabsWrapper(props: {partnerID: string}): ReactElement {
 					}
 				});
 
-				// generate clean structure for TChartBars which we will fill with aggregated payout data
-				const _data: TChartBar[] = Object.values(partnerPayoutTotals)[0].map((item): TChartBar => {
-					return {...item, data: {}};
-				});
-				
-				Object.keys(partnerPayoutTotals).map((key): void => {
-					const asset = partnerPayoutTotals[key]; 
-					const [address, network] = key.split('_');
-
-					asset.forEach((dataPoint, i): void => {
-						const {token} = dataPoint;
-						const {feePayout} = dataPoint.data;
-	
-						// Distinction by address required as some partners have equivalent asset vaults on the same network
-						// not separation this way causes later instances of the asset to override values for the first instances
-						_data[i] = {..._data[i], data: {..._data[i].data, [`${token}_${network}_${address}`]: feePayout}};
-					});
-				});
-
 				set_payoutTotals(partnerPayoutTotals);
-				set_aggregatedPayouts(_data);
 			});
 
 	}, [partnerID, windowValue]);
@@ -328,7 +307,7 @@ function	DashboardTabsWrapper(props: {partnerID: string}): ReactElement {
 				vault={selectedVault}
 				selectedIndex={selectedIndex}/>
 
-			{ !balanceTVLs || !wrapperTotals || !payoutTotals || !aggregatedPayouts ? 
+			{ !balanceTVLs || !wrapperTotals || !payoutTotals ? 
 				<h1>{'Generating visuals...'}</h1> : (
 					<>			
 						{Object.values(vaults || []).map((_, idx): ReactElement | null => {
@@ -348,7 +327,6 @@ function	DashboardTabsWrapper(props: {partnerID: string}): ReactElement {
 							windowValue={windowValue}
 							wrapperTotals={wrapperTotals}
 							balanceTVLs={balanceTVLs}
-							aggregatedPayouts={aggregatedPayouts}
 							payoutTotals={payoutTotals}
 						/> : null}
 					</>

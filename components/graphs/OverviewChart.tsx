@@ -12,7 +12,6 @@ type TOverviewChartProps = {
 	activeWindow: string,
 	wrapperTotals: TChartBar[],
 	balanceTVLs: TDict<TChartBar[]>
-	aggregatedPayouts: TChartBar[]
 	payoutTotals: TDict<TChartBar[]>
 }
 
@@ -24,7 +23,7 @@ const chartColors = [
 
 
 function	OverviewChart(props: TOverviewChartProps): ReactElement {
-	const {wrapperTotals, balanceTVLs, windowValue, aggregatedPayouts, payoutTotals} = props;
+	const {wrapperTotals, balanceTVLs, windowValue, payoutTotals} = props;
 
 	const harvestEvents = useMemo((): TChartBar[] => {
 		const _data: TChartBar[] = Object.values(payoutTotals)[0].map((item): TChartBar => {
@@ -112,37 +111,6 @@ function	OverviewChart(props: TOverviewChartProps): ReactElement {
 					return {name: `${name} - ${networkShort}`, symbol: {pre: '$', post: ''}, fill};
 				}).reverse()}
 				legendItems={Object.keys(harvestEvents[1].data).map((asset, idx): TLegendItem => {
-					const [token, ,] = asset.split('_');
-
-					const legendItem = {
-						type: 'single',
-						details: `${token}`,
-						color: chartColors[idx % chartColors.length],
-						isCondensed: true
-					};
-					return legendItem;
-				}).reverse()} />
-
-
-			<Chart
-				title={'Aggregate Total Payouts (USD)'}
-				type={'stacked'}
-				className={'mb-20'}
-				windowValue={windowValue}
-				data={aggregatedPayouts}
-				bars={Object.keys(aggregatedPayouts[0].data).map((asset, idx): {name: string, fill: string} => {
-					return {name: `data.${asset}`, fill: chartColors[idx % chartColors.length]};
-				})}
-				yAxisOptions={{domain: [0, 'auto'], hideRightAxis: false}}
-				xAxisOptions={{interval: undefined}}
-				tooltipItems={Object.keys(aggregatedPayouts[0].data).map((asset, idx): TTooltipItem => {
-					const [name, network] = asset.split('_');
-					const networkShort = NETWORK_LABELS[+network];
-					const fill = chartColors[idx % chartColors.length];
-				
-					return {name: `${name} - ${networkShort}`, symbol: {pre: '$', post: ''}, fill};
-				}).reverse()}
-				legendItems={Object.keys(aggregatedPayouts[0].data).map((asset, idx): TLegendItem => {
 					const [token, ,] = asset.split('_');
 
 					const legendItem = {
