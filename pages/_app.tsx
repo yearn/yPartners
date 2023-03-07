@@ -73,7 +73,7 @@ function	AppHead(): ReactElement {
 					description: process.env.WEBSITE_DESCRIPTION,
 					images: [
 						{
-							url: `${process.env.WEBSITE_URI}og.jpeg`,
+							url: `${process.env.WEBSITE_URI}og.png`,
 							width: 1200,
 							height: 675,
 							alt: 'Yearn'
