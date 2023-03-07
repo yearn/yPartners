@@ -1,5 +1,5 @@
 # Yearn Web Lib
-![](./public/og.jpeg)
+![](./public/og.png)
 
 The Yearn Web Template provides an easy way to bootstrap a new Yearn Web project.  
 This include the default repo structure and configurations with the latest dependencies and compatible web-lib version.  
@@ -29,7 +29,7 @@ You can change the meta tags in the `next.config.js` file:
 
 Then, you can go in `pages/_app.tsx` and update some more info: 
 - Update the content of the meta `theme-color` with your primary color
-- Update `og.jpeg` by the OG image name in the `public` folder
+- [X] Update `og.jpeg` by the OG image name in the `public` folder
 - Update twitter handle if required
 
 Then, you can update the `public/manifest.json` file which will be use for the Gnosis wallet support:
