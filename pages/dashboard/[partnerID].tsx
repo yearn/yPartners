@@ -1,6 +1,8 @@
 
 import React, {useEffect, useMemo, useState} from 'react';
+import router from 'next/router';
 import {DashboardTabsWrapper} from 'components/dashboard/DashboardTabsWrapper';
+import {useAuth} from 'contexts/useAuth';
 import {PartnerContextApp, usePartner} from 'contexts/usePartner';
 import {LOGOS, PARTNERS} from 'utils/b2b/Partners';
 import {Button} from '@yearn-finance/web-lib/components/Button';
@@ -19,6 +21,7 @@ function Index({partnerID}: {partnerID: string}): ReactElement {
 	const today = formatDate(currentDate);
 	const firstDayLastMonth = formatDate(new Date(new Date().setFullYear(currentYear, lastMonth, 1)));
 
+	const {isLoggedIn} = useAuth();
 	const {isLoadingVaults, vaults} = usePartner();
 	const [lastSync, set_lastSync] = useState('');
 	const [reportStart, set_reportStart] = useState(firstDayLastMonth);
@@ -28,12 +31,17 @@ function Index({partnerID}: {partnerID: string}): ReactElement {
 	const currentPartnerName = currentPartner ? currentPartner.name : '';
 
 	useEffect((): void => {
+		if(!isLoggedIn){
+			router.push('/');
+		}
+	}, [isLoggedIn]);
+
+	useEffect((): void => {
 		const latestSync = new Date().toLocaleString('default',
 			{month: 'long', day: '2-digit', year: 'numeric', hour: 'numeric', minute:'numeric'});
 
 		set_lastSync(latestSync);
 	}, []);
-
 
 
 	function downloadReport(e: FormEvent<HTMLFormElement>): void {
