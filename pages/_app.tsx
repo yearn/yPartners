@@ -158,9 +158,9 @@ function	AppHeader(): ReactElement {
 				<Card>
 					{isLoading ? (<h1 className={'mb-5'}>{'Loading Dashboard...'}</h1>) : (
 						<>
-							<h1 className={'mb-5'}>{'View Dashboard'}</h1>
+							<h1 className={'mb-7'}>{'Log in'}</h1>
 							<WrappedInput
-								title={'enter treasury address'}
+								title={'Project Address'}
 								initialValue={''}
 								onSave={(address): void => {
 									Object.values(PARTNERS).forEach((partner): void => {
@@ -258,7 +258,7 @@ function	WrappedInput({title, initialValue, onSave}: TWrappedInput): ReactElemen
 						onFocus={(): void => set_isFocused(true)}
 						onBlur={(): void => set_isFocused(false)}
 						className={'h-10 w-full overflow-x-scroll border-2 border-neutral-700 bg-neutral-0 p-2 outline-none scrollbar-none'}
-						placeholder={'0x'}
+						placeholder={'0x...'}
 						value={value}
 						type={'text'}
 						onChange={(e): void => set_value(e.target.value)}
@@ -266,9 +266,9 @@ function	WrappedInput({title, initialValue, onSave}: TWrappedInput): ReactElemen
 				</div>
 				<Button
 					disabled={isInitialValue || value.length !== 42}
-					className={'w-full md:w-48'}
+					className={'w-full text-sm md:w-48'}
 					onClick={(): void => onSave(value)}>
-					{'Submit'}
+					{'View Dashboard'}
 				</Button>
 			</div>
 		</label>

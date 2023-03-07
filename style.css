@@ -81,7 +81,7 @@ body {@apply text-neutral-900;}
 
 	& .yearn--modal {
 		@media (min-width: 640px){
-			@apply min-w-[38rem];
+			@apply min-w-[40rem];
 		}
 	}
 } 
