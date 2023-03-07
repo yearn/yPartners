@@ -25,7 +25,7 @@ function	AppHead(): ReactElement {
 				<meta name={'viewport'} content={'width=device-width, initial-scale=1'} />
 				<meta name={'description'} content={process.env.WEBSITE_NAME} />
 				<meta name={'msapplication-TileColor'} content={'#000000'} />
-				<meta name={'theme-color'} content={'#FF90A1'} />
+				<meta name={'theme-color'} content={'#000000'} />
 
 				<link
 					rel={'shortcut icon'}
