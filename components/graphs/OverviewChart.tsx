@@ -26,6 +26,10 @@ function	OverviewChart(props: TOverviewChartProps): ReactElement {
 	const {wrapperTotals, balanceTVLs, windowValue, payoutTotals} = props;
 
 	const harvestEvents = useMemo((): TChartBar[] => {
+		if(Object.values(payoutTotals).length === 0 ){
+			return [{name: 'no data', shortDate: 'n/a', data: {}}];
+		}
+
 		const _data: TChartBar[] = Object.values(payoutTotals)[0].map((item): TChartBar => {
 			const {name, shortDate} = item;
 			return {name, shortDate, data: {}};
@@ -91,36 +95,39 @@ function	OverviewChart(props: TOverviewChartProps): ReactElement {
 	return (
 		<div className={'h-[400px]'}>
 
-			<Chart
-				title={'Individual Harvest Events (USD)'}
-				type={'stacked'}
-				className={'mb-20'}
-				windowValue={windowValue}
-				data={harvestEvents}
-				bars={Object.keys(harvestEvents[1].data).map((asset, idx): {name: string, fill: string} => {
-					const bar = {name: `data.${asset}`, fill: chartColors[idx % chartColors.length]};
-					return bar;
-				})}
-				yAxisOptions={{domain: [0, 'auto'], hideRightAxis: true}}
-				xAxisOptions={{interval: undefined}}
-				tooltipItems={Object.keys(harvestEvents[1].data).map((asset, idx): TTooltipItem => {
-					const [name, network] = asset.split('_');
-					const networkShort = NETWORK_LABELS[+network];
-					const fill = chartColors[idx % chartColors.length];
-				
-					return {name: `${name} - ${networkShort}`, symbol: {pre: '$', post: ''}, fill};
-				}).reverse()}
-				legendItems={Object.keys(harvestEvents[1].data).map((asset, idx): TLegendItem => {
-					const [token, ,] = asset.split('_');
-
-					const legendItem = {
-						type: 'single',
-						details: `${token}`,
-						color: chartColors[idx % chartColors.length],
-						isCondensed: true
-					};
-					return legendItem;
-				}).reverse()} />
+			{harvestEvents[0].name !== 'no data' && (
+				<Chart
+					title={'Individual Harvest Events (USD)'}
+					type={'stacked'}
+					className={'mb-20'}
+					windowValue={windowValue}
+					data={harvestEvents}
+					bars={Object.keys(harvestEvents[1].data).map((asset, idx): {name: string, fill: string} => {
+						const bar = {name: `data.${asset}`, fill: chartColors[idx % chartColors.length]};
+						return bar;
+					})}
+					yAxisOptions={{domain: [0, 'auto'], hideRightAxis: true}}
+					xAxisOptions={{interval: undefined}}
+					tooltipItems={Object.keys(harvestEvents[1].data).map((asset, idx): TTooltipItem => {
+						const [name, network] = asset.split('_');
+						const networkShort = NETWORK_LABELS[+network];
+						const fill = chartColors[idx % chartColors.length];
+						
+						return {name: `${name} - ${networkShort}`, symbol: {pre: '$', post: ''}, fill};
+					}).reverse()}
+					legendItems={Object.keys(harvestEvents[1].data).map((asset, idx): TLegendItem => {
+						const [token, ,] = asset.split('_');
+		
+						const legendItem = {
+							type: 'single',
+							details: `${token}`,
+							color: chartColors[idx % chartColors.length],
+							isCondensed: true
+						};
+						return legendItem;
+					}).reverse()} />
+			)}
+	
 
 			<Chart
 				title={'Aggregate Wrapper Balance (USD)'}
