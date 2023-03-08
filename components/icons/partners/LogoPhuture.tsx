@@ -6,7 +6,7 @@ type TLogo = SVGProps<SVGSVGElement> & {isColored?: boolean};
 
 function	LogoPhuture(props: TLogo): ReactElement {
 	const defaultProps = {
-		width: 81,
+		width: 50,
 		height: 40
 	};
 
