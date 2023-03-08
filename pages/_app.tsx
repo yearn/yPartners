@@ -10,6 +10,7 @@ import {Button} from '@yearn-finance/web-lib/components/Button';
 import {Card} from '@yearn-finance/web-lib/components/Card';
 import {Modal} from '@yearn-finance/web-lib/components/Modal';
 import {WithYearn} from '@yearn-finance/web-lib/contexts/WithYearn';
+import {toAddress} from '@yearn-finance/web-lib/utils/address';
 
 import type {AppProps} from 'next/app';
 import type {ReactElement} from 'react';
@@ -162,7 +163,9 @@ function	AppHeader(): ReactElement {
 							<WrappedInput
 								title={'Project Address'}
 								initialValue={''}
-								onSave={(address): void => {
+								onSave={(addr): void => {
+									const address = toAddress(addr);
+
 									Object.values(PARTNERS).forEach((partner): void => {
 										if (partner.treasury?.includes(address)) {
 											const idx = partner.treasury?.indexOf(address);
