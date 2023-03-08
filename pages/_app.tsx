@@ -9,6 +9,7 @@ import {PARTNERS} from 'utils/b2b/Partners';
 import {Button} from '@yearn-finance/web-lib/components/Button';
 import {Card} from '@yearn-finance/web-lib/components/Card';
 import {Modal} from '@yearn-finance/web-lib/components/Modal';
+import {yToast} from '@yearn-finance/web-lib/components/yToast';
 import {WithYearn} from '@yearn-finance/web-lib/contexts/WithYearn';
 import {toAddress} from '@yearn-finance/web-lib/utils/address';
 
@@ -166,8 +167,12 @@ function	AppHeader(): ReactElement {
 								onSave={(addr): void => {
 									const address = toAddress(addr);
 
+									const {toast} = yToast();
+									let isMatched = false;
+
 									Object.values(PARTNERS).forEach((partner): void => {
 										if (partner.treasury?.includes(address)) {
+											isMatched = true;
 											const idx = partner.treasury?.indexOf(address);
 
 											console.log(partner.treasury[idx]);
@@ -182,6 +187,14 @@ function	AppHeader(): ReactElement {
 											});
 										}
 									});
+
+									if (!isMatched){
+										toast({
+											type: 'error',
+											content: 'Invalid partner address',
+											duration: 3000
+										});
+									}
 
 								} } />
 						</>
