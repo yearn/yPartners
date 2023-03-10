@@ -9,6 +9,7 @@ import {PARTNERS} from 'utils/b2b/Partners';
 import {Button} from '@yearn-finance/web-lib/components/Button';
 import {Card} from '@yearn-finance/web-lib/components/Card';
 import {Modal} from '@yearn-finance/web-lib/components/Modal';
+import {yToast} from '@yearn-finance/web-lib/components/yToast';
 import {WithYearn} from '@yearn-finance/web-lib/contexts/WithYearn';
 import {toAddress} from '@yearn-finance/web-lib/utils/address';
 
@@ -92,6 +93,7 @@ function	AppHead(): ReactElement {
 
 function	AppHeader(): ReactElement {
 	const	router = useRouter();
+	const {toast} = yToast();
 	const	{hasModal, isLoggedIn, isLoading, set_hasModal, set_isLoggedIn, set_isLoading} = useAuth();
 	const	[authOption, set_authOption] = useState('Log in');
 	const	[address, set_address] = useState('');
@@ -165,9 +167,11 @@ function	AppHeader(): ReactElement {
 								initialValue={''}
 								onSave={(addr): void => {
 									const address = toAddress(addr);
+									let isMatched = false;
 
 									Object.values(PARTNERS).forEach((partner): void => {
 										if (partner.treasury?.includes(address)) {
+											isMatched = true;
 											const idx = partner.treasury?.indexOf(address);
 
 											console.log(partner.treasury[idx]);
@@ -182,6 +186,14 @@ function	AppHeader(): ReactElement {
 											});
 										}
 									});
+
+									if (!isMatched){
+										toast({
+											type: 'warning',
+											content: 'That address isn\'t associated with any dashboard. Reach out to us if you believe this is a mistake.',
+											duration: 10000
+										});
+									}
 
 								} } />
 						</>
