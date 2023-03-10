@@ -5,7 +5,7 @@ import {motion} from 'framer-motion';
 import {useSettings} from '@yearn-finance/web-lib/contexts/useSettings';
 import {baseFetcher} from '@yearn-finance/web-lib/utils/fetchers';
 
-import LogoYearn from './icons/LogoYearn';
+import DefaultLogo from './icons/partners/DefaultLogo';
 
 import type {ReactElement} from 'react';
 import type {SWRResponse} from 'swr';
@@ -43,7 +43,7 @@ function	Partners(): ReactElement {
 			for (const [, currentVault] of Object.entries(vaultsForNetwork || {})) {
 				const shortName = currentVault.name.toLowerCase();
 				const {description} = currentVault;
-				const logo = PARTNERS[shortName] ? PARTNERS[shortName].logo : <LogoYearn className={'text-900'} />;
+				const logo = PARTNERS[shortName] ? PARTNERS[shortName].logo : <DefaultLogo className={'text-900'} />;
 
 				if(PARTNERS[shortName]){
 					_partners[shortName] = {name: currentVault.full_name, shortName, description, logo};
