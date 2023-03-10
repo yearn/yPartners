@@ -93,6 +93,7 @@ function	AppHead(): ReactElement {
 
 function	AppHeader(): ReactElement {
 	const	router = useRouter();
+	const {toast} = yToast();
 	const	{hasModal, isLoggedIn, isLoading, set_hasModal, set_isLoggedIn, set_isLoading} = useAuth();
 	const	[authOption, set_authOption] = useState('Log in');
 	const	[address, set_address] = useState('');
@@ -166,8 +167,6 @@ function	AppHeader(): ReactElement {
 								initialValue={''}
 								onSave={(addr): void => {
 									const address = toAddress(addr);
-
-									const {toast} = yToast();
 									let isMatched = false;
 
 									Object.values(PARTNERS).forEach((partner): void => {
@@ -190,9 +189,9 @@ function	AppHeader(): ReactElement {
 
 									if (!isMatched){
 										toast({
-											type: 'error',
-											content: 'Invalid partner address',
-											duration: 3000
+											type: 'warning',
+											content: 'That address isn\'t associated with any dashboard. Contact support if you believe this is a mistake.',
+											duration: 10000
 										});
 									}
 
