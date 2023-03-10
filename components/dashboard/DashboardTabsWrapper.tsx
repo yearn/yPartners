@@ -1,5 +1,6 @@
 import React, {Fragment, useMemo, useState} from 'react';
 import OverviewChart from 'components/graphs/OverviewChart';
+import IconChevronDown from 'components/icons/IconChevronDown';
 import dayjs, {extend, unix} from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import {getExplorerURL, NETWORK_CHAINID, NETWORK_LABELS} from 'utils/b2b';
@@ -7,7 +8,6 @@ import {PROFIT_SHARE_TEIRS} from 'utils/b2b/Partners';
 import axios from 'axios';
 import {Listbox, Transition} from '@headlessui/react';
 import {Button} from '@yearn-finance/web-lib/components/Button';
-import Chevron from '@yearn-finance/web-lib/icons/IconChevron';
 import IconCopy from '@yearn-finance/web-lib/icons/IconCopy';
 import IconLinkOut from '@yearn-finance/web-lib/icons/IconLinkOut';
 import {toAddress} from '@yearn-finance/web-lib/utils/address';
@@ -83,8 +83,8 @@ function	Tabs({selectedIndex, set_selectedIndex}: TProps): ReactElement {
 										: 'Overview'}
 								</div>
 								<div className={'absolute right-0'}>
-									<Chevron
-										className={`h-6 w-6 transition-transform ${open ? '-rotate-180' : 'rotate-0'}`} />
+									<IconChevronDown
+										className={`transition-transform ${open ? 'rotate-0' : '-rotate-90'}`} />
 								</div>
 							</Listbox.Button>
 							<Transition
