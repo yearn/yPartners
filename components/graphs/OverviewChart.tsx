@@ -95,11 +95,11 @@ function	OverviewChart(props: TOverviewChartProps): ReactElement {
 	return (
 		<div className={'h-[400px]'}>
 
-			{harvestEvents[0].name !== 'no data' ? (
+			{harvestEvents[0].name === 'no data' ? (
 				<div className={'flex h-full w-[85%] items-center justify-center bg-[#E1E1E1]'}>
 					<div className={'text-center'}>
-						<h1>{'Nothing to see here...'}</h1>
-						<p>{'Try adjusting the range or viewing another asset'}</p>
+						<h1 className={'mb-2'}>{'Nothing to see here...'}</h1>
+						<p>{'Your vaults haven\'t earned any payouts yet. Check back later!'}</p>
 					</div>
 				</div>
 			) : (
