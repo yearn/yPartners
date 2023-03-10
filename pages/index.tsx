@@ -17,12 +17,12 @@ function	Index(): ReactElement {
 					<p className={'text-lg'}>{'Integrate Yearn vaults to earn up to 50% profit share'}</p>
 					<div className={'mt-4 flex flex-row space-x-4'}>
 						<Link href={'/team-up'}>
-							<Button className={'w-[200px]'}>
+							<Button className={'w-[150px] md:w-[200px]'}>
 								{'Apply'}
 							</Button>
 						</Link>
 						<Link href={'/learn-more'}>
-							<Button className={'w-[200px]'} variant={'outlined'}>
+							<Button className={'w-[150px] md:w-[200px]'} variant={'outlined'}>
 								{'Learn More'}
 							</Button>
 						</Link>
