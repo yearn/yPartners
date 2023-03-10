@@ -190,7 +190,7 @@ function	AppHeader(): ReactElement {
 									if (!isMatched){
 										toast({
 											type: 'warning',
-											content: 'That address isn\'t associated with any dashboard. Contact support if you believe this is a mistake.',
+											content: 'That address isn\'t associated with any dashboard. Reach out to us if you believe this is a mistake.',
 											duration: 10000
 										});
 									}
