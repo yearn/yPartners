@@ -1,4 +1,3 @@
-import 	DefaultLogo 			from 	'components/icons/partners/DefaultLogo';
 import 	LogoAkropolis 			from 	'components/icons/partners/LogoAkropolis';
 import	LogoAlchemix			from	'components/icons/partners/LogoAlchemix';
 import 	LogoAmbire 				from 	'components/icons/partners/LogoAmbire';
@@ -7,7 +6,6 @@ import 	LogoBasket 				from 	'components/icons/partners/LogoBasket';
 import	LogoBeethoven			from	'components/icons/partners/LogoBeethoven';
 import 	LogoCoinomi 			from 	'components/icons/partners/LogoCoinomi';
 import 	LogoDeus 				from 	'components/icons/partners/LogoDeus';
-import 	LogoDonut 				from 	'components/icons/partners/LogoDonut';
 import	LogoElement				from	'components/icons/partners/LogoElement';
 import 	LogoFrax 				from	'components/icons/partners/LogoFrax';
 import	LogoGearbox				from	'components/icons/partners/LogoGearbox';
@@ -25,7 +23,6 @@ import	LogoSpool				from	'components/icons/partners/LogoSpool';
 import	LogoSturdy				from	'components/icons/partners/LogoSturdy';
 import 	LogoTempus 				from 	'components/icons/partners/LogoTempus';
 import 	LogoWido 				from 	'components/icons/partners/LogoWido';
-import 	LogoYieldster 			from 	'components/icons/partners/LogoYieldster';
 import {toAddress} 	from '@yearn-finance/web-lib/utils/address';
 
 import 	type {ReactElement} from 	'react';
@@ -93,18 +90,6 @@ const	PARTNERS: TDict<TPartner> = {
 		treasury: [toAddress('0x237a4d2166Eb65cB3f9fabBe55ef2eb5ed56bdb9')],
 		logo: <LogoPhuture className={'text-900'} />
 	},
-	'yieldster':  {
-		name: 'Yieldster',
-		shortName: 'yieldster',
-		treasury: [toAddress('0x2955278aBCE187315D6d72B0d626f1217786DF60')],
-		logo: <LogoYieldster className={'text-900'} />
-	},
-	'chfry':  {
-		name: 'Cheese Fry Finance',
-		shortName: 'chfry',
-		treasury: [toAddress('0x3400985be0b41Ce9778823E9618074115f830799')],
-		logo: <DefaultLogo className={'text-900'} />
-	},
 	'popcorndao':  {
 		name: 'Popcorn DAO',
 		shortName: 'popcorndao',
@@ -129,12 +114,6 @@ const	PARTNERS: TDict<TPartner> = {
 		treasury: [toAddress('0x5EF7F250f74d4F11A68054AE4e150705474a6D4a')],
 		logo: <LogoWido className={'text-900'} />
 	},
-	'gb':  {
-		name: 'gb',
-		shortName: 'gb',
-		treasury: [toAddress('0x6965292e29514e527df092659FB4638dc39e7248')],
-		logo: <DefaultLogo className={'text-900'} />
-	},
 	'basketdao':  {
 		name: 'BasketDAO',
 		shortName: 'basketdao',
@@ -152,18 +131,6 @@ const	PARTNERS: TDict<TPartner> = {
 		shortName: 'shapeshiftdao',
 		treasury: [toAddress('0x90A48D5CF7343B08dA12E067680B4C6dbfE551Be')],
 		logo: <LogoShapeshift className={'text-900'} />
-	},
-	'cofi':  {
-		name: 'CoFi',
-		shortName: 'cofi',
-		treasury: [toAddress('0x982646BA80a706B402Bf6e286A815c06f5b71129')],
-		logo: <DefaultLogo className={'text-900'} />
-	},
-	'donutapp':  {
-		name: 'Donut',
-		shortName: 'donutapp',
-		treasury: [toAddress('0x9eaCFF404BAC19195CbD131a4BeA880Abd09B35e')],
-		logo: <LogoDonut className={'text-900'} />
 	},
 	'ambire':  {
 		name: 'Ambire Wallet',
@@ -212,12 +179,6 @@ const	PARTNERS: TDict<TPartner> = {
 		shortName: 'sturdy',
 		treasury: [toAddress('0xFd1D36995d76c0F75bbe4637C84C06E4A68bBB3a')],
 		logo: <LogoSturdy className={'text-900'} />
-	},
-	'yapeswap':  {
-		name: 'yApeSwap',
-		shortName: 'yapeswap',
-		treasury: [toAddress('0x10DE513EE154BfA97f1c2841Cab91E8C389c7c72')],
-		logo: <DefaultLogo className={'text-900'} />
 	}
 };
 
@@ -237,18 +198,13 @@ const LOGOS: TPartnerLogo = {
 	'Inverse Finance': <LogoInverse isColored={true} className={'text-900 h-3/4 w-3/4'} />,
 	'Pickle Finance': <LogoPickle isColored={true} className={'text-900 h-3/4 w-3/4'} />,
 	'Phuture': <LogoPhuture isColored={true} className={'text-900 h-3/4 w-3/4'} />,
-	'Yieldster': <LogoYieldster isColored={true} className={'text-900 h-3/4 w-3/4'} />,
-	'Cheese Fry Finance': <DefaultLogo className={'text-900 h-3/4 w-3/4'} />,
 	'Popcorn DAO': <LogoPopcorndao isColored={true} className={'text-900 h-3/4 w-3/4'} />,
 	'DEUS Finance DAO': <LogoDeus isColored={true} className={'text-900 h-3/4 w-3/4'} />,
 	'rhino.fi': <LogoRhino isColored={true} className={'text-900 h-3/4 w-3/4'} />,
 	'Wido': <LogoWido isColored={true} className={'text-900 h-3/4 w-3/4'} />,
-	'gb': <DefaultLogo className={'text-900 h-3/4 w-3/4'} />,
 	'BasketDAO': <LogoBasket isColored={true} className={'text-900 h-3/4 w-3/4'} />,
 	'Frax Finance': <LogoFrax isColored={true} className={'text-900 h-3/4 w-3/4'} />,
 	'ShapeShift DAO': <LogoShapeshift isColored={true} className={'text-900 h-3/4 w-3/4'} />,
-	'CoFi': <DefaultLogo className={'text-900 h-3/4 w-3/4'} />,
-	'Donut': <LogoDonut isColored={true} className={'text-900 h-3/4 w-3/4'} />,
 	'Ambire Wallet': <LogoAmbire isColored={true} className={'text-900 h-3/4 w-3/4'} />,
 	'Tempus': <LogoTempus isColored={true} className={'text-900 h-3/4 w-3/4'} />,
 	'Akropolis': <LogoAkropolis isColored={true} className={'text-900 h-3/4 w-3/4'} />,
@@ -256,8 +212,7 @@ const LOGOS: TPartnerLogo = {
 	'Coinomi': <LogoCoinomi isColored={true}className={'text-900 h-3/4 w-3/4'} />,
 	'Mover': <LogoMover isColored={true} className={'text-900 h-3/4 w-3/4'} />,
 	'Beethoven X': <LogoBeethoven isColored={true} className={'text-900 h-3/4 w-3/4'} />,
-	'Sturdy': <LogoSturdy isColored={true} className={'text-900 h-3/4 w-3/4'} />,
-	'yApeSwap': <DefaultLogo className={'text-900 h-3/4 w-3/4'} />
+	'Sturdy': <LogoSturdy isColored={true} className={'text-900 h-3/4 w-3/4'} />
 };
 
 
