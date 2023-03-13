@@ -4,7 +4,6 @@ import 	LogoAmbire 				from 	'components/icons/partners/LogoAmbire';
 import	LogoBadger				from	'components/icons/partners/LogoBadger';
 import 	LogoBasket 				from 	'components/icons/partners/LogoBasket';
 import	LogoBeethoven			from	'components/icons/partners/LogoBeethoven';
-import 	LogoCoinomi 			from 	'components/icons/partners/LogoCoinomi';
 import 	LogoDeus 				from 	'components/icons/partners/LogoDeus';
 import	LogoElement				from	'components/icons/partners/LogoElement';
 import 	LogoFrax 				from	'components/icons/partners/LogoFrax';
@@ -156,12 +155,6 @@ const	PARTNERS: TDict<TPartner> = {
 		treasury: [toAddress('0xD0A7A8B98957b9CD3cFB9c0425AbE44551158e9e')],
 		logo: <LogoBadger className={'text-900'} />
 	},
-	'coinomi':  {
-		name: 'Coinomi',
-		shortName: 'coinomi',
-		treasury: [toAddress('0xd3877D9df3Cb52006b7d932e8Db4B36E22e89242')],
-		logo: <LogoCoinomi className={'text-900'} />
-	},
 	'mover':  {
 		name: 'Mover',
 		shortName: 'mover',
@@ -209,7 +202,6 @@ const LOGOS: TPartnerLogo = {
 	'Tempus': <LogoTempus isColored={true} className={'text-900 h-3/4 w-3/4'} />,
 	'Akropolis': <LogoAkropolis isColored={true} className={'text-900 h-3/4 w-3/4'} />,
 	'BadgerDAO': <LogoBadger isColored={true} className={'text-900 h-3/4 w-3/4'} />,
-	'Coinomi': <LogoCoinomi isColored={true}className={'text-900 h-3/4 w-3/4'} />,
 	'Mover': <LogoMover isColored={true} className={'text-900 h-3/4 w-3/4'} />,
 	'Beethoven X': <LogoBeethoven isColored={true} className={'text-900 h-3/4 w-3/4'} />,
 	'Sturdy': <LogoSturdy isColored={true} className={'text-900 h-3/4 w-3/4'} />
