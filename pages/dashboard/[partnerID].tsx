@@ -158,7 +158,7 @@ export async function getStaticPaths(): Promise<GetStaticPathsResult> {
 	};
 }
 
-export async function getStaticProps(context: {params: {partnerID: string}}): Promise<GetStaticPropsResult<any>> {
+export async function getStaticProps(context: {params: {partnerID: string}}): Promise<GetStaticPropsResult<{partnerID: string}>>{
 	return ({props: {partnerID: context.params.partnerID}});
 }
 
