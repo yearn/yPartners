@@ -102,33 +102,37 @@ function	AppHeader(): ReactElement {
 		<header>
 			<div className={'flex w-full flex-row items-center justify-between py-6'}>
 				<nav className={'flex flex-row items-center space-x-6 md:space-x-10'}>
-					<div>
-						<Link href={'/'}>
-							<p
-								aria-selected={router.pathname === '/'}
-								className={'project--nav'}>
-								{'Main'}
-							</p>
-						</Link>
-					</div>
-					<div>
-						<Link href={'/team-up'}>
-							<p
-								aria-selected={router.pathname === '/team-up'}
-								className={'project--nav'}>
-								{'Team up'}
-							</p>
-						</Link>
-					</div>
-					<div>
-						<Link href={'/learn-more'}>
-							<p
-								aria-selected={router.pathname === '/learn-more'}
-								className={'project--nav'}>
-								{'Learn more'}
-							</p>
-						</Link>
-					</div>
+					{!isLoggedIn && (
+						<>
+							<div>
+								<Link href={'/'}>
+									<p
+										aria-selected={router.pathname === '/'}
+										className={'project--nav'}>
+										{'Main'}
+									</p>
+								</Link>
+							</div>
+							<div>
+								<Link href={'/team-up'}>
+									<p
+										aria-selected={router.pathname === '/team-up'}
+										className={'project--nav'}>
+										{'Team up'}
+									</p>
+								</Link>
+							</div>
+							<div>
+								<Link href={'/learn-more'}>
+									<p
+										aria-selected={router.pathname === '/learn-more'}
+										className={'project--nav'}>
+										{'Learn more'}
+									</p>
+								</Link>
+							</div>
+						</>
+					)}
 				</nav>
 
 				<div className={'flex flex-row items-center space-x-6 md:space-x-10'}>
