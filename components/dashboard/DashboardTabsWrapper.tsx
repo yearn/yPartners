@@ -29,7 +29,7 @@ const dataWindows = [
 	{name: '1 week', value: 7},
 	{name: '1 month', value: 29},
 	{name: '1 year', value: 365},
-	{name: 'All time', value: 50}
+	{name: 'All time', value: 40}
 ];
 
 type TProps = {
@@ -259,7 +259,7 @@ function	DashboardTabsWrapper(props: {partnerID: string}): ReactElement {
 							const shortDate = unix(data.ts).format('MMM DD');
 							const {token} = currentVault;
 							
-							if (currentVault.tvl > 0 || vaultPayoutArray?.length > 0) {
+							if (currentVault.tvl > 0) {
 								const dataPoint = {name: date, shortDate, data: {feePayout: currentVault.tvl}, token};
 
 								if(vaultPayoutArray){
