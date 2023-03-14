@@ -76,7 +76,7 @@ function	Tabs({selectedIndex, set_selectedIndex}: TProps): ReactElement {
 					{({open}): ReactElement => (
 						<>
 							<Listbox.Button
-								className={`flex h-10 w-40 flex-row items-center border-0 border-b-2 border-neutral-900 bg-neutral-100 p-0 font-bold focus:border-neutral-900 ${vaultCount > 5 ? '' : 'md:hidden'}`}>
+								className={`flex h-10 w-50 flex-row items-center border-0 border-b-2 border-neutral-900 bg-neutral-100 p-0 font-bold focus:border-neutral-900 ${vaultCount > 5 ? '' : 'md:hidden'}`}>
 								<div className={'relative flex flex-row items-center'}>
 									{displayVaults[selectedIndex] ? 
 										`${displayVaults[selectedIndex].token} - ${NETWORK_LABELS[displayVaults[selectedIndex]?.chainID]}` 
