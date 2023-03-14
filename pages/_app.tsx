@@ -177,8 +177,6 @@ function	AppHeader(): ReactElement {
 										if (partner.treasury?.includes(address)) {
 											isMatched = true;
 											const idx = partner.treasury?.indexOf(address);
-
-											console.log(partner.treasury[idx]);
 											
 											set_isLoading(true);
 											set_address(partner.treasury[idx]);
