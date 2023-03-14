@@ -1,15 +1,17 @@
-import React, {useState} from 'react';
+import React, {useMemo, useState} from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
 import {useRouter} from 'next/router';
-import {SessionProvider, useSession} from 'next-auth/react';
 import {DefaultSeo} from 'next-seo';
+import {AuthContextApp, useAuth} from 'contexts/useAuth';
 import {YearnContextApp} from 'contexts/useYearn';
+import {PARTNERS} from 'utils/b2b/Partners';
 import {Button} from '@yearn-finance/web-lib/components/Button';
-import {useWeb3} from '@yearn-finance/web-lib/contexts/useWeb3';
+import {Card} from '@yearn-finance/web-lib/components/Card';
+import {Modal} from '@yearn-finance/web-lib/components/Modal';
+import {yToast} from '@yearn-finance/web-lib/components/yToast';
 import {WithYearn} from '@yearn-finance/web-lib/contexts/WithYearn';
-import {useClientEffect} from '@yearn-finance/web-lib/hooks';
-import {truncateHex} from '@yearn-finance/web-lib/utils/address';
+import {toAddress} from '@yearn-finance/web-lib/utils/address';
 
 import type {AppProps} from 'next/app';
 import type {ReactElement} from 'react';
@@ -25,7 +27,7 @@ function	AppHead(): ReactElement {
 				<meta name={'viewport'} content={'width=device-width, initial-scale=1'} />
 				<meta name={'description'} content={process.env.WEBSITE_NAME} />
 				<meta name={'msapplication-TileColor'} content={'#000000'} />
-				<meta name={'theme-color'} content={'#FF90A1'} />
+				<meta name={'theme-color'} content={'#000000'} />
 
 				<link
 					rel={'shortcut icon'}
@@ -73,7 +75,7 @@ function	AppHead(): ReactElement {
 					description: process.env.WEBSITE_DESCRIPTION,
 					images: [
 						{
-							url: `${process.env.WEBSITE_URI}og.jpeg`,
+							url: `${process.env.WEBSITE_URI}og.png`,
 							width: 1200,
 							height: 675,
 							alt: 'Yearn'
@@ -91,109 +93,123 @@ function	AppHead(): ReactElement {
 
 function	AppHeader(): ReactElement {
 	const	router = useRouter();
-	const	{isActive, address, ens, openLoginModal, onSwitchChain, onDesactivate} = useWeb3();
-	const	{data: session} = useSession();
-	const	[walletIdentity, set_walletIdentity] = useState('Log in');
-
-	// const	hasPendingSignature = useRef(false);
-
-	// const authenticate = useCallback(async (_ens: string): Promise<void> => {
-	// 	if (hasPendingSignature.current) {
-	// 		return;
-	// 	}
-
-	// 	hasPendingSignature.current = true;
-	// 	const	signer = provider.getSigner();
-	// 	const	signature = await signer.signMessage('YOU CAN\'T BUILD TRUSTLESS SYSTEMS WITHOUT TRUST.');
-	// 	const	result = await signIn('web3', {redirect: false, address, signature});
-	// 	hasPendingSignature.current = false;
-	// 	if (result?.ok) {
-	// 		set_walletIdentity(_ens ? _ens : truncateHex(address, 4));
-	// 		if (router.query.callbackUrl) {
-	// 			const	callbackUrl = (router.query.callbackUrl as string).replace(window.location.origin, '');
-	// 			router.push(callbackUrl);
-	// 		}
-	// 	}
-
-	// }, [provider, address, router]);
-
-	useClientEffect((): void => {
-		if (address) {
-			set_walletIdentity(ens ? ens : truncateHex(address, 6));
-		} else {
-			set_walletIdentity('Log in');
-		}
-	}, [ens, address, isActive, session]);
-
-	useClientEffect((): void => {
-		if (session) {
-			console.log(`Hello ${session.user?.name}`);
-		}
-	}, [session]);
-
-
-	async function	onLogIn(): Promise<void> {
-		if (isActive) {
-			await onDesactivate();
-			// if (session) {
-			// 	await signOut({redirect: false});
-			// }
-		} else if (!isActive && address) {
-			onSwitchChain(1, true);
-		} else {
-			openLoginModal();
-		}
-	}
+	const {toast} = yToast();
+	const	{hasModal, isLoggedIn, isLoading, set_hasModal, set_isLoggedIn, set_isLoading} = useAuth();
+	const	[authOption, set_authOption] = useState('Log in');
+	const	[address, set_address] = useState('');
 
 	return (
 		<header>
 			<div className={'flex w-full flex-row items-center justify-between py-6'}>
 				<nav className={'flex flex-row items-center space-x-6 md:space-x-10'}>
-					<div>
-						<Link href={'/'}>
-							<p
-								aria-selected={router.pathname === '/'}
-								className={'project--nav'}>
-								{'Main'}
-							</p>
-						</Link>
-					</div>
-					<div>
-						<Link href={'/team-up'}>
-							<p
-								aria-selected={router.pathname === '/team-up'}
-								className={'project--nav'}>
-								{'Team up'}
-							</p>
-						</Link>
-					</div>
-					<div>
-						<Link href={'/learn-more'}>
-							<p
-								aria-selected={router.pathname === '/learn-more'}
-								className={'project--nav'}>
-								{'Learn more'}
-							</p>
-						</Link>
-					</div>
+					{!isLoggedIn && (
+						<>
+							<div>
+								<Link href={'/'}>
+									<p
+										aria-selected={router.pathname === '/'}
+										className={'project--nav'}>
+										{'Main'}
+									</p>
+								</Link>
+							</div>
+							<div>
+								<Link href={'/team-up'}>
+									<p
+										aria-selected={router.pathname === '/team-up'}
+										className={'project--nav'}>
+										{'Team up'}
+									</p>
+								</Link>
+							</div>
+							<div>
+								<Link href={'/learn-more'}>
+									<p
+										aria-selected={router.pathname === '/learn-more'}
+										className={'project--nav'}>
+										{'Learn more'}
+									</p>
+								</Link>
+							</div>
+						</>
+					)}
 				</nav>
 
 				<div className={'flex flex-row items-center space-x-6 md:space-x-10'}>
 					<Button
 						variant={'filled'}
 						className={'!h-[30px]'}
-						onClick={onLogIn}>
-						{walletIdentity}
+						onClick={(): void => {
+							if(isLoggedIn && address){
+								set_address('');
+								set_isLoggedIn(false);
+								set_authOption('Log in');
+								router.push('/');
+							} else {
+								set_hasModal(!hasModal);
+							}
+						}}>
+						{authOption}
 					</Button>
 				</div>
 
 			</div>
+
+			<Modal
+				isOpen={hasModal}
+				onClose={(): void => {
+					if(!isLoading){
+						set_hasModal(false);
+					}
+				}}>
+				<Card>
+					{isLoading ? (<h1 className={'mb-5'}>{'Loading Dashboard...'}</h1>) : (
+						<>
+							<h1 className={'mb-7'}>{'Log in'}</h1>
+							<WrappedInput
+								title={'Project Address'}
+								initialValue={''}
+								onSave={(addr): void => {
+									const address = toAddress(addr);
+									let isMatched = false;
+
+									Object.values(PARTNERS).forEach((partner): void => {
+										if (partner.treasury?.includes(address)) {
+											isMatched = true;
+											const idx = partner.treasury?.indexOf(address);
+											
+											set_isLoading(true);
+											set_address(partner.treasury[idx]);
+											set_isLoggedIn(true);
+											set_authOption('Log out');
+											router.push(`dashboard/${partner.shortName}`).then((): void => {
+												set_hasModal(false);
+												setTimeout((): void => set_isLoading(false), 1000);
+											});
+										}
+									});
+
+									if (!isMatched){
+										toast({
+											type: 'warning',
+											content: 'That address isn\'t associated with any dashboard. Reach out to us if you believe this is a mistake.',
+											duration: 10000
+										});
+									}
+
+								} } />
+						</>
+					)}
+
+				</Card>
+			</Modal>
 		</header>
 	);
 }
 
 function	AppWrapper(props: AppProps): ReactElement {
 	const	{Component, pageProps, router} = props;
+
 
 	return (
 		<>
@@ -226,15 +242,52 @@ function	MyApp(props: AppProps): ReactElement {
 				}
 			}}>
 			<YearnContextApp>
-				<SessionProvider /*session={pageProps.session} */ >
+				<AuthContextApp>
 					<AppWrapper
 						Component={Component}
 						pageProps={pageProps}
 						router={props.router} />
-				</SessionProvider>
+				</AuthContextApp>
 			</YearnContextApp>
 		</WithYearn>
 	);
 }
 
 export default MyApp;
+
+type TWrappedInput = {
+	title: string;
+	initialValue: string;
+	onSave: (value: string) => void;
+}
+
+function	WrappedInput({title, initialValue, onSave}: TWrappedInput): ReactElement {
+	const	[isFocused, set_isFocused] = useState(false);
+	const	[value, set_value] = useState(initialValue);
+	const	isInitialValue = useMemo((): boolean => value === initialValue, [value, initialValue]);
+
+	return (
+		<label>
+			<p className={'pb-1 text-neutral-900'}>{title}</p>
+			<div className={'flex flex-row space-x-2'}>
+				<div data-focused={isFocused} className={'yearn--input relative w-full'}>
+					<input
+						onFocus={(): void => set_isFocused(true)}
+						onBlur={(): void => set_isFocused(false)}
+						className={'h-10 w-full overflow-x-scroll border-2 border-neutral-700 bg-neutral-0 p-2 outline-none scrollbar-none'}
+						placeholder={'0x...'}
+						value={value}
+						type={'text'}
+						onChange={(e): void => set_value(e.target.value)}
+					/>
+				</div>
+				<Button
+					disabled={isInitialValue || value.length !== 42}
+					className={'w-full text-sm md:w-48'}
+					onClick={(): void => onSave(value)}>
+					{'View Dashboard'}
+				</Button>
+			</div>
+		</label>
+	);
+}

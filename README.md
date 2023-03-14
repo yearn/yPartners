@@ -1,4 +1,5 @@
 # Yearn B2B Partners Dashboard
+![](./public/og.png)
 
 Have you ever found yourself thinking:
 
@@ -7,8 +8,6 @@ Have you ever found yourself thinking:
 Well friend, you’ve come to the right place!
 
 - Check [Yearn B2B Parners Dashboard](https://b2b-dashboard.yearn.farm)
-
-<img width="400" alt="Screenshot 2023-03-07 at 10 36 52 AM" src="https://user-images.githubusercontent.com/7863230/223503425-6de7c859-a497-4cc2-a76c-9f657a37fe85.png">
 
 ## Development Instructions
 

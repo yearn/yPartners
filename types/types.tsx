@@ -23,6 +23,7 @@ export type TPartner = {
 	name: string;
 	shortName: string;
 	description?: string;
+	treasury?: TAddress[];
 	logo: ReactElement;
 }
 

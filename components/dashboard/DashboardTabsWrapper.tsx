@@ -1,13 +1,13 @@
 import React, {Fragment, useMemo, useState} from 'react';
 import OverviewChart from 'components/graphs/OverviewChart';
+import IconChevronDown from 'components/icons/IconChevronDown';
 import dayjs, {extend, unix} from 'dayjs';
 import utc from 'dayjs/plugin/utc';
-import {getExplorerURL, NETWORK_CHAINID} from 'utils/b2b';
+import {getExplorerURL, NETWORK_CHAINID, NETWORK_LABELS} from 'utils/b2b';
 import {PROFIT_SHARE_TEIRS} from 'utils/b2b/Partners';
 import axios from 'axios';
 import {Listbox, Transition} from '@headlessui/react';
 import {Button} from '@yearn-finance/web-lib/components/Button';
-import Chevron from '@yearn-finance/web-lib/icons/IconChevron';
 import IconCopy from '@yearn-finance/web-lib/icons/IconCopy';
 import IconLinkOut from '@yearn-finance/web-lib/icons/IconLinkOut';
 import {toAddress} from '@yearn-finance/web-lib/utils/address';
@@ -29,7 +29,7 @@ const dataWindows = [
 	{name: '1 week', value: 7},
 	{name: '1 month', value: 29},
 	{name: '1 year', value: 365},
-	{name: 'All time', value: 50}
+	{name: 'All time', value: 40}
 ];
 
 type TProps = {
@@ -62,7 +62,7 @@ function	Tabs({selectedIndex, set_selectedIndex}: TProps): ReactElement {
 						<p
 							aria-selected={selectedIndex === idx}
 							className={'hover-fix tab'}>
-							{vault.token}
+							{`${vault.token} - ${NETWORK_LABELS[vault.chainID]}`}
 						</p>
 					</button>
 				))}
@@ -76,13 +76,15 @@ function	Tabs({selectedIndex, set_selectedIndex}: TProps): ReactElement {
 					{({open}): ReactElement => (
 						<>
 							<Listbox.Button
-								className={`flex h-10 w-40 flex-row items-center border-0 border-b-2 border-neutral-900 bg-neutral-100 p-0 font-bold focus:border-neutral-900 ${vaultCount > 5 ? '' : 'md:hidden'}`}>
+								className={`flex h-10 w-50 flex-row items-center border-0 border-b-2 border-neutral-900 bg-neutral-100 p-0 font-bold focus:border-neutral-900 ${vaultCount > 5 ? '' : 'md:hidden'}`}>
 								<div className={'relative flex flex-row items-center'}>
-									{displayVaults[selectedIndex]?.token || 'Overview'}
+									{displayVaults[selectedIndex] ? 
+										`${displayVaults[selectedIndex].token} - ${NETWORK_LABELS[displayVaults[selectedIndex]?.chainID]}` 
+										: 'Overview'}
 								</div>
 								<div className={'absolute right-0'}>
-									<Chevron
-										className={`h-6 w-6 transition-transform ${open ? '-rotate-180' : 'rotate-0'}`} />
+									<IconChevronDown
+										className={`transition-transform ${open ? 'rotate-0' : '-rotate-90'}`} />
 								</div>
 							</Listbox.Button>
 							<Transition
@@ -106,7 +108,7 @@ function	Tabs({selectedIndex, set_selectedIndex}: TProps): ReactElement {
 											className={'yearn--listbox-menu-item'}
 											key={idx}
 											value={idx}>
-											{vault.token}
+											{`${vault.token} - ${NETWORK_LABELS[vault.chainID]}`}
 										</Listbox.Option>
 									))}
 								</Listbox.Options>
@@ -128,7 +130,6 @@ function	DashboardTabsWrapper(props: {partnerID: string}): ReactElement {
 	const [balanceTVLs, set_balanceTVLs] = useState<TDict<TChartBar[]>>();
 	const [wrapperTotals, set_wrapperTotals] = useState<TChartBar[]>();
 	const [payoutTotals, set_payoutTotals] = useState<TDict<TChartBar[]>>();
-	const [aggregatedPayouts, set_aggregatedPayouts] = useState<TChartBar[]>();
 
 	const selectedVault = Object.values(vaults)[selectedIndex];
 
@@ -159,6 +160,7 @@ function	DashboardTabsWrapper(props: {partnerID: string}): ReactElement {
 			payoutEndpoints.push(`${basePayoutURI}?ts=${ts}`);
 		}
 
+		const earliestTimestamp = startOfToday - (86400 * (windowValue-1));
 		// reverse so requests resolve with first elements being the oldest
 		balanceEndpoints.reverse();
 		payoutEndpoints.reverse();
@@ -180,13 +182,29 @@ function	DashboardTabsWrapper(props: {partnerID: string}): ReactElement {
 							const shortDate = unix(data.ts).format('MMM DD');
 							const {token} = currentVault;
 							
-							if (currentVault.tvl > 0) {
+							if (currentVault.tvl > 0 || vaultBalanceArray?.length > 0) {
 								const dataPoint = {name: date, shortDate, data: {balanceTVL: currentVault.tvl}, token};
 
 								if(vaultBalanceArray){
 									partnerBalanceTVL[`${toAddress(vaultAddress)}_${chainID}`].push(dataPoint);
 								}else{
-									partnerBalanceTVL[`${toAddress(vaultAddress)}_${chainID}`] = [dataPoint];
+									const missingData = [];
+
+									if(data.ts > earliestTimestamp){
+										const numToAdd = (data.ts - earliestTimestamp) / 86400;
+
+										for (let i = 0; i < numToAdd; i++) {
+											const ts = earliestTimestamp + (86400 * i);
+											const _date = unix(ts).format('MMM DD YYYY');
+											const _shortDate = unix(ts).format('MMM DD');
+
+											const missingDataPoint = {name: _date, shortDate: _shortDate, data: {balanceTVL: 0}, token};
+											missingData.push(missingDataPoint);
+										}
+									}
+
+									missingData.push(dataPoint);
+									partnerBalanceTVL[`${toAddress(vaultAddress)}_${chainID}`] = missingData;
 								}
 	
 								// Sum TVLs by day for aggregate wrapper balance chart
@@ -247,34 +265,30 @@ function	DashboardTabsWrapper(props: {partnerID: string}): ReactElement {
 								if(vaultPayoutArray){
 									partnerPayoutTotals[`${toAddress(vaultAddress)}_${chainID}`].push(dataPoint);
 								}else{
-									partnerPayoutTotals[`${toAddress(vaultAddress)}_${chainID}`] = [dataPoint];
+									const missingData = [];
+
+									if(data.ts > earliestTimestamp){
+										const numToAdd = (data.ts - earliestTimestamp) / 86400;
+										for (let i = 0; i < numToAdd; i++) {
+											const ts = earliestTimestamp + (86400 * i);
+											const _date = unix(ts).format('MMM DD YYYY');
+											const _shortDate = unix(ts).format('MMM DD');
+
+											const _datapoint = {name: _date, shortDate: _shortDate, data: {feePayout: 0}, token};
+											missingData.push(_datapoint);
+										}
+									}
+
+									missingData.push(dataPoint);
+
+									partnerPayoutTotals[`${toAddress(vaultAddress)}_${chainID}`] = missingData;
 								}
 							}
 						}
 					}
 				});
 
-				// generate clean structure for TChartBars which we will fill with aggregated payout data
-				const _data: TChartBar[] = Object.values(partnerPayoutTotals)[0].map((item): TChartBar => {
-					return {...item, data: {}};
-				});
-				
-				Object.keys(partnerPayoutTotals).map((key): void => {
-					const asset = partnerPayoutTotals[key]; 
-					const [address, network] = key.split('_');
-
-					asset.forEach((dataPoint, i): void => {
-						const {token} = dataPoint;
-						const {feePayout} = dataPoint.data;
-	
-						// Distinction by address required as some partners have equivalent asset vaults on the same network
-						// not separation this way causes later instances of the asset to override values for the first instances
-						_data[i] = {..._data[i], data: {..._data[i].data, [`${token}_${network}_${address}`]: feePayout}};
-					});
-				});
-
 				set_payoutTotals(partnerPayoutTotals);
-				set_aggregatedPayouts(_data);
 			});
 
 	}, [partnerID, windowValue]);
@@ -326,7 +340,7 @@ function	DashboardTabsWrapper(props: {partnerID: string}): ReactElement {
 				vault={selectedVault}
 				selectedIndex={selectedIndex}/>
 
-			{ !balanceTVLs || !wrapperTotals || !payoutTotals || !aggregatedPayouts ? 
+			{ !balanceTVLs || !wrapperTotals || !payoutTotals ? 
 				<h1>{'Generating visuals...'}</h1> : (
 					<>			
 						{Object.values(vaults || []).map((_, idx): ReactElement | null => {
@@ -346,7 +360,6 @@ function	DashboardTabsWrapper(props: {partnerID: string}): ReactElement {
 							windowValue={windowValue}
 							wrapperTotals={wrapperTotals}
 							balanceTVLs={balanceTVLs}
-							aggregatedPayouts={aggregatedPayouts}
 							payoutTotals={payoutTotals}
 						/> : null}
 					</>

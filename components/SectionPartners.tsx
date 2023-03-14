@@ -1,12 +1,11 @@
 import React, {useMemo, useState} from 'react';
-import Link from 'next/link';
 import {PARTNERS} from 'utils/b2b/Partners';
 import useSWR from 'swr';
 import {motion} from 'framer-motion';
 import {useSettings} from '@yearn-finance/web-lib/contexts/useSettings';
 import {baseFetcher} from '@yearn-finance/web-lib/utils/fetchers';
 
-import LogoYearn from './icons/LogoYearn';
+import DefaultLogo from './icons/partners/DefaultLogo';
 
 import type {ReactElement} from 'react';
 import type {SWRResponse} from 'swr';
@@ -44,9 +43,11 @@ function	Partners(): ReactElement {
 			for (const [, currentVault] of Object.entries(vaultsForNetwork || {})) {
 				const shortName = currentVault.name.toLowerCase();
 				const {description} = currentVault;
-				const logo = PARTNERS[shortName] ? PARTNERS[shortName].logo : <LogoYearn className={'text-900'} />;
+				const logo = PARTNERS[shortName] ? PARTNERS[shortName].logo : <DefaultLogo className={'text-900'} />;
 
-				_partners[shortName] = {name: currentVault.full_name, shortName, description, logo};
+				if(PARTNERS[shortName]){
+					_partners[shortName] = {name: currentVault.full_name, shortName, description, logo};
+				}
 			}
 		}
 		
@@ -72,22 +73,21 @@ function	Partners(): ReactElement {
 				</div>
 				<div className={'mt-8 grid w-full max-w-5xl grid-cols-1 gap-8 md:grid-cols-3'}>
 					{partnerList?.map((partner: TPartner, i: number): ReactElement => (
-						<Link key={partner.name} href={`/dashboard/${partner.shortName}`}>
-							<motion.div
-								custom={i % 3}
-								initial={'initial'}
-								whileInView={'enter'}
-								className={'flex h-66 cursor-pointer flex-col justify-between border-2 border-neutral-200 bg-neutral-200 p-6'}
-								variants={variants}>
-								<div className={'h-14'}>
-									{partner.logo}
-								</div>
-								<div className={'space-y-2'}>
-									<b className={'text-lg'}>{partner.name}</b>
-									<p>{partner.description}</p>
-								</div>
-							</motion.div>
-						</Link>
+						<motion.div
+							key={partner.name}
+							custom={i % 3}
+							initial={'initial'}
+							whileInView={'enter'}
+							className={'flex h-66 flex-col justify-between border-2 border-neutral-200 bg-neutral-200 p-6'}
+							variants={variants}>
+							<div className={'min-h-10 max-height-10 mb-5'}>
+								{partner.logo}
+							</div>
+							<div className={'min-h-full space-y-2'}>
+								<b className={'text-lg'}>{partner.name}</b>
+								<p>{partner.description}</p>
+							</div>
+						</motion.div>
 					))}
 				</div>
 			</div>

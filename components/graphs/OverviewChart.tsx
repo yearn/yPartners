@@ -1,4 +1,4 @@
-import	React, {useMemo}	from	'react';
+import	React, {useMemo, useState}	from	'react';
 import Chart from 'components/charts/Chart';
 import {NETWORK_LABELS} from 'utils/b2b';
 import {formatAmount} from '@yearn-finance/web-lib/utils/format.number';
@@ -12,7 +12,6 @@ type TOverviewChartProps = {
 	activeWindow: string,
 	wrapperTotals: TChartBar[],
 	balanceTVLs: TDict<TChartBar[]>
-	aggregatedPayouts: TChartBar[]
 	payoutTotals: TDict<TChartBar[]>
 }
 
@@ -24,13 +23,20 @@ const chartColors = [
 
 
 function	OverviewChart(props: TOverviewChartProps): ReactElement {
-	const {wrapperTotals, balanceTVLs, windowValue, aggregatedPayouts, payoutTotals} = props;
+	const {wrapperTotals, balanceTVLs, windowValue, payoutTotals} = props;
+	const [assetsList, set_assetsList] = useState<string[]>([]);
 
 	const harvestEvents = useMemo((): TChartBar[] => {
+		if(Object.values(payoutTotals).length === 0 ){
+			return [{name: 'no data', shortDate: 'n/a', data: {}}];
+		}
+
 		const _data: TChartBar[] = Object.values(payoutTotals)[0].map((item): TChartBar => {
 			const {name, shortDate} = item;
 			return {name, shortDate, data: {}};
 		});
+
+		const _assets = new Set<string>();
 
 		Object.keys(payoutTotals).forEach((key): void => {
 			const dailyPayoutTotals = payoutTotals[key]; 
@@ -39,6 +45,11 @@ function	OverviewChart(props: TOverviewChartProps): ReactElement {
 			let lastPayout = 0;
 			Object.values(dailyPayoutTotals).forEach((dailyPayoutTotal, idx): void => {
 				const {token} = dailyPayoutTotal;
+				const assetId = `${token}_${network}_${address}`;
+
+				if(!_assets.has(assetId)){
+					_assets.add(assetId);
+				}
 
 				if(idx === 0){
 					lastPayout = dailyPayoutTotal.data.feePayout;
@@ -49,13 +60,15 @@ function	OverviewChart(props: TOverviewChartProps): ReactElement {
 						lastPayout = _currentPayout;
 						// Distinction by address required as some partners have equivalent asset vaults on the same network
 						// not separation this way causes later instances of the asset to override values for the first instances
-						_data[idx] = {..._data[idx], data: {..._data[idx].data, [`${token}_${network}_${address}`]: payoutDiff}};
+						_data[idx] = {..._data[idx], data: {..._data[idx].data, [assetId]: payoutDiff}};
 					} else {
-						_data[idx] = {..._data[idx], data: {..._data[idx].data, [`${token}_${network}_${address}`]: 0}};
+						_data[idx] = {..._data[idx], data: {..._data[idx].data, [assetId]: 0}};
 					}
 				}
 			});
 		});
+
+		set_assetsList(Array.from(_assets));
 
 		// Remove first element as it will contain no data and cause errors
 		_data.shift();
@@ -77,7 +90,7 @@ function	OverviewChart(props: TOverviewChartProps): ReactElement {
 				const {token} = dataPoint;
 				const {balanceTVL} = dataPoint.data;
 				const {totalTVL} = wrapperTotals[i].data;
-				const _percent = totalTVL === 0 ? 0 : +formatAmount((balanceTVL / totalTVL) * 100, 0, 2);
+				const _percent = totalTVL === 0 ? 0 : +formatAmount((balanceTVL / totalTVL) * 100, 0, 4).slice(0, -1);
 
 				// Distinction by address required as some partners have equivalent asset vaults on the same network
 				// not separation this way causes later instances of the asset to override values for the first instances
@@ -90,74 +103,52 @@ function	OverviewChart(props: TOverviewChartProps): ReactElement {
 	}, [wrapperTotals, balanceTVLs]);
 	
 	return (
-		<div className={'h-[400px]'}>
-
-			<Chart
-				title={'Individual Harvest Events (USD)'}
-				type={'stacked'}
-				className={'mb-20'}
-				windowValue={windowValue}
-				data={harvestEvents}
-				bars={Object.keys(harvestEvents[1].data).map((asset, idx): {name: string, fill: string} => {
-					const bar = {name: `data.${asset}`, fill: chartColors[idx % chartColors.length]};
-					return bar;
-				})}
-				yAxisOptions={{domain: [0, 'auto'], hideRightAxis: true}}
-				xAxisOptions={{interval: undefined}}
-				tooltipItems={Object.keys(harvestEvents[1].data).map((asset, idx): TTooltipItem => {
-					const [name, network] = asset.split('_');
-					const networkShort = NETWORK_LABELS[+network];
-					const fill = chartColors[idx % chartColors.length];
-				
-					return {name: `${name} - ${networkShort}`, symbol: {pre: '$', post: ''}, fill};
-				}).reverse()}
-				legendItems={Object.keys(harvestEvents[1].data).map((asset, idx): TLegendItem => {
-					const [token, ,] = asset.split('_');
-
-					const legendItem = {
-						type: 'single',
-						details: `${token}`,
-						color: chartColors[idx % chartColors.length],
-						isCondensed: true
-					};
-					return legendItem;
-				}).reverse()} />
-
-
-			<Chart
-				title={'Aggregate Total Payouts (USD)'}
-				type={'stacked'}
-				className={'mb-10'}
-				windowValue={windowValue}
-				data={aggregatedPayouts}
-				bars={Object.keys(aggregatedPayouts[0].data).map((asset, idx): {name: string, fill: string} => {
-					return {name: `data.${asset}`, fill: chartColors[idx % chartColors.length]};
-				})}
-				yAxisOptions={{domain: [0, 'auto'], hideRightAxis: false}}
-				xAxisOptions={{interval: undefined}}
-				tooltipItems={Object.keys(aggregatedPayouts[0].data).map((asset, idx): TTooltipItem => {
-					const [name, network] = asset.split('_');
-					const networkShort = NETWORK_LABELS[+network];
-					const fill = chartColors[idx % chartColors.length];
-				
-					return {name: `${name} - ${networkShort}`, symbol: {pre: '$', post: ''}, fill};
-				}).reverse()}
-				legendItems={Object.keys(aggregatedPayouts[0].data).map((asset, idx): TLegendItem => {
-					const [token, ,] = asset.split('_');
-
-					const legendItem = {
-						type: 'single',
-						details: `${token}`,
-						color: chartColors[idx % chartColors.length],
-						isCondensed: true
-					};
-					return legendItem;
-				}).reverse()} />
+		<div>
+			{harvestEvents[0].name === 'no data' ? (
+				<div className={'flex h-full w-[85%] items-center justify-center bg-[#E1E1E1]'}>
+					<div className={'text-center'}>
+						<h1 className={'mb-2'}>{'Nothing to see here...'}</h1>
+						<p>{'Your vaults haven\'t earned any payouts yet. Check back later!'}</p>
+					</div>
+				</div>
+			) : (
+				<Chart
+					title={'Individual Harvest Events (USD)'}
+					type={'stacked'}
+					className={'mb-20'}
+					windowValue={windowValue}
+					data={harvestEvents}
+					bars={assetsList.map((asset, idx): {name: string, fill: string} => {
+						const bar = {name: `data.${asset}`, fill: chartColors[idx % chartColors.length]};
+						return bar;
+					})}
+					yAxisOptions={{domain: [0, 'auto'], hideRightAxis: true}}
+					xAxisOptions={{interval: undefined}}
+					tooltipItems={assetsList.map((asset, idx): TTooltipItem => {
+						const [name, network] = asset.split('_');
+						const networkShort = NETWORK_LABELS[+network];
+						const fill = chartColors[idx % chartColors.length];
+						
+						return {name: `${name} - ${networkShort}`, symbol: {pre: '$', post: ''}, fill};
+					}).reverse()}
+					legendItems={assetsList.map((asset, idx): TLegendItem => {
+						const [token, ,] = asset.split('_');
+		
+						const legendItem = {
+							type: 'single',
+							details: `${token}`,
+							color: chartColors[idx % chartColors.length],
+							isCondensed: true
+						};
+						return legendItem;
+					}).reverse()} />
+			)}
+	
 
 			<Chart
 				title={'Aggregate Wrapper Balance (USD)'}
 				type={'composed'}
-				className={'mb-10'}
+				className={'mb-20'}
 				windowValue={windowValue}
 				data={wrapperTotals}
 				bars={[{name: 'data.totalTVL', fill: '#8884d8'}, {name: 'data.profitShare', fill: '#82ca9d'}]}
