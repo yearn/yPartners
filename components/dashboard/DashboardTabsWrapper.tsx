@@ -160,6 +160,7 @@ function	DashboardTabsWrapper(props: {partnerID: string}): ReactElement {
 			payoutEndpoints.push(`${basePayoutURI}?ts=${ts}`);
 		}
 
+		const earliestTimestamp = startOfToday - (86400 * (windowValue-1));
 		// reverse so requests resolve with first elements being the oldest
 		balanceEndpoints.reverse();
 		payoutEndpoints.reverse();
@@ -181,13 +182,29 @@ function	DashboardTabsWrapper(props: {partnerID: string}): ReactElement {
 							const shortDate = unix(data.ts).format('MMM DD');
 							const {token} = currentVault;
 							
-							if (currentVault.tvl > 0) {
+							if (currentVault.tvl > 0 || vaultBalanceArray?.length > 0) {
 								const dataPoint = {name: date, shortDate, data: {balanceTVL: currentVault.tvl}, token};
 
 								if(vaultBalanceArray){
 									partnerBalanceTVL[`${toAddress(vaultAddress)}_${chainID}`].push(dataPoint);
 								}else{
-									partnerBalanceTVL[`${toAddress(vaultAddress)}_${chainID}`] = [dataPoint];
+									const missingData = [];
+
+									if(data.ts > earliestTimestamp){
+										const numToAdd = (data.ts - earliestTimestamp) / 86400;
+
+										for (let i = 0; i < numToAdd; i++) {
+											const ts = earliestTimestamp + (86400 * i);
+											const _date = unix(ts).format('MMM DD YYYY');
+											const _shortDate = unix(ts).format('MMM DD');
+
+											const missingDataPoint = {name: _date, shortDate: _shortDate, data: {balanceTVL: 0}, token};
+											missingData.push(missingDataPoint);
+										}
+									}
+
+									missingData.push(dataPoint);
+									partnerBalanceTVL[`${toAddress(vaultAddress)}_${chainID}`] = missingData;
 								}
 	
 								// Sum TVLs by day for aggregate wrapper balance chart
@@ -242,12 +259,28 @@ function	DashboardTabsWrapper(props: {partnerID: string}): ReactElement {
 							const shortDate = unix(data.ts).format('MMM DD');
 							const {token} = currentVault;
 							
-							if (currentVault.tvl > 0) {
+							if (currentVault.tvl > 0 || vaultPayoutArray?.length > 0) {
 								const dataPoint = {name: date, shortDate, data: {feePayout: currentVault.tvl}, token};
 
 								if(vaultPayoutArray){
 									partnerPayoutTotals[`${toAddress(vaultAddress)}_${chainID}`].push(dataPoint);
 								}else{
+									const missingData = [];
+
+									if(data.ts > earliestTimestamp){
+										const numToAdd = (data.ts - earliestTimestamp) / 86400;
+										for (let i = 0; i < numToAdd; i++) {
+											const ts = earliestTimestamp + (86400 * i);
+											const _date = unix(ts).format('MMM DD YYYY');
+											const _shortDate = unix(ts).format('MMM DD');
+
+											const missingDataPoint = {name: _date, shortDate: _shortDate, data: {feePayout: 0}, token};
+											missingData.push(missingDataPoint);
+										}
+									}
+
+									missingData.push(dataPoint);
+
 									partnerPayoutTotals[`${toAddress(vaultAddress)}_${chainID}`] = [dataPoint];
 								}
 							}
