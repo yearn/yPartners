@@ -42,8 +42,7 @@ function	VaultChart(props: TVaultChartProps): ReactElement {
 	}, [payoutTotal]);
 
 	return (
-		<div className={'h-[400px]'}>
-
+		<div>
 			<Chart
 				title={'Harvest Events (USD)'}
 				type={'bar'}

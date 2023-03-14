@@ -78,7 +78,7 @@ function Index({partnerID}: {partnerID: string}): ReactElement {
 	}, [currentPartner, vaults, isLoadingVaults, partnerID]);
 
 	return (
-		<main>
+		<main className={'mb-20 pb-20'}>
 			<section aria-label={'hero'} className={'mt-[75px] mb-14 grid grid-cols-12'}>
 				<div className={'col-span-12 md:col-span-7'}>
 					<h1 className={'mb-2 text-6xl text-neutral-900 md:text-8xl'}>
