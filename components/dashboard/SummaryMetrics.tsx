@@ -27,22 +27,30 @@ function SummaryMetrics(props: TProps): ReactElement {
 			<div className={'my-20 hidden w-[80%] justify-between bg-good-ol-grey-100 md:flex'}>
 				<div>
 					<p>{'TVL'}</p>
-					<h1>{'$ '}{vault ? formatAmount(props.vault.tvl) : formatAmount(allVaultsTVL)}</h1>
+					<b className={'text-2xl tabular-nums'}>
+						{'$ '}{vault ? formatAmount(props.vault.tvl) : formatAmount(allVaultsTVL)}
+					</b>
 				</div>
 
 				<div>
 					<p>{'Fees earned to date'}</p>
-					<h1>{'$ '}{vault ? formatAmount(props.vault.totalPayout, 0, 2) : formatAmount(allVaultsFees)}</h1>
+					<b className={'text-2xl tabular-nums'}>
+						{`$ ${vault ? formatAmount(props.vault.totalPayout, 0, 2) : formatAmount(allVaultsFees)} `}
+					</b>
 				</div>
 
 				<div>
 					<p>{'Annual Yield'}</p>
-					<h1>{vault ? formatPercent(props.vault.apy) : '-'}</h1>
+					<b className={'text-2xl tabular-nums'}>
+						{vault ? formatPercent(props.vault.apy) : '-'}
+					</b>
 				</div>
 
 				<div>
 					<p>{'Risk Score'}</p>
-					<h1>{vault ? formatAmount(props.vault.riskScore, 0, 2) : '-'}</h1>
+					<b className={'text-2xl tabular-nums'}>
+						{vault ? formatAmount(props.vault.riskScore, 0, 2) : '-'}
+					</b>
 				</div>
 			</div>
 
@@ -50,24 +58,32 @@ function SummaryMetrics(props: TProps): ReactElement {
 				<div>
 					<div className={'mb-5'}>
 						<p>{'TVL'}</p>
-						<h1>{'$ '}{vault ? formatAmount(props.vault.tvl) : formatAmount(allVaultsTVL)}</h1>
+						<b className={'text-2xl tabular-nums'}>
+							{'$ '}{vault ? formatAmount(props.vault.tvl) : formatAmount(allVaultsTVL)}
+						</b>
 					</div>
 
 					<div>
 						<p>{'Fees earned to date'}</p>
-						<h1>{'$ '}{vault ? formatAmount(props.vault.balance, 0, 2) : formatAmount(allVaultsFees)}</h1>
+						<b className={'text-2xl tabular-nums'}>
+							{`$ ${vault ? formatAmount(props.vault.totalPayout, 0, 2) : formatAmount(allVaultsFees)} `}
+						</b>
 					</div>
 				</div>
 
 				<div>
 					<div className={'mb-5'}>
 						<p>{'Annual Yield'}</p>
-						<h1>{vault ? formatPercent(props.vault.apy) : '-'}</h1>
+						<b className={'text-2xl tabular-nums'}>
+							{vault ? formatPercent(props.vault.apy) : '-'}
+						</b>
 					</div>
 
 					<div>
 						<p>{'Risk Score'}</p>
-						<h1>{vault ? formatAmount(props.vault.riskScore, 0, 2) : '-'}</h1>
+						<b className={'text-2xl tabular-nums'}>
+							{vault ? formatAmount(props.vault.riskScore, 0, 2) : '-'}
+						</b>
 					</div>
 				</div>
 
