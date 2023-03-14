@@ -274,14 +274,14 @@ function	DashboardTabsWrapper(props: {partnerID: string}): ReactElement {
 											const _date = unix(ts).format('MMM DD YYYY');
 											const _shortDate = unix(ts).format('MMM DD');
 
-											const missingDataPoint = {name: _date, shortDate: _shortDate, data: {feePayout: 0}, token};
-											missingData.push(missingDataPoint);
+											const _datapoint = {name: _date, shortDate: _shortDate, data: {feePayout: 0}, token};
+											missingData.push(_datapoint);
 										}
 									}
 
 									missingData.push(dataPoint);
 
-									partnerPayoutTotals[`${toAddress(vaultAddress)}_${chainID}`] = [dataPoint];
+									partnerPayoutTotals[`${toAddress(vaultAddress)}_${chainID}`] = missingData;
 								}
 							}
 						}
