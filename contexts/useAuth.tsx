@@ -20,7 +20,7 @@ const	defaultProps: TAuthContext = {
 	set_hasModal: (): void => undefined
 };
 
-const	AuthContext = createContext<TAuthContext>(defaultProps);
+const AuthContext = createContext<TAuthContext>(defaultProps);
 export const AuthContextApp = memo(function AuthContextApp({children}: {children: ReactElement}): ReactElement {
 
 	const	[isLoggedIn, set_isLoggedIn] = useState(false);
