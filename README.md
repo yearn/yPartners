@@ -7,7 +7,7 @@ Have you ever found yourself thinking:
 
 Well friend, you’ve come to the right place!
 
-- Check [Yearn B2B Parners Dashboard](https://b2b-dashboard.yearn.farm)
+- Check [Yearn B2B Parners Dashboard](https://partners.yearn.finance)
 
 ## Development Instructions
 

@@ -7,7 +7,7 @@ module.exports = ({
 		** Stuff used for the SEO or some related elements, like the title, the
 		** github url etc.
 		**********************************************************************/
-		WEBSITE_URI: 'https://b2b-dashboard.yearn.farm/',
+		WEBSITE_URI: 'https://partners.yearn.finance/',
 		WEBSITE_NAME: 'Yearn Partners',
 		WEBSITE_TITLE: 'Yearn Partners',
 		WEBSITE_DESCRIPTION: 'Yearn is the permissionless DeFi base layer enabling infinite possibilities for buildooors',
