@@ -191,7 +191,7 @@ function	DashboardTabsWrapper(props: {partnerID: string}): ReactElement {
 									const missingData = [];
 
 									if(data.ts > earliestTimestamp){
-										const numToAdd = (data.ts - earliestTimestamp) / 86400;
+										const numToAdd = Math.floor((data.ts - earliestTimestamp) / 86400);
 
 										for (let i = 0; i < numToAdd; i++) {
 											const ts = earliestTimestamp + (86400 * i);
@@ -268,7 +268,7 @@ function	DashboardTabsWrapper(props: {partnerID: string}): ReactElement {
 									const missingData = [];
 
 									if(data.ts > earliestTimestamp){
-										const numToAdd = (data.ts - earliestTimestamp) / 86400;
+										const numToAdd = Math.floor((data.ts - earliestTimestamp) / 86400);
 										for (let i = 0; i < numToAdd; i++) {
 											const ts = earliestTimestamp + (86400 * i);
 											const _date = unix(ts).format('MMM DD YYYY');
