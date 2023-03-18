@@ -11,6 +11,8 @@ import type {TChartProps} from '../../types/chart';
 function Chart(props: TChartProps): ReactElement {
 	const {type, data} = props; 
 
+	const isLegendShown = data.length > 0 && data[0].name !== 'no data';
+	
 	// function chartNavigation(): void {
 	// 	alert('Feature currently unavailable');
 	// }
@@ -32,9 +34,17 @@ function Chart(props: TChartProps): ReactElement {
 
 				{type === 'composed' && <Composed {...props} />}
 
-				{type === 'stacked' && <Stacked {...props} />}
-
-				{data.length > 0 && <ChartLegend items={props.legendItems}/> }
+				{type === 'stacked' && (data[0].name !== 'no data' ?
+					<Stacked {...props} /> :
+					<div className={'flex h-full w-[85%] items-center justify-center bg-[#E1E1E1]'}>
+						<div className={'text-center'}>
+							<h1 className={'mb-2'}>{'Nothing to see here...'}</h1>
+							<p>{'Your vaults haven\'t earned any payouts yet. Check back later!'}</p>
+						</div>
+					</div>
+				)}
+				
+				{isLegendShown && <ChartLegend items={props.legendItems}/> }
 			</div>
 
 			{/* {data.length > 0 && 
