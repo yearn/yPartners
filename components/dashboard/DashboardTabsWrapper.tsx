@@ -29,7 +29,7 @@ const dataWindows = [
 	{name: '1 week', value: 7},
 	{name: '1 month', value: 29},
 	{name: '1 year', value: 365},
-	{name: 'All time', value: 40}
+	{name: 'All time', value: 45}
 ];
 
 type TProps = {
