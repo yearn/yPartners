@@ -79,13 +79,18 @@ function Index({partnerID}: {partnerID: string}): ReactElement {
 
 	return (
 		<main className={'mb-20 pb-20'}>
-			<section aria-label={'hero'} className={'mt-[75px] mb-14 grid grid-cols-12'}>
-				<div className={'col-span-12 md:col-span-7'}>
-					<h1 className={'mb-2 text-6xl text-neutral-900 md:text-8xl'}>
+			<section aria-label={'hero'} className={'mt-3 mb-8 grid grid-cols-8 md:mb-14 md:mt-[75px] md:grid-cols-12'}>
+
+				<div className={'col-span-3 md:hidden'}>
+					{LOGOS[currentPartnerName]}
+				</div>
+
+				<div className={'col-span-8 lg:col-span-9'}>
+					<h1 className={'my-4 text-6xl text-neutral-900 md:text-8xl'}>
 						{currentPartner?.name === 'Abracadabra.Money' ? 'Abracadabra': currentPartner?.name}
 					</h1>
 
-					<p className={'mb-10 w-3/4 text-neutral-500'}>{`Last updated ${lastSync}`}</p>
+					<p className={'mb-6 w-3/4 text-neutral-500 md:mb-10'}>{`Last updated ${lastSync}`}</p>
 
 					<form onSubmit={downloadReport}>
 						<div className={'mt-2 flex flex-row items-end space-x-4'}>
@@ -124,13 +129,10 @@ function Index({partnerID}: {partnerID: string}): ReactElement {
 					</form>
 				</div>
 
-				<div className={'col-span-1 hidden md:block'} />
-
-				<div className={'col-span-3 hidden md:block'}>
+				<div className={'hidden md:col-span-4 md:block lg:col-span-3'}>
 					{LOGOS[currentPartnerName]}
 				</div>
 
-				<div className={'col-span-2 hidden md:block'} />
 			</section>
 
 			<section aria-label={'tabs'}>
