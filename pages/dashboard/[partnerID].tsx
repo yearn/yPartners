@@ -88,8 +88,8 @@ function Index({partnerID}: {partnerID: string}): ReactElement {
 					<p className={'mb-10 w-3/4 text-neutral-500'}>{`Last updated ${lastSync}`}</p>
 
 					<form onSubmit={downloadReport}>
-						<div className={'mt-2 flex flex-row items-end space-x-4'}>
-							<div>
+						<div className={'mt-2 flex flex-row justify-start sm:items-end'}>
+							<div className={'pr-4'}>
 								<label className={'block text-neutral-500'} htmlFor={'start'}>{'From'}</label>
 								<input
 									className={'text-neutral-500'}
@@ -102,7 +102,7 @@ function Index({partnerID}: {partnerID: string}): ReactElement {
 									max={reportEnd} />
 							</div>
 
-							<div>
+							<div className={'pr-4'}>
 								<label className={'block text-neutral-500'} htmlFor={'end'}>{'To'}</label>
 								<input
 									className={'text-neutral-500'}
@@ -116,11 +116,16 @@ function Index({partnerID}: {partnerID: string}): ReactElement {
 							</div>
 
 							<Button
-								className={'w-[200px] text-sm  md:text-base'}
+								className={'hidden w-[200px] text-sm sm:block lg:text-base'}
 								variant={'filled'}>
 								{'Download Report'}
 							</Button>
 						</div>
+						<Button
+							className={'my-4 w-[100%]  sm:hidden'}
+							variant={'filled'}>
+							{'Download Report'}
+						</Button>
 					</form>
 				</div>
 
