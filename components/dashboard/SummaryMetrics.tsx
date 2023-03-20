@@ -54,7 +54,7 @@ function SummaryMetrics(props: TProps): ReactElement {
 				</div>
 			</div>
 
-			<div className={'my-20 flex w-[60%] justify-between bg-good-ol-grey-100 md:hidden'}>
+			<div className={'my-10 grid grid-cols-2 bg-good-ol-grey-100 md:hidden'}>
 				<div>
 					<div className={'mb-5'}>
 						<p>{'TVL'}</p>
@@ -72,14 +72,14 @@ function SummaryMetrics(props: TProps): ReactElement {
 				</div>
 
 				<div>
-					<div className={'mb-5'}>
+					<div className={'mb-5 ml-8'}>
 						<p>{'Annual Yield'}</p>
 						<b className={'text-2xl tabular-nums'}>
 							{vault ? formatPercent(props.vault.apy) : '-'}
 						</b>
 					</div>
 
-					<div>
+					<div className={'ml-8'}>
 						<p>{'Risk Score'}</p>
 						<b className={'text-2xl tabular-nums'}>
 							{vault ? formatAmount(props.vault.riskScore, 0, 2) : '-'}
