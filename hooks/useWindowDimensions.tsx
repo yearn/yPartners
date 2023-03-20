@@ -18,7 +18,7 @@ function getWindowDimensions(): TWindowDimensions {
 }
 
 export default function useWindowDimensions(): TWindowDimensions {
-	const [windowDimensions, set_windowDimensions] = useState(getWindowDimensions());
+	const [windowDimensions, set_windowDimensions] = useState({width: 0, height: 0});
 
 	useEffect((): TVoidCleanupFunction => {
 		function handleResize(): void {
