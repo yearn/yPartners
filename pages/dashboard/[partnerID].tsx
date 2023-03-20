@@ -4,6 +4,7 @@ import router from 'next/router';
 import {DashboardTabsWrapper} from 'components/dashboard/DashboardTabsWrapper';
 import {useAuth} from 'contexts/useAuth';
 import {PartnerContextApp, usePartner} from 'contexts/usePartner';
+import useWindowDimensions from 'hooks/useWindowDimensions';
 import {LOGOS, PARTNERS} from 'utils/b2b/Partners';
 import {Button} from '@yearn-finance/web-lib/components/Button';
 
@@ -15,6 +16,7 @@ function formatDate(date: Date): string {
 }
 
 function Index({partnerID}: {partnerID: string}): ReactElement {
+	const {width} = useWindowDimensions();
 	const currentDate = new Date();
 	const currentYear = currentDate.getFullYear();
 	const lastMonth = currentDate.getMonth() - 1;
@@ -82,7 +84,7 @@ function Index({partnerID}: {partnerID: string}): ReactElement {
 			<section aria-label={'hero'} className={'mt-3 mb-8 grid grid-cols-8 md:mb-14 md:mt-[75px] md:grid-cols-12'}>
 
 				<div className={'col-span-3 md:hidden'}>
-					{LOGOS[currentPartnerName]}
+					{ width < 768 && LOGOS[currentPartnerName]}
 				</div>
 
 				<div className={'col-span-8 lg:col-span-9'}>
@@ -130,7 +132,7 @@ function Index({partnerID}: {partnerID: string}): ReactElement {
 				</div>
 
 				<div className={'hidden md:col-span-4 md:block lg:col-span-3'}>
-					{LOGOS[currentPartnerName]}
+					{ width >= 768 && LOGOS[currentPartnerName]}
 				</div>
 
 			</section>
