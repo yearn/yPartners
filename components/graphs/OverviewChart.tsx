@@ -104,45 +104,37 @@ function	OverviewChart(props: TOverviewChartProps): ReactElement {
 	
 	return (
 		<div>
-			{harvestEvents[0].name === 'no data' ? (
-				<div className={'flex h-full w-[85%] items-center justify-center bg-[#E1E1E1]'}>
-					<div className={'text-center'}>
-						<h1 className={'mb-2'}>{'Nothing to see here...'}</h1>
-						<p>{'Your vaults haven\'t earned any payouts yet. Check back later!'}</p>
-					</div>
-				</div>
-			) : (
-				<Chart
-					title={'Individual Harvest Events (USD)'}
-					type={'stacked'}
-					className={'mb-20'}
-					windowValue={windowValue}
-					data={harvestEvents}
-					bars={assetsList.map((asset, idx): {name: string, fill: string} => {
-						const bar = {name: `data.${asset}`, fill: chartColors[idx % chartColors.length]};
-						return bar;
-					})}
-					yAxisOptions={{domain: [0, 'auto'], hideRightAxis: true}}
-					xAxisOptions={{interval: undefined}}
-					tooltipItems={assetsList.map((asset, idx): TTooltipItem => {
-						const [name, network] = asset.split('_');
-						const networkShort = NETWORK_LABELS[+network];
-						const fill = chartColors[idx % chartColors.length];
+			<Chart
+				title={'Individual Harvest Events (USD)'}
+				type={'stacked'}
+				className={'mb-20'}
+				windowValue={windowValue}
+				data={harvestEvents}
+				bars={assetsList.map((asset, idx): {name: string, fill: string} => {
+					const bar = {name: `data.${asset}`, fill: chartColors[idx % chartColors.length]};
+					return bar;
+				})}
+				yAxisOptions={{domain: [0, 'auto'], hideRightAxis: true}}
+				xAxisOptions={{interval: undefined}}
+				tooltipItems={assetsList.map((asset, idx): TTooltipItem => {
+					const [name, network] = asset.split('_');
+					const networkShort = NETWORK_LABELS[+network];
+					const fill = chartColors[idx % chartColors.length];
 						
-						return {name: `${name} - ${networkShort}`, symbol: {pre: '$', post: ''}, fill};
-					}).reverse()}
-					legendItems={assetsList.map((asset, idx): TLegendItem => {
-						const [token, ,] = asset.split('_');
+					return {name: `${name} - ${networkShort}`, symbol: {pre: '$', post: ''}, fill};
+				}).reverse()}
+				legendItems={assetsList.map((asset, idx): TLegendItem => {
+					const [token, ,] = asset.split('_');
 		
-						const legendItem = {
-							type: 'single',
-							details: `${token}`,
-							color: chartColors[idx % chartColors.length],
-							isCondensed: true
-						};
-						return legendItem;
-					}).reverse()} />
-			)}
+					const legendItem = {
+						type: 'single',
+						details: `${token}`,
+						color: chartColors[idx % chartColors.length],
+						isCondensed: true
+					};
+					return legendItem;
+				}).reverse()} />
+
 	
 
 			<Chart

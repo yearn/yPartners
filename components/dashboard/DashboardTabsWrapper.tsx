@@ -29,7 +29,7 @@ const dataWindows = [
 	{name: '1 week', value: 7},
 	{name: '1 month', value: 29},
 	{name: '1 year', value: 365},
-	{name: 'All time', value: 40}
+	{name: 'All time', value: 45}
 ];
 
 type TProps = {
@@ -191,7 +191,7 @@ function	DashboardTabsWrapper(props: {partnerID: string}): ReactElement {
 									const missingData = [];
 
 									if(data.ts > earliestTimestamp){
-										const numToAdd = (data.ts - earliestTimestamp) / 86400;
+										const numToAdd = Math.floor((data.ts - earliestTimestamp) / 86400);
 
 										for (let i = 0; i < numToAdd; i++) {
 											const ts = earliestTimestamp + (86400 * i);
@@ -268,7 +268,7 @@ function	DashboardTabsWrapper(props: {partnerID: string}): ReactElement {
 									const missingData = [];
 
 									if(data.ts > earliestTimestamp){
-										const numToAdd = (data.ts - earliestTimestamp) / 86400;
+										const numToAdd = Math.floor((data.ts - earliestTimestamp) / 86400);
 										for (let i = 0; i < numToAdd; i++) {
 											const ts = earliestTimestamp + (86400 * i);
 											const _date = unix(ts).format('MMM DD YYYY');

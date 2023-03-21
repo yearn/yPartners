@@ -4,6 +4,7 @@ import router from 'next/router';
 import {DashboardTabsWrapper} from 'components/dashboard/DashboardTabsWrapper';
 import {useAuth} from 'contexts/useAuth';
 import {PartnerContextApp, usePartner} from 'contexts/usePartner';
+import useWindowDimensions from 'hooks/useWindowDimensions';
 import {LOGOS, PARTNERS} from 'utils/b2b/Partners';
 import {Button} from '@yearn-finance/web-lib/components/Button';
 
@@ -15,6 +16,7 @@ function formatDate(date: Date): string {
 }
 
 function Index({partnerID}: {partnerID: string}): ReactElement {
+	const {width} = useWindowDimensions();
 	const currentDate = new Date();
 	const currentYear = currentDate.getFullYear();
 	const lastMonth = currentDate.getMonth() - 1;
@@ -79,17 +81,22 @@ function Index({partnerID}: {partnerID: string}): ReactElement {
 
 	return (
 		<main className={'mb-20 pb-20'}>
-			<section aria-label={'hero'} className={'mt-[75px] mb-14 grid grid-cols-12'}>
-				<div className={'col-span-12 md:col-span-7'}>
-					<h1 className={'mb-2 text-6xl text-neutral-900 md:text-8xl'}>
+			<section aria-label={'hero'} className={'mt-3 mb-8 grid grid-cols-8 md:mb-14 md:mt-[75px] md:grid-cols-12'}>
+
+				<div className={'col-span-3 md:hidden'}>
+					{ width < 768 && LOGOS[currentPartnerName]}
+				</div>
+
+				<div className={'col-span-8 lg:col-span-9'}>
+					<h1 className={'my-4 text-6xl text-neutral-900 md:text-8xl'}>
 						{currentPartner?.name === 'Abracadabra.Money' ? 'Abracadabra': currentPartner?.name}
 					</h1>
 
-					<p className={'mb-10 w-3/4 text-neutral-500'}>{`Last updated ${lastSync}`}</p>
+					<p className={'mb-6 w-3/4 text-neutral-500 md:mb-10'}>{`Last updated ${lastSync}`}</p>
 
 					<form onSubmit={downloadReport}>
-						<div className={'mt-2 flex flex-row items-end space-x-4'}>
-							<div>
+						<div className={'mt-2 flex flex-row justify-start sm:items-end'}>
+							<div className={'pr-4'}>
 								<label className={'block text-neutral-500'} htmlFor={'start'}>{'From'}</label>
 								<input
 									className={'text-neutral-500'}
@@ -102,7 +109,7 @@ function Index({partnerID}: {partnerID: string}): ReactElement {
 									max={reportEnd} />
 							</div>
 
-							<div>
+							<div className={'pr-4'}>
 								<label className={'block text-neutral-500'} htmlFor={'end'}>{'To'}</label>
 								<input
 									className={'text-neutral-500'}
@@ -116,21 +123,23 @@ function Index({partnerID}: {partnerID: string}): ReactElement {
 							</div>
 
 							<Button
-								className={'w-[200px] text-sm  md:text-base'}
+								className={'hidden w-[200px] text-sm sm:block lg:text-base'}
 								variant={'filled'}>
 								{'Download Report'}
 							</Button>
 						</div>
+						<Button
+							className={'my-4 w-[100%]  sm:hidden'}
+							variant={'filled'}>
+							{'Download Report'}
+						</Button>
 					</form>
 				</div>
 
-				<div className={'col-span-1 hidden md:block'} />
-
-				<div className={'col-span-3 hidden md:block'}>
-					{LOGOS[currentPartnerName]}
+				<div className={'hidden md:col-span-4 md:block lg:col-span-3'}>
+					{ width >= 768 && LOGOS[currentPartnerName]}
 				</div>
 
-				<div className={'col-span-2 hidden md:block'} />
 			</section>
 
 			<section aria-label={'tabs'}>
