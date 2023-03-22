@@ -269,7 +269,7 @@ function	WrappedInput({title, initialValue, onSave}: TWrappedInput): ReactElemen
 	return (
 		<label>
 			<p className={'pb-1 text-neutral-900'}>{title}</p>
-			<div className={'flex flex-row space-x-2'}>
+			<div className={'grid-col-1 grid items-end space-y-2 md:flex md:flex-row md:space-x-2'}>
 				<div data-focused={isFocused} className={'yearn--input relative w-full'}>
 					<input
 						onFocus={(): void => set_isFocused(true)}
