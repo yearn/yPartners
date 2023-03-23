@@ -61,6 +61,7 @@ function	Tabs({selectedIndex, set_selectedIndex}: TProps): ReactElement {
 						onClick={(): void => set_selectedIndex(idx)}>
 						<p
 							aria-selected={selectedIndex === idx}
+							title={`${vault.token} - ${NETWORK_LABELS[vault.chainID]}`}
 							className={'hover-fix tab'}>
 							{`${vault.token} - ${NETWORK_LABELS[vault.chainID]}`}
 						</p>
