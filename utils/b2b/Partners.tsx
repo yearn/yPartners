@@ -175,6 +175,10 @@ const	PARTNERS: TDict<TPartner> = {
 	}
 };
 
+const SHAREABLE_ADDRESSES: {[key: string]: {name: string, shortName: string}} = {
+	'0x679016b3f8e98673f85c6f72567f22b58aa15a54':  {name: 'QiDAO', shortName: 'qidao'}
+};
+
 
 type TPartnerLogo = {
 	[key: string]: ReactElement
@@ -227,5 +231,5 @@ const PROFIT_SHARE_TEIRS: TProfitShareTier = {
 };
 
 export {
-	LOGOS, PARTNERS, PROFIT_SHARE_TEIRS
+	LOGOS, PARTNERS, PROFIT_SHARE_TEIRS, SHAREABLE_ADDRESSES
 };
