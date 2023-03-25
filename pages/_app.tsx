@@ -1,17 +1,17 @@
-import React, {useMemo, useState} from 'react';
+import React, {useEffect, useMemo, useState} from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
 import {useRouter} from 'next/router';
 import {DefaultSeo} from 'next-seo';
 import {AuthContextApp, useAuth} from 'contexts/useAuth';
 import {YearnContextApp} from 'contexts/useYearn';
-import {PARTNERS} from 'utils/b2b/Partners';
+import {PARTNERS, SHAREABLE_ADDRESSES} from 'utils/b2b/Partners';
 import {Button} from '@yearn-finance/web-lib/components/Button';
 import {Card} from '@yearn-finance/web-lib/components/Card';
 import {Modal} from '@yearn-finance/web-lib/components/Modal';
 import {yToast} from '@yearn-finance/web-lib/components/yToast';
 import {WithYearn} from '@yearn-finance/web-lib/contexts/WithYearn';
-import {toAddress} from '@yearn-finance/web-lib/utils/address';
+import {isZeroAddress, toAddress} from '@yearn-finance/web-lib/utils/address';
 
 import type {AppProps} from 'next/app';
 import type {ReactElement} from 'react';
@@ -97,6 +97,17 @@ function	AppHeader(): ReactElement {
 	const	{hasModal, isLoggedIn, isLoading, set_hasModal, set_isLoggedIn, set_isLoading} = useAuth();
 	const	[authOption, set_authOption] = useState('Log in');
 	const	[address, set_address] = useState('');
+
+	const slug = router.query.partnerID as string;
+
+	useEffect((): void => {
+		if(slug && !isZeroAddress(toAddress(slug)) && SHAREABLE_ADDRESSES[slug]){
+			set_address('shareable');
+			set_isLoggedIn(true);
+			set_authOption('Log out');
+		}
+
+	}, [set_isLoggedIn, slug]);
 
 	return (
 		<header>
