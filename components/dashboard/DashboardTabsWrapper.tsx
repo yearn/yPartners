@@ -122,8 +122,7 @@ function	Tabs({selectedIndex, set_selectedIndex}: TProps): ReactElement {
 	);
 }
 
-function	DashboardTabsWrapper(props: {partnerID: string}): ReactElement {
-	const {partnerID} = props;
+function	DashboardTabsWrapper({partnerID}: {partnerID: string}): ReactElement {
 	const {vaults} = usePartner();
 	const [selectedIndex, set_selectedIndex] = useState(-1);
 	const [activeWindow, set_activeWindow] = useState('1 month');

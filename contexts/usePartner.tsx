@@ -1,7 +1,7 @@
 import	React, {createContext, useContext, useMemo}	from 'react';
 import {useYearn} from 'contexts/useYearn';
 import {NETWORK_CHAINID} from 'utils/b2b';
-import {SHAREABLE_ADDRESSES} from 'utils/b2b/Partners';
+import {PARTNERS, SHAREABLE_ADDRESSES} from 'utils/b2b/Partners';
 import useSWR from 'swr';
 import {isZeroAddress, toAddress} from '@yearn-finance/web-lib/utils/address';
 import {baseFetcher} from '@yearn-finance/web-lib/utils/fetchers';
@@ -29,16 +29,17 @@ export const PartnerContextApp = ({
 }: {partnerID: string, children: ReactElement}): ReactElement => {
 	const	{vaults: yVaults} = useYearn();
 	const isShareableURL = !isZeroAddress(toAddress(partnerID));
-	const id = isShareableURL ? SHAREABLE_ADDRESSES[partnerID].shortName : partnerID;
+	const currentPartner = isShareableURL ? SHAREABLE_ADDRESSES[partnerID] : PARTNERS[partnerID];
+	const currentPartnerShortname = currentPartner ? currentPartner.shortName : '';
 
 	const	{data: balances, isLoading: isLoadingBalances} = useSWR(
-		`${process.env.YVISION_BASE_URI}/partners/${id}/balance`,
+		`${process.env.YVISION_BASE_URI}/partners/${currentPartnerShortname}/balance`,
 		baseFetcher,
 		{revalidateOnFocus: false}
 	) as SWRResponse;
 	
 	const	{data: payouts, isLoading: isLoadingPayouts} = useSWR(
-		`${process.env.YVISION_BASE_URI}/partners/${id}/payout_total`,
+		`${process.env.YVISION_BASE_URI}/partners/${currentPartnerShortname}/payout_total`,
 		baseFetcher,
 		{revalidateOnFocus: false}
 	) as SWRResponse;

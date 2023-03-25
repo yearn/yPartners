@@ -33,6 +33,7 @@ function Index({partnerID}: {partnerID: string}): ReactElement {
 	const isShareableURL = !isZeroAddress(toAddress(partnerID));
 	const currentPartner = isShareableURL ? SHAREABLE_ADDRESSES[partnerID] : PARTNERS[partnerID];
 	const currentPartnerName = currentPartner ? currentPartner.name : '';
+	const currentPartnerShortname = currentPartner ? currentPartner.shortName : '';
 
 	useEffect((): void => {
 		if(!isLoggedIn && !isShareableURL){
@@ -77,9 +78,9 @@ function Index({partnerID}: {partnerID: string}): ReactElement {
 		}
 
 		return (
-			<DashboardTabsWrapper partnerID={partnerID} />
+			<DashboardTabsWrapper partnerID={currentPartnerShortname} />
 		);
-	}, [currentPartner, vaults, isLoadingVaults, partnerID]);
+	}, [currentPartner, isLoadingVaults, vaults, currentPartnerShortname]);
 
 	return (
 		<main className={'mb-20 pb-20'}>
