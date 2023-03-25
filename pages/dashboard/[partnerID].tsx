@@ -25,7 +25,7 @@ function Index({partnerID}: {partnerID: string}): ReactElement {
 	const firstDayLastMonth = formatDate(new Date(new Date().setFullYear(currentYear, lastMonth, 1)));
 
 	const {isLoggedIn} = useAuth();
-	const {isLoadingVaults, vaults} = usePartner();
+	const {isLoadingVaults} = usePartner();
 	const [lastSync, set_lastSync] = useState('');
 	const [reportStart, set_reportStart] = useState(firstDayLastMonth);
 	const [reportEnd, set_reportEnd] = useState(today);
@@ -71,16 +71,10 @@ function Index({partnerID}: {partnerID: string}): ReactElement {
 			);
 		}
 
-		if (currentPartner && !isLoadingVaults && Object.values(vaults || []).length === 0) {
-			return (
-				<h1>{'No Vaults Found'}</h1>
-			);
-		}
-
 		return (
 			<DashboardTabsWrapper partnerID={currentPartnerShortname} />
 		);
-	}, [currentPartner, isLoadingVaults, vaults, currentPartnerShortname]);
+	}, [currentPartner, isLoadingVaults, currentPartnerShortname]);
 
 	return (
 		<main className={'mb-20 pb-20'}>

@@ -130,6 +130,7 @@ function	DashboardTabsWrapper({partnerID}: {partnerID: string}): ReactElement {
 	const [balanceTVLs, set_balanceTVLs] = useState<TDict<TChartBar[]>>();
 	const [wrapperTotals, set_wrapperTotals] = useState<TChartBar[]>();
 	const [payoutTotals, set_payoutTotals] = useState<TDict<TChartBar[]>>();
+	const [aggregationStep, set_aggregationStep] = useState(0);
 
 	const selectedVault = Object.values(vaults)[selectedIndex];
 
@@ -240,6 +241,7 @@ function	DashboardTabsWrapper({partnerID}: {partnerID: string}): ReactElement {
 
 				set_balanceTVLs(partnerBalanceTVL);
 				set_wrapperTotals(wrapperData);
+				set_aggregationStep((prevStep): number => (prevStep + 1));
 			});
 
 			
@@ -289,9 +291,17 @@ function	DashboardTabsWrapper({partnerID}: {partnerID: string}): ReactElement {
 				});
 
 				set_payoutTotals(partnerPayoutTotals);
+				set_aggregationStep((prevStep): number => (prevStep + 1));
 			});
 
-	}, [partnerID, windowValue]);
+	}, [partnerID, set_aggregationStep, windowValue]);
+
+
+	if (aggregationStep === 2 && Object.values(balanceTVLs || []).length === 0) {
+		return (
+			<h1>{'No Vaults Found'}</h1>
+		);
+	}
 
 	return (
 		<div aria-label={'Vault Details'} className={'col-span-12 mb-4 flex flex-col bg-neutral-100'}>
@@ -340,7 +350,7 @@ function	DashboardTabsWrapper({partnerID}: {partnerID: string}): ReactElement {
 				vault={selectedVault}
 				selectedIndex={selectedIndex}/>
 
-			{ !balanceTVLs || !wrapperTotals || !payoutTotals ? 
+			{aggregationStep < 2 || !balanceTVLs || !wrapperTotals || !payoutTotals ? 
 				<h1>{'Generating visuals...'}</h1> : (
 					<>			
 						{Object.values(vaults || []).map((_, idx): ReactElement | null => {
