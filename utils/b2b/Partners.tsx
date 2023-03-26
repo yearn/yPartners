@@ -176,7 +176,30 @@ const	PARTNERS: TDict<TPartner> = {
 };
 
 const SHAREABLE_ADDRESSES: {[key: string]: {name: string, shortName: string}} = {
-	'0x679016b3f8e98673f85c6f72567f22b58aa15a54':  {name: 'QiDAO', shortName: 'qidao'}
+	'0x679016b3f8e98673f85c6f72567f22b58aa15a54': {name: 'QiDAO', shortName: 'qidao'},
+	'0x82eF450FB7f06E3294F2f19ed1713b255Af0f541': {name: 'Element Finance', shortName: 'element'},
+	'0xF6Bc2E3b1F939C435D9769D078a6e5048AaBD463': {name: 'SpoolFi', shortName: 'spoolfi'},
+	'0xDF2C270f610Dc35d8fFDA5B453E74db5471E126B': {name: 'Abracadabra.Money', shortName: 'abracadabra'},
+	'0x558247e365be655f9144e1a0140D793984372Ef3': {name: 'Ledger', shortName: 'ledger'},
+	'0x8392F6669292fA56123F71949B52d883aE57e225': {name: 'Alchemix Finance', shortName: 'alchemix'},
+	'0x7b065Fcb0760dF0CEA8CFd144e08554F3CeA73D1': {name: 'Gearbox', shortName: 'gearbox'},
+	'0x926dF14a23BE491164dCF93f4c468A50ef659D5B': {name: 'Inverse Finance', shortName: 'inverse'},
+	'0x066419EaEf5DE53cc5da0d8702b990c5bc7D1AB3': {name: 'Pickle Finance', shortName: 'pickle'},
+	'0x237a4d2166Eb65cB3f9fabBe55ef2eb5ed56bdb9': {name: 'Phuture', shortName: 'phuture'},
+	'0x403d41e72308b5D89a383C3F6789EDD7D3576Ee0': {name: 'Popcorn DAO', shortName: 'popcorndao'},
+	'0x4e8a7C429192bFDa8c9a1ef0f3B749d0f66657AA': {name: 'DEUS Finance DAO', shortName: 'deus'},
+	'0x520Cf70a2D0B3dfB7386A2Bc9F800321F62a5c3a': {name: 'rhino.fi', shortName: 'rhino.fi'},
+	'0x5EF7F250f74d4F11A68054AE4e150705474a6D4a': {name: 'Wido', shortName: 'wido'},
+	'0x7301C46be73bB04847576b6Af107172bF5e8388e': {name: 'BasketDAO', shortName: 'basketdao'},
+	'0x8d0C5D009b128315715388844196B85b41D9Ea30': {name: 'Frax Finance', shortName: 'frax'},
+	'0x90A48D5CF7343B08dA12E067680B4C6dbfE551Be': {name: 'ShapeShift DAO', shortName: 'shapeshiftdao'},
+	'0xa07D75aacEFd11b425AF7181958F0F85c312f143': {name: 'Ambire Wallet', shortName: 'ambire'},
+	'0xaB40A7e3cEF4AfB323cE23B6565012Ac7c76BFef': {name: 'Tempus', shortName: 'tempus'},
+	'0xC5aF91F7D10dDe118992ecf536Ed227f276EC60D': {name: 'Akropolis', shortName: 'akropolis'},
+	'0xD0A7A8B98957b9CD3cFB9c0425AbE44551158e9e': {name: 'BadgerDAO', shortName: 'badger'},
+	'0xf6A0307cb6aA05D7C19d080A0DA9B14eAB1050b7': {name: 'Mover', shortName: 'mover'},
+	'0xa1E849B1d6c2Fd31c63EEf7822e9E0632411ada7': {name: 'Beethoven X', shortName: 'beethovenx'},
+	'0xFd1D36995d76c0F75bbe4637C84C06E4A68bBB3a': {name: 'Sturdy', shortName: 'sturdy'}
 };
 
 
