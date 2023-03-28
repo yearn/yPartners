@@ -1,13 +1,10 @@
 
 import React, {useEffect, useMemo, useState} from 'react';
-import router from 'next/router';
 import {DashboardTabsWrapper} from 'components/dashboard/DashboardTabsWrapper';
-import {useAuth} from 'contexts/useAuth';
 import {PartnerContextApp, usePartner} from 'contexts/usePartner';
 import useWindowDimensions from 'hooks/useWindowDimensions';
-import {LOGOS, PARTNERS, SHAREABLE_ADDRESSES} from 'utils/b2b/Partners';
+import {LOGOS, SHAREABLE_ADDRESSES} from 'utils/b2b/Partners';
 import {Button} from '@yearn-finance/web-lib/components/Button';
-import {isZeroAddress, toAddress} from '@yearn-finance/web-lib/utils/address';
 
 import type {GetStaticPathsResult, GetStaticPropsResult} from 'next';
 import type {ChangeEvent, FormEvent, ReactElement} from 'react';
@@ -24,22 +21,14 @@ function Index({partnerID}: {partnerID: string}): ReactElement {
 	const today = formatDate(currentDate);
 	const firstDayLastMonth = formatDate(new Date(new Date().setFullYear(currentYear, lastMonth, 1)));
 
-	const {isLoggedIn} = useAuth();
 	const {isLoadingVaults} = usePartner();
 	const [lastSync, set_lastSync] = useState('');
 	const [reportStart, set_reportStart] = useState(firstDayLastMonth);
 	const [reportEnd, set_reportEnd] = useState(today);
 
-	const isShareableURL = !isZeroAddress(toAddress(partnerID));
-	const currentPartner = isShareableURL ? SHAREABLE_ADDRESSES[partnerID] : PARTNERS[partnerID];
+	const currentPartner = SHAREABLE_ADDRESSES[partnerID];
 	const currentPartnerName = currentPartner ? currentPartner.name : '';
 	const currentPartnerShortname = currentPartner ? currentPartner.shortName : '';
-
-	useEffect((): void => {
-		if(!isLoggedIn && !isShareableURL){
-			router.push('/');
-		}
-	}, [isLoggedIn, isShareableURL]);
 
 	useEffect((): void => {
 		const latestSync = new Date().toLocaleString('default',
@@ -154,12 +143,10 @@ function	PartnerDashboardWrapper({partnerID}: {partnerID: string}): ReactElement
 
 
 export async function getStaticPaths(): Promise<GetStaticPathsResult> {
-	const	partners = Object.values(PARTNERS);
 	const	addrs = Object.keys(SHAREABLE_ADDRESSES);
-	const namePaths = partners.map((partner): {params: {partnerID: string}} => ({params: {partnerID: partner.shortName}}));
 	const addressPaths = addrs.map((addr): {params: {partnerID: string}} => ({params: {partnerID: addr}}));
 	return {
-		paths: namePaths.concat(addressPaths),
+		paths: addressPaths,
 		fallback: false
 	};
 }

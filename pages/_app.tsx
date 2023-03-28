@@ -11,7 +11,7 @@ import {Card} from '@yearn-finance/web-lib/components/Card';
 import {Modal} from '@yearn-finance/web-lib/components/Modal';
 import {yToast} from '@yearn-finance/web-lib/components/yToast';
 import {WithYearn} from '@yearn-finance/web-lib/contexts/WithYearn';
-import {isZeroAddress, toAddress} from '@yearn-finance/web-lib/utils/address';
+import {toAddress} from '@yearn-finance/web-lib/utils/address';
 
 import type {AppProps} from 'next/app';
 import type {ReactElement} from 'react';
@@ -101,8 +101,8 @@ function	AppHeader(): ReactElement {
 	const slug = router.query.partnerID as string;
 
 	useEffect((): void => {
-		if(slug && !isZeroAddress(toAddress(slug)) && SHAREABLE_ADDRESSES[slug]){
-			set_address('shareable');
+		if(slug && SHAREABLE_ADDRESSES[slug]){
+			set_address(slug);
 			set_isLoggedIn(true);
 			set_authOption('Log out');
 		}
@@ -193,7 +193,7 @@ function	AppHeader(): ReactElement {
 											set_address(partner.treasury[idx]);
 											set_isLoggedIn(true);
 											set_authOption('Log out');
-											router.push(`dashboard/${partner.shortName}`).then((): void => {
+											router.push(`dashboard/${partner.treasury[0]}`).then((): void => {
 												set_hasModal(false);
 												setTimeout((): void => set_isLoading(false), 1000);
 											});
