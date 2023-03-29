@@ -14,8 +14,8 @@ function	LogoBadger(props: TLogo): ReactElement {
 			src={'https://raw.githubusercontent.com/yearn/yearn-assets/d37bb4f2dd42f337e9ddf8dcbbb608cc0f2cdd5f/icons/protocols/badger/logo.svg'}/>
 	):(
 		<Image
-			width={38}
-			height={43}
+			width={35}
+			height={40}
 			alt={'badger logo'}
 			src={'https://raw.githubusercontent.com/yearn/yearn-assets/d37bb4f2dd42f337e9ddf8dcbbb608cc0f2cdd5f/icons/protocols/badger/monochrome.svg'}/>
 	);

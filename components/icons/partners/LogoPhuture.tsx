@@ -14,8 +14,11 @@ function	LogoPhuture(props: TLogo): ReactElement {
 			src={'https://raw.githubusercontent.com/yearn/yearn-assets/d37bb4f2dd42f337e9ddf8dcbbb608cc0f2cdd5f/icons/protocols/phuture/icon.svg'}/>
 	):(
 		<Image
-			width={50}
-			height={25}
+			style={{
+				padding:'3px'
+			}}
+			width={60}
+			height={33}
 			alt={'phuture logo'}
 			src={'https://raw.githubusercontent.com/yearn/yearn-assets/d37bb4f2dd42f337e9ddf8dcbbb608cc0f2cdd5f/icons/protocols/phuture/monochrome.svg'}/>
 	);

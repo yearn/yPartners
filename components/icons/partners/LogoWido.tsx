@@ -15,7 +15,7 @@ function	LogoWido(props: TLogo): ReactElement {
 	):(
 		<Image
 			width={45}
-			height={40}
+			height={37}
 			alt={'wido logo'}
 			src={'https://raw.githubusercontent.com/yearn/yearn-assets/d37bb4f2dd42f337e9ddf8dcbbb608cc0f2cdd5f/icons/protocols/wido/monochrome.svg'}/>
 	);

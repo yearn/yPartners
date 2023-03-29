@@ -15,7 +15,7 @@ function	LogoBasket(props: TLogo): ReactElement {
 	):(
 		<Image
 			width={42}
-			height={38}
+			height={40}
 			alt={'basketdao logo'}
 			src={'https://raw.githubusercontent.com/yearn/yearn-assets/d37bb4f2dd42f337e9ddf8dcbbb608cc0f2cdd5f/icons/protocols/basketdao/monochrome.svg'}/>
 	);

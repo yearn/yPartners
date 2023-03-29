@@ -14,8 +14,8 @@ function	LogoElement(props: TLogo): ReactElement {
 			src={'https://raw.githubusercontent.com/yearn/yearn-assets/d37bb4f2dd42f337e9ddf8dcbbb608cc0f2cdd5f/icons/protocols/element/logo.svg'}/>
 	):(
 		<Image
-			width={42}
-			height={39}
+			width={43}
+			height={40}
 			alt={'element logo'}
 			src={'https://raw.githubusercontent.com/yearn/yearn-assets/d37bb4f2dd42f337e9ddf8dcbbb608cc0f2cdd5f/icons/protocols/element/monochrome.svg'}/>
 	);

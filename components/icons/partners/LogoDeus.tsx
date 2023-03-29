@@ -14,8 +14,8 @@ function	LogoDeus(props: TLogo): ReactElement {
 			src={'https://raw.githubusercontent.com/yearn/yearn-assets/d37bb4f2dd42f337e9ddf8dcbbb608cc0f2cdd5f/icons/protocols/deus/logo.svg'}/>
 	):(
 		<Image
-			width={48}
-			height={46}
+			width={41}
+			height={40}
 			alt={'deus logo'}
 			src={'https://raw.githubusercontent.com/yearn/yearn-assets/d37bb4f2dd42f337e9ddf8dcbbb608cc0f2cdd5f/icons/protocols/deus/monochrome.svg'}/>
 	);

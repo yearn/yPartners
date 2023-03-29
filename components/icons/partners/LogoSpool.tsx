@@ -14,8 +14,8 @@ function	LogoSpool(props: TLogo): ReactElement {
 			src={'https://raw.githubusercontent.com/yearn/yearn-assets/d37bb4f2dd42f337e9ddf8dcbbb608cc0f2cdd5f/icons/protocols/spoolfi/logo.svg'}/>
 	):(
 		<Image
-			width={30}
-			height={48}
+			width={25}
+			height={40}
 			alt={'spoolfi logo'}
 			src={'https://raw.githubusercontent.com/yearn/yearn-assets/d37bb4f2dd42f337e9ddf8dcbbb608cc0f2cdd5f/icons/protocols/spoolfi/monochrome.svg'}/>
 	);

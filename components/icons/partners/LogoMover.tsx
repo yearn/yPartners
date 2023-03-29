@@ -14,8 +14,8 @@ function	LogoMover(props: TLogo): ReactElement {
 			src={'https://raw.githubusercontent.com/yearn/yearn-assets/d37bb4f2dd42f337e9ddf8dcbbb608cc0f2cdd5f/icons/protocols/mover/logo.svg'}/>
 	):(
 		<Image
-			width={42}
-			height={37}
+			width={46}
+			height={40}
 			alt={'mover logo'}
 			src={'https://raw.githubusercontent.com/yearn/yearn-assets/d37bb4f2dd42f337e9ddf8dcbbb608cc0f2cdd5f/icons/protocols/mover/monochrome.svg'}/>
 	);

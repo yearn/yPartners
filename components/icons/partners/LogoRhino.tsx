@@ -14,8 +14,11 @@ function LogoRhino(props: TLogo): ReactElement {
 			src={'https://raw.githubusercontent.com/yearn/yearn-assets/d37bb4f2dd42f337e9ddf8dcbbb608cc0f2cdd5f/icons/protocols/rhino.fi/logo.svg'}/>
 	):(
 		<Image
-			width={60}
-			height={40}
+			style={{
+				paddingTop:'4.5px'
+			}}
+			width={70}
+			height={35}
 			alt={'rhino.fi logo'}
 			src={'https://raw.githubusercontent.com/yearn/yearn-assets/d37bb4f2dd42f337e9ddf8dcbbb608cc0f2cdd5f/icons/protocols/rhino.fi/monochrome.svg'}/>
 	);

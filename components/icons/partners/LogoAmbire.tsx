@@ -14,8 +14,8 @@ function	LogoAmbire(props: TLogo): ReactElement {
 			src={'https://raw.githubusercontent.com/yearn/yearn-assets/d37bb4f2dd42f337e9ddf8dcbbb608cc0f2cdd5f/icons/protocols/ambire/logo.svg'}/>
 	):(
 		<Image
-			width={32}
-			height={47}
+			width={27}
+			height={40}
 			alt={'ambire logo'}
 			src={'https://raw.githubusercontent.com/yearn/yearn-assets/d37bb4f2dd42f337e9ddf8dcbbb608cc0f2cdd5f/icons/protocols/ambire/monochrome.svg'}/>
 	);
