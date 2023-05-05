@@ -74,7 +74,7 @@ function Index({partnerID}: {partnerID: string}): ReactElement {
 				</div>
 
 				<div className={'col-span-8 lg:col-span-9'}>
-					<h1 className={'my-4 text-6xl text-neutral-900 md:text-8xl'}>
+					<h1 className={`my-4 text-neutral-900 md:text-8xl ${currentPartner?.name === 'Abracadabra.Money' ? 'text-[3.5rem]':'text-6xl'}`}>
 						{currentPartner?.name === 'Abracadabra.Money' ? 'Abracadabra': currentPartner?.name}
 					</h1>
 
