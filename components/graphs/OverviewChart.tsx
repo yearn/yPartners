@@ -56,13 +56,16 @@ function	OverviewChart(props: TOverviewChartProps): ReactElement {
 				}else {
 					const _currentPayout = dailyPayoutTotal.data.feePayout;
 					const payoutDiff = _currentPayout - lastPayout;
-					if(payoutDiff > 0){
-						lastPayout = _currentPayout;
-						// Distinction by address required as some partners have equivalent asset vaults on the same network
-						// not separation this way causes later instances of the asset to override values for the first instances
-						_data[idx] = {..._data[idx], data: {..._data[idx].data, [assetId]: payoutDiff}};
-					} else {
-						_data[idx] = {..._data[idx], data: {..._data[idx].data, [assetId]: 0}};
+
+					if(_data[idx]){
+						if(payoutDiff > 0){
+							lastPayout = _currentPayout;
+							// Distinction by address required as some partners have equivalent asset vaults on the same network
+							// not separation this way causes later instances of the asset to override values for the first instances
+							_data[idx] = {..._data[idx], data: {..._data[idx].data, [assetId]: payoutDiff}};
+						} else {
+							_data[idx] = {..._data[idx], data: {..._data[idx].data, [assetId]: 0}};
+						}
 					}
 				}
 			});
@@ -89,12 +92,14 @@ function	OverviewChart(props: TOverviewChartProps): ReactElement {
 			asset.forEach((dataPoint, i): void => {
 				const {token} = dataPoint;
 				const {balanceTVL} = dataPoint.data;
-				const {totalTVL} = wrapperTotals[i].data;
+				const {totalTVL} = wrapperTotals[i] ? wrapperTotals[i].data: {totalTVL: 0};
 				const _percent = totalTVL === 0 ? 0 : +formatAmount((balanceTVL / totalTVL) * 100, 0, 4).slice(0, -1);
 
-				// Distinction by address required as some partners have equivalent asset vaults on the same network
-				// not separation this way causes later instances of the asset to override values for the first instances
-				_data[i] = {..._data[i], data: {..._data[i].data, [`${token}_${network}_${address}`]: _percent}};
+				if(_data[i]){
+					// Distinction by address required as some partners have equivalent asset vaults on the same network
+					// not separation this way causes later instances of the asset to override values for the first instances
+					_data[i] = {..._data[i], data: {..._data[i].data, [`${token}_${network}_${address}`]: _percent}};
+				}
 			});
 		});
 
