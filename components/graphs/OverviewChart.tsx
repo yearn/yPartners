@@ -103,7 +103,7 @@ function	OverviewChart(props: TOverviewChartProps): ReactElement {
 			});
 		});
 
-		return _data;
+		return _data.filter((bar): boolean => Object.keys(bar.data).length > 0);
 
 	}, [wrapperTotals, balanceTVLs]);
 	
