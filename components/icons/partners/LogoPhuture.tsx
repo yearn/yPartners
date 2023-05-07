@@ -15,7 +15,7 @@ function	LogoPhuture(props: TLogo): ReactElement {
 	):(
 		<Image
 			style={{
-				padding:'3px'
+				paddingTop:'10px'
 			}}
 			width={60}
 			height={33}
