@@ -78,12 +78,12 @@ function	Partners(): ReactElement {
 							custom={i % 3}
 							initial={'initial'}
 							whileInView={'enter'}
-							className={'flex h-66 flex-col justify-between border-2 border-neutral-200 bg-neutral-200 p-6'}
+							className={'flex flex-col justify-between border-2 border-neutral-200 bg-neutral-200 p-6 sm:h-[16.5rem] md:h-[21.5rem] lg:h-[18.5rem]'}
 							variants={variants}>
 							<div className={'min-h-10 max-height-10 mb-5'}>
 								{partner.logo}
 							</div>
-							<div className={'min-h-full space-y-2'}>
+							<div className={'h-full space-y-2'}>
 								<b className={'text-lg'}>{partner.name}</b>
 								<p>{partner.description}</p>
 							</div>
