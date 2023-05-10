@@ -12,6 +12,7 @@ import IconCopy from '@yearn-finance/web-lib/icons/IconCopy';
 import IconLinkOut from '@yearn-finance/web-lib/icons/IconLinkOut';
 import {toAddress} from '@yearn-finance/web-lib/utils/address';
 import {copyToClipboard} from '@yearn-finance/web-lib/utils/helpers';
+import performBatchedUpdates from '@yearn-finance/web-lib/utils/performBatchedUpdates';
 
 import {usePartner} from '../../contexts/usePartner';
 import VaultChart from '../graphs/VaultChart';
@@ -140,8 +141,10 @@ function	DashboardTabsWrapper({partnerID}: {partnerID: string}): ReactElement {
 
 	function handleWindowChange(e: MouseEvent<HTMLButtonElement>): void {
 		const {name, value} = e.currentTarget;
-		set_activeWindow(name);
-		set_windowValue(+value);
+		performBatchedUpdates((): void => {
+			set_activeWindow(name);
+			set_windowValue(+value);
+		});
 	}
 
 
@@ -239,9 +242,11 @@ function	DashboardTabsWrapper({partnerID}: {partnerID: string}): ReactElement {
 					return {...item, data: {...item.data, profitShare: partnerTier}};
 				});
 
-				set_balanceTVLs(partnerBalanceTVL);
-				set_wrapperTotals(wrapperData);
-				set_aggregationStep((prevStep): number => (prevStep + 1));
+				performBatchedUpdates((): void => {
+					set_balanceTVLs(partnerBalanceTVL);
+					set_wrapperTotals(wrapperData);
+					set_aggregationStep((prevStep): number => (prevStep + 1));
+				});
 			});
 
 			
@@ -290,8 +295,10 @@ function	DashboardTabsWrapper({partnerID}: {partnerID: string}): ReactElement {
 					}
 				});
 
-				set_payoutTotals(partnerPayoutTotals);
-				set_aggregationStep((prevStep): number => (prevStep + 1));
+				performBatchedUpdates((): void => {
+					set_payoutTotals(partnerPayoutTotals);
+					set_aggregationStep((prevStep): number => (prevStep + 1));
+				});
 			});
 
 	}, [partnerID, set_aggregationStep, windowValue]);
