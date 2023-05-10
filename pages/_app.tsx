@@ -1,17 +1,18 @@
-import React, {useMemo, useState} from 'react';
+import React, {useEffect, useMemo, useState} from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
 import {useRouter} from 'next/router';
 import {DefaultSeo} from 'next-seo';
 import {AuthContextApp, useAuth} from 'contexts/useAuth';
 import {YearnContextApp} from 'contexts/useYearn';
-import {PARTNERS} from 'utils/b2b/Partners';
+import {PARTNERS, SHAREABLE_ADDRESSES} from 'utils/b2b/Partners';
 import {Button} from '@yearn-finance/web-lib/components/Button';
 import {Card} from '@yearn-finance/web-lib/components/Card';
 import {Modal} from '@yearn-finance/web-lib/components/Modal';
 import {yToast} from '@yearn-finance/web-lib/components/yToast';
 import {WithYearn} from '@yearn-finance/web-lib/contexts/WithYearn';
 import {toAddress} from '@yearn-finance/web-lib/utils/address';
+import performBatchedUpdates from '@yearn-finance/web-lib/utils/performBatchedUpdates';
 
 import type {AppProps} from 'next/app';
 import type {ReactElement} from 'react';
@@ -98,6 +99,19 @@ function	AppHeader(): ReactElement {
 	const	[authOption, set_authOption] = useState('Log in');
 	const	[address, set_address] = useState('');
 
+	const slug = (router.query.partnerID as string) || '';
+
+	useEffect((): void => {
+		if(SHAREABLE_ADDRESSES?.[slug]){
+			performBatchedUpdates((): void => {
+				set_address(slug);
+				set_isLoggedIn(true);
+				set_authOption('Log out');
+			});
+		}
+
+	}, [set_isLoggedIn, slug]);
+
 	return (
 		<header>
 			<div className={'flex w-full flex-row items-center justify-between py-6'}>
@@ -141,9 +155,12 @@ function	AppHeader(): ReactElement {
 						className={'!h-[30px]'}
 						onClick={(): void => {
 							if(isLoggedIn && address){
-								set_address('');
-								set_isLoggedIn(false);
-								set_authOption('Log in');
+								performBatchedUpdates((): void => {
+									set_address('');
+									set_isLoggedIn(false);
+									set_authOption('Log in');
+								});
+
 								router.push('/');
 							} else {
 								set_hasModal(!hasModal);
@@ -178,13 +195,18 @@ function	AppHeader(): ReactElement {
 											isMatched = true;
 											const idx = partner.treasury?.indexOf(address);
 											
-											set_isLoading(true);
-											set_address(partner.treasury[idx]);
-											set_isLoggedIn(true);
-											set_authOption('Log out');
-											router.push(`dashboard/${partner.shortName}`).then((): void => {
-												set_hasModal(false);
-												setTimeout((): void => set_isLoading(false), 1000);
+											performBatchedUpdates((): void => {
+												set_isLoading(true);
+												set_address((partner.treasury?.[idx] as string) || '');
+												set_isLoggedIn(true);
+												set_authOption('Log out');
+											});											
+
+											router.push(`dashboard/${partner.treasury[0]}`).then((): void => {
+												performBatchedUpdates((): void => {
+													set_hasModal(false);
+													setTimeout((): void => set_isLoading(false), 1000);
+												});			
 											});
 										}
 									});

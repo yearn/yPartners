@@ -12,6 +12,7 @@ import IconCopy from '@yearn-finance/web-lib/icons/IconCopy';
 import IconLinkOut from '@yearn-finance/web-lib/icons/IconLinkOut';
 import {toAddress} from '@yearn-finance/web-lib/utils/address';
 import {copyToClipboard} from '@yearn-finance/web-lib/utils/helpers';
+import performBatchedUpdates from '@yearn-finance/web-lib/utils/performBatchedUpdates';
 
 import {usePartner} from '../../contexts/usePartner';
 import VaultChart from '../graphs/VaultChart';
@@ -122,8 +123,7 @@ function	Tabs({selectedIndex, set_selectedIndex}: TProps): ReactElement {
 	);
 }
 
-function	DashboardTabsWrapper(props: {partnerID: string}): ReactElement {
-	const {partnerID} = props;
+function	DashboardTabsWrapper({partnerID}: {partnerID: string}): ReactElement {
 	const {vaults} = usePartner();
 	const [selectedIndex, set_selectedIndex] = useState(-1);
 	const [activeWindow, set_activeWindow] = useState('1 month');
@@ -131,6 +131,7 @@ function	DashboardTabsWrapper(props: {partnerID: string}): ReactElement {
 	const [balanceTVLs, set_balanceTVLs] = useState<TDict<TChartBar[]>>();
 	const [wrapperTotals, set_wrapperTotals] = useState<TChartBar[]>();
 	const [payoutTotals, set_payoutTotals] = useState<TDict<TChartBar[]>>();
+	const [aggregationStep, set_aggregationStep] = useState(0);
 
 	const selectedVault = Object.values(vaults)[selectedIndex];
 
@@ -140,8 +141,10 @@ function	DashboardTabsWrapper(props: {partnerID: string}): ReactElement {
 
 	function handleWindowChange(e: MouseEvent<HTMLButtonElement>): void {
 		const {name, value} = e.currentTarget;
-		set_activeWindow(name);
-		set_windowValue(+value);
+		performBatchedUpdates((): void => {
+			set_activeWindow(name);
+			set_windowValue(+value);
+		});
 	}
 
 
@@ -239,8 +242,11 @@ function	DashboardTabsWrapper(props: {partnerID: string}): ReactElement {
 					return {...item, data: {...item.data, profitShare: partnerTier}};
 				});
 
-				set_balanceTVLs(partnerBalanceTVL);
-				set_wrapperTotals(wrapperData);
+				performBatchedUpdates((): void => {
+					set_balanceTVLs(partnerBalanceTVL);
+					set_wrapperTotals(wrapperData);
+					set_aggregationStep((prevStep): number => (prevStep + 1));
+				});
 			});
 
 			
@@ -289,10 +295,20 @@ function	DashboardTabsWrapper(props: {partnerID: string}): ReactElement {
 					}
 				});
 
-				set_payoutTotals(partnerPayoutTotals);
+				performBatchedUpdates((): void => {
+					set_payoutTotals(partnerPayoutTotals);
+					set_aggregationStep((prevStep): number => (prevStep + 1));
+				});
 			});
 
-	}, [partnerID, windowValue]);
+	}, [partnerID, set_aggregationStep, windowValue]);
+
+
+	if (aggregationStep === 2 && Object.values(balanceTVLs || []).length === 0) {
+		return (
+			<h1>{'No Vaults Found'}</h1>
+		);
+	}
 
 	return (
 		<div aria-label={'Vault Details'} className={'col-span-12 mb-4 flex flex-col bg-neutral-100'}>
@@ -341,7 +357,7 @@ function	DashboardTabsWrapper(props: {partnerID: string}): ReactElement {
 				vault={selectedVault}
 				selectedIndex={selectedIndex}/>
 
-			{ !balanceTVLs || !wrapperTotals || !payoutTotals ? 
+			{aggregationStep < 2 || !balanceTVLs || !wrapperTotals || !payoutTotals ? 
 				<h1>{'Generating visuals...'}</h1> : (
 					<>			
 						{Object.values(vaults || []).map((_, idx): ReactElement | null => {
