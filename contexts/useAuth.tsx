@@ -1,4 +1,4 @@
-import React, {createContext, memo, useContext, useState} from 'react';
+import {createContext, memo, useContext, useState} from 'react';
 
 import type {ReactElement} from 'react';
 

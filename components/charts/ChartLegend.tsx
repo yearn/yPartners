@@ -1,5 +1,3 @@
-import React from 'react';
-
 import type {ReactElement} from 'react';
 import type {TLegendItem} from 'types/chart';
 

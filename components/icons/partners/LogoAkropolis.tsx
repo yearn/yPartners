@@ -1,4 +1,3 @@
-
 import 	Image	from	'next/image';
 
 import type {ReactElement, SVGProps} from 'react';

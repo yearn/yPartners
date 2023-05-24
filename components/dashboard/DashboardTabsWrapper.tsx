@@ -1,4 +1,4 @@
-import React, {Fragment, useMemo, useState} from 'react';
+import {Fragment, useMemo, useState} from 'react';
 import OverviewChart from 'components/graphs/OverviewChart';
 import IconChevronDown from 'components/icons/IconChevronDown';
 import dayjs, {extend, unix} from 'dayjs';

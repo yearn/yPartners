@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import {useState} from 'react';
 import CustomTooltip from 'components/charts/CustomTooltip';
 import {Bar, Cell, ComposedChart, ResponsiveContainer, Tooltip, XAxis, YAxis} from 'recharts';
 import {formatYAxis} from 'utils/b2b/Chart';

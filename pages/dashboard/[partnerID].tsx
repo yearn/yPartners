@@ -1,5 +1,4 @@
-
-import React, {useEffect, useMemo, useState} from 'react';
+import {useEffect, useMemo, useState} from 'react';
 import {DashboardTabsWrapper} from 'components/dashboard/DashboardTabsWrapper';
 import {PartnerContextApp, usePartner} from 'contexts/usePartner';
 import useWindowDimensions from 'hooks/useWindowDimensions';

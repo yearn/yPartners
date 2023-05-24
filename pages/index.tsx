@@ -1,4 +1,3 @@
-import React from 'react';
 import Link from 'next/link';
 import B2BMeme from 'components/B2BMeme';
 import SectionPartner from 'components/SectionPartners';
