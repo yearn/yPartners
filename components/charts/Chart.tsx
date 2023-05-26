@@ -1,5 +1,3 @@
-import React from 'react';
-
 import Bar from './Bar';
 import ChartLegend from './ChartLegend';
 import Composed from './Composed';

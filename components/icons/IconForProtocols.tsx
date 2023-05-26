@@ -1,5 +1,3 @@
-import	React		from	'react';
-
 import type {ReactElement, SVGProps} from 'react';
 
 function	IconForProtocols(props: SVGProps<SVGSVGElement>): ReactElement {

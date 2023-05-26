@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import {useEffect, useState} from 'react';
 import IconForDevelopers from 'components/icons/IconForDevelopers';
 import IconForInstitutions from 'components/icons/IconForInstitutions';
 import IconForProtocols from 'components/icons/IconForProtocols';

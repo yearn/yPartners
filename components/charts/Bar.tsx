@@ -1,4 +1,3 @@
-import React from 'react';
 import {Bar, BarChart, ResponsiveContainer, Tooltip, XAxis, YAxis} from 'recharts';
 import {formatYAxis} from 'utils/b2b/Chart';
 

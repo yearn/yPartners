@@ -1,4 +1,4 @@
-import	React, {createContext, useContext, useMemo}	from 'react';
+import {createContext, useContext, useMemo}	from 'react';
 import {useYearn} from 'contexts/useYearn';
 import {NETWORK_CHAINID} from 'utils/b2b';
 import {SHAREABLE_ADDRESSES} from 'utils/b2b/Partners';

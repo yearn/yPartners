@@ -1,4 +1,3 @@
-import React from 'react';
 import {formatAmount} from '@yearn-finance/web-lib/utils/format.number';
 
 import type {ReactElement} from 'react';

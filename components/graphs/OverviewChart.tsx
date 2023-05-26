@@ -1,4 +1,4 @@
-import	React, {useMemo, useState}	from	'react';
+import {useMemo, useState}	from	'react';
 import Chart from 'components/charts/Chart';
 import {NETWORK_LABELS} from 'utils/b2b';
 import {formatAmount} from '@yearn-finance/web-lib/utils/format.number';
