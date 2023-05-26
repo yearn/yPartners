@@ -32,7 +32,7 @@ const	PARTNERS: TDict<TPartner> = {
 	'qidao' : {
 		name: 'QiDAO',
 		shortName: 'qidao',
-		treasury: [toAddress('0x679016b3f8e98673f85c6f72567f22b58aa15a54')],
+		treasury: [toAddress('0x679016B3F8E98673f85c6F72567f22b58Aa15A54')],
 		logo: <LogoQiDAO className={'text-900'} />
 	},
 	'element':  {
@@ -176,7 +176,7 @@ const	PARTNERS: TDict<TPartner> = {
 };
 
 const SHAREABLE_ADDRESSES: {[key: string]: {name: string, shortName: string}} = {
-	'0x679016b3f8e98673f85c6f72567f22b58aa15a54': {name: 'QiDAO', shortName: 'qidao'},
+	'0x679016B3F8E98673f85c6F72567f22b58Aa15A54': {name: 'QiDAO', shortName: 'qidao'},
 	'0x82eF450FB7f06E3294F2f19ed1713b255Af0f541': {name: 'Element Finance', shortName: 'element'},
 	'0xF6Bc2E3b1F939C435D9769D078a6e5048AaBD463': {name: 'SpoolFi', shortName: 'spoolfi'},
 	'0xDF2C270f610Dc35d8fFDA5B453E74db5471E126B': {name: 'Abracadabra.Money', shortName: 'abracadabra'},
