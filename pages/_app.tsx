@@ -5,7 +5,7 @@ import {useRouter} from 'next/router';
 import {DefaultSeo} from 'next-seo';
 import {AuthContextApp, useAuth} from 'contexts/useAuth';
 import {YearnContextApp} from 'contexts/useYearn';
-import {PARTNERS, SHAREABLE_ADDRESSES} from 'utils/b2b/Partners';
+import {PARTNERS, SHAREABLE_ADDRESSES} from 'utils/Partners';
 import {Button} from '@yearn-finance/web-lib/components/Button';
 import {Card} from '@yearn-finance/web-lib/components/Card';
 import {Modal} from '@yearn-finance/web-lib/components/Modal';
