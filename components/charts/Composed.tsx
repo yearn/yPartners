@@ -1,7 +1,7 @@
 import {useState} from 'react';
 import CustomTooltip from 'components/charts/CustomTooltip';
 import {Bar, Cell, ComposedChart, ResponsiveContainer, Tooltip, XAxis, YAxis} from 'recharts';
-import {formatYAxis} from 'utils/b2b/Chart';
+import {formatYAxis} from 'utils/Chart';
 
 import type {ReactElement} from 'react';
 import type {TChartProps} from 'types/chart';
