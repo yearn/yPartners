@@ -1,7 +1,7 @@
 import {createContext, useContext, useMemo}	from 'react';
 import {useYearn} from 'contexts/useYearn';
-import {NETWORK_CHAINID} from 'utils/b2b';
-import {SHAREABLE_ADDRESSES} from 'utils/b2b/Partners';
+import {NETWORK_CHAINID} from 'utils';
+import {SHAREABLE_ADDRESSES} from 'utils/Partners';
 import useSWR from 'swr';
 import {toAddress} from '@yearn-finance/web-lib/utils/address';
 import {baseFetcher} from '@yearn-finance/web-lib/utils/fetchers';
