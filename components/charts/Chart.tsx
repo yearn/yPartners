@@ -17,8 +17,8 @@ function Chart(props: TChartProps): ReactElement {
 
 	return (
 		<div className={props.className}>
-			<h2 className={'mt-10 mb-7 text-lg font-semibold'}>{props.title}</h2>
-			<div className={'mt-2 mb-4 flex h-[350px] items-center justify-start'}>
+			<h2 className={'mb-7 mt-10 text-lg font-semibold'}>{props.title}</h2>
+			<div className={'mb-4 mt-2 flex h-[350px] items-center justify-start'}>
 
 				{type === 'bar' && (data.length > 0 ?
 					<Bar {...props} /> :
