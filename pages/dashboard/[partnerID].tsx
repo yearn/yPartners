@@ -66,7 +66,7 @@ function Index({partnerID}: {partnerID: string}): ReactElement {
 
 	return (
 		<main className={'mb-20 pb-20'}>
-			<section aria-label={'hero'} className={'mt-3 mb-8 grid grid-cols-8 md:mb-14 md:mt-[75px] md:grid-cols-12'}>
+			<section aria-label={'hero'} className={'mb-8 mt-3 grid grid-cols-8 md:mb-14 md:mt-[75px] md:grid-cols-12'}>
 
 				<div className={'col-span-3 md:hidden'}>
 					{ width < 768 && LOGOS[currentPartnerName]}
