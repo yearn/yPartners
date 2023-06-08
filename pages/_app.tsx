@@ -11,11 +11,12 @@ import {Card} from '@yearn-finance/web-lib/components/Card';
 import {Modal} from '@yearn-finance/web-lib/components/Modal';
 import {yToast} from '@yearn-finance/web-lib/components/yToast';
 import {WithYearn} from '@yearn-finance/web-lib/contexts/WithYearn';
-import {toAddress} from '@yearn-finance/web-lib/utils/address';
+import {isZeroAddress, toAddress} from '@yearn-finance/web-lib/utils/address';
 import performBatchedUpdates from '@yearn-finance/web-lib/utils/performBatchedUpdates';
 
 import type {AppProps} from 'next/app';
 import type {ReactElement} from 'react';
+import type {TAddress} from '@yearn-finance/web-lib/utils/address';
 
 import '../style.css';
 
@@ -97,19 +98,18 @@ function	AppHeader(): ReactElement {
 	const {toast} = yToast();
 	const	{hasModal, isLoggedIn, isLoading, set_hasModal, set_isLoggedIn, set_isLoading} = useAuth();
 	const	[authOption, set_authOption] = useState('Log in');
-	const	[address, set_address] = useState('');
+	const	[address, set_address] = useState<TAddress | undefined>(undefined);
 
-	const slug = (router.query.partnerID as string) || '';
+	const slug = (router.query.partnerID as TAddress) || undefined;
 
 	useEffect((): void => {
-		if(SHAREABLE_ADDRESSES?.[slug]){
+		if(!isZeroAddress(toAddress(slug)) && SHAREABLE_ADDRESSES?.[slug]){
 			performBatchedUpdates((): void => {
 				set_address(slug);
 				set_isLoggedIn(true);
 				set_authOption('Log out');
 			});
 		}
-
 	}, [set_isLoggedIn, slug]);
 
 	return (
@@ -156,7 +156,7 @@ function	AppHeader(): ReactElement {
 						onClick={(): void => {
 							if(isLoggedIn && address){
 								performBatchedUpdates((): void => {
-									set_address('');
+									set_address(undefined);
 									set_isLoggedIn(false);
 									set_authOption('Log in');
 								});
@@ -197,7 +197,7 @@ function	AppHeader(): ReactElement {
 											
 											performBatchedUpdates((): void => {
 												set_isLoading(true);
-												set_address((partner.treasury?.[idx] as string) || '');
+												set_address(partner.treasury?.[idx] as TAddress || undefined);
 												set_isLoggedIn(true);
 												set_authOption('Log out');
 											});											
