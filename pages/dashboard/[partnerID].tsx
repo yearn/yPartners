@@ -1,11 +1,8 @@
-
-import React, {useEffect, useMemo, useState} from 'react';
-import router from 'next/router';
+import {useEffect, useMemo, useState} from 'react';
 import {DashboardTabsWrapper} from 'components/dashboard/DashboardTabsWrapper';
-import {useAuth} from 'contexts/useAuth';
 import {PartnerContextApp, usePartner} from 'contexts/usePartner';
 import useWindowDimensions from 'hooks/useWindowDimensions';
-import {LOGOS, PARTNERS} from 'utils/b2b/Partners';
+import {LOGOS, SHAREABLE_ADDRESSES} from 'utils/Partners';
 import {Button} from '@yearn-finance/web-lib/components/Button';
 
 import type {GetStaticPathsResult, GetStaticPropsResult} from 'next';
@@ -23,27 +20,21 @@ function Index({partnerID}: {partnerID: string}): ReactElement {
 	const today = formatDate(currentDate);
 	const firstDayLastMonth = formatDate(new Date(new Date().setFullYear(currentYear, lastMonth, 1)));
 
-	const {isLoggedIn} = useAuth();
-	const {isLoadingVaults, vaults} = usePartner();
+	const {isLoadingVaults} = usePartner();
 	const [lastSync, set_lastSync] = useState('');
 	const [reportStart, set_reportStart] = useState(firstDayLastMonth);
 	const [reportEnd, set_reportEnd] = useState(today);
 
-	const currentPartner = PARTNERS[partnerID];
+	const currentPartner = SHAREABLE_ADDRESSES[partnerID];
 	const currentPartnerName = currentPartner ? currentPartner.name : '';
-
-	useEffect((): void => {
-		if(!isLoggedIn){
-			router.push('/');
-		}
-	}, [isLoggedIn]);
+	const currentPartnerShortname = currentPartner ? currentPartner.shortName : '';
 
 	useEffect((): void => {
 		const latestSync = new Date().toLocaleString('default',
 			{month: 'long', day: '2-digit', year: 'numeric', hour: 'numeric', minute:'numeric'});
 
 		set_lastSync(latestSync);
-	}, []);
+	}, [set_lastSync]);
 
 
 	function downloadReport(e: FormEvent<HTMLFormElement>): void {
@@ -68,20 +59,14 @@ function Index({partnerID}: {partnerID: string}): ReactElement {
 			);
 		}
 
-		if (currentPartner && !isLoadingVaults && Object.values(vaults || []).length === 0) {
-			return (
-				<h1>{'No Vaults Found'}</h1>
-			);
-		}
-
 		return (
-			<DashboardTabsWrapper partnerID={partnerID} />
+			<DashboardTabsWrapper partnerID={currentPartnerShortname} />
 		);
-	}, [currentPartner, vaults, isLoadingVaults, partnerID]);
+	}, [currentPartner, isLoadingVaults, currentPartnerShortname]);
 
 	return (
 		<main className={'mb-20 pb-20'}>
-			<section aria-label={'hero'} className={'mt-3 mb-8 grid grid-cols-8 md:mb-14 md:mt-[75px] md:grid-cols-12'}>
+			<section aria-label={'hero'} className={'mb-8 mt-3 grid grid-cols-8 md:mb-14 md:mt-[75px] md:grid-cols-12'}>
 
 				<div className={'col-span-3 md:hidden'}>
 					{ width < 768 && LOGOS[currentPartnerName]}
@@ -157,9 +142,10 @@ function	PartnerDashboardWrapper({partnerID}: {partnerID: string}): ReactElement
 
 
 export async function getStaticPaths(): Promise<GetStaticPathsResult> {
-	const	partners = Object.values(PARTNERS);
+	const	addrs = Object.keys(SHAREABLE_ADDRESSES);
+	const addressPaths = addrs.map((addr): {params: {partnerID: string}} => ({params: {partnerID: addr}}));
 	return {
-		paths: partners.map((partner): {params: {partnerID: string}} => ({params: {partnerID: partner.shortName}})),
+		paths: addressPaths,
 		fallback: false
 	};
 }

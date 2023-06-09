@@ -1,4 +1,3 @@
-import React from 'react';
 import Link from 'next/link';
 import B2BMeme from 'components/B2BMeme';
 import SectionPartner from 'components/SectionPartners';
@@ -11,7 +10,7 @@ import type {ReactElement} from 'react';
 function	Index(): ReactElement {
 	return (
 		<main>
-			<section aria-label={'hero'} className={'mt-[85px] mb-28 grid grid-cols-12 items-center'}>
+			<section aria-label={'hero'} className={'mb-28 mt-[85px] grid grid-cols-12 items-center'}>
 				<div className={'col-span-12 md:col-span-8'}>
 					<h1 className={'mb-6 text-6xl text-neutral-900 md:text-8xl'}>{'Yearn Partners'}</h1>
 					<p className={'text-lg'}>{'Integrate Yearn vaults to earn up to 50% profit share'}</p>

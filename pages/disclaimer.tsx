@@ -1,4 +1,3 @@
-import React from 'react';
 import Link from 'next/link';
 import {Card} from '@yearn-finance/web-lib/components/Card';
 import Cross from '@yearn-finance/web-lib/icons/IconCross';

@@ -1,5 +1,5 @@
-import React, {useMemo, useState} from 'react';
-import {PARTNERS} from 'utils/b2b/Partners';
+import {useMemo, useState} from 'react';
+import {PARTNERS} from 'utils/Partners';
 import useSWR from 'swr';
 import {motion} from 'framer-motion';
 import {useSettings} from '@yearn-finance/web-lib/contexts/useSettings';

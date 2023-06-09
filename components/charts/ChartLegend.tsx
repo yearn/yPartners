@@ -1,5 +1,3 @@
-import React from 'react';
-
 import type {ReactElement} from 'react';
 import type {TLegendItem} from 'types/chart';
 
@@ -8,7 +6,7 @@ function MultiItem(props: {details: string[], color: string, isThin?: boolean}):
 	const itemWidth = props.isThin ? '0.5rem' : '1rem';
 
 	return (
-		<div className={'mb-8 -ml-8 flex flex-row'}>
+		<div className={'-ml-8 mb-8 flex flex-row'}>
 			<div className={'h-5'} style={{width: itemWidth, backgroundColor: props.color}} />
 
 			<div>

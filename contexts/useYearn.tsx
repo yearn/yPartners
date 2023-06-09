@@ -1,4 +1,4 @@
-import React, {createContext, memo, useContext, useMemo} from 'react';
+import {createContext, memo, useContext, useMemo} from 'react';
 import useSWR from 'swr';
 import {useSettings} from '@yearn-finance/web-lib/contexts/useSettings';
 import {toAddress} from '@yearn-finance/web-lib/utils/address';
