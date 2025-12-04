@@ -1,87 +1,146 @@
-/* This will load Tailwindcss + all the overwrite from Yearn lib */
-@import '@yearn-finance/web-lib/style.next.css';
-@import	'./public/fonts/fonts.css';
+@import '@rainbow-me/rainbowkit/styles.css';
+@import './public/fonts/fonts.css';
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-* {@apply font-aeonik;}
-body {@apply text-neutral-900;}
-.max-w-5xl {@apply max-w-[1120px];}
-
-:root,
-:root body[data-theme="light"] {
+:root {
 	--default-rounded: 0rem;
 
-	/* 🔵 - Yearn Finance ******************************************************
-	**	These are the colors you will use the most and will make up the majority
-	**	of your UI. Use them for most of your text, backgrounds, and borders,
-	**	as well as for things like secondary buttons and links.
-	**************************************************************************/
-	--color-neutral-0: 0 0% 100%;
-	--color-neutral-100: 0 0% 96%;
-	--color-neutral-200: 0 0% 92%;
-	--color-neutral-300: 0 0% 88%;
-	--color-neutral-400: 0 0% 62%;
-	--color-neutral-500: 0 0% 50%;
-	--color-neutral-600: 0 0% 36%;
-	--color-neutral-700: 0 0% 26%;
-	--color-neutral-800: 0 0% 16%;
-	--color-neutral-900: 0 0% 5%;
+	--color-black: hsl(0 0% 0%);
+	--color-white: hsl(0 0% 100%);
+	--color-fallback: hsl(0 0% 80%);
 
-	/* 🔵 - Yearn Finance ******************************************************
-	**	These are the splashes of color that should appear the most in your UI,
-	**	and are the ones that determine the overall "look" of the site. Use
-	**	these for things like primary actions, links, navigation items, icons,
-	**	accent borders, or text you want to emphasize.
-	**************************************************************************/
-	--color-primary-100: 220 100% 94%;
-	--color-primary-200: 220 81% 88%;
-	--color-primary-500: 220 95% 50%;
-	--color-primary-600: 220 100% 44%;
-	--color-accent-500: 220 95% 50%;
-	--color-accent-600: 220 100% 44%;
+	--color-neutral-0: hsl(0 0% 100%);
+	--color-neutral-100: hsl(0 0% 96%);
+	--color-neutral-200: hsl(0 0% 92%);
+	--color-neutral-300: hsl(0 0% 88%);
+	--color-neutral-400: hsl(0 0% 62%);
+	--color-neutral-500: hsl(0 0% 50%);
+	--color-neutral-600: hsl(0 0% 36%);
+	--color-neutral-700: hsl(0 0% 26%);
+	--color-neutral-800: hsl(0 0% 16%);
+	--color-neutral-900: hsl(0 0% 5%);
 
-	/* 🔵 - Yearn Finance ******************************************************
-	**	These colors should be used fairly conservatively throughout your UI to
-	**	avoid overpowering your primary colors. Use them when you need an
-	**	element to stand out, or to reinforce things like error states or
-	**	positive trends with the appropriate semantic color.
-	**************************************************************************/
-	--color-yellow-900: 32 100% 45%;
-	--color-yellow-300: 32 100% 95%;
-	--color-yellow-200: 32 100% 90%;
-	--color-pink-900: 328 100% 45%;
-	--color-pink-300: 328 100% 95%;
-	--color-pink-200: 328 100% 90%;
-	--color-red-900: 0 100% 45%;
-	--color-red-300: 0 100% 95%;
-	--color-red-200: 0 100% 90%;
+	--color-primary-100: hsl(220 100% 94%);
+	--color-primary-200: hsl(220 81% 88%);
+	--color-primary-500: hsl(220 95% 50%);
+	--color-primary-600: hsl(220 100% 44%);
+	--color-accent-500: hsl(220 95% 50%);
+	--color-accent-600: hsl(220 100% 44%);
 
-	font-family: 'Aeonik', sans-serif;
+	--color-red-900: hsl(0 100% 45%);
+	--color-red-300: hsl(0 100% 95%);
+	--color-red-200: hsl(0 100% 90%);
+	--color-pink-900: hsl(332 100% 45%);
+	--color-pink-300: hsl(332 95% 95%);
+	--color-pink-200: hsl(332 90% 90%);
+
+	font-family: Aeonik, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
 }
 
-:root,
-:root body[data-theme="light"] {
-	& .yearn--button {
-		@apply px-5 h-10;
+body {
+	color: var(--color-neutral-900);
+	font-family: Aeonik, 'Aeonik Fallback', 'Source Code Pro', sans-serif;
+	background-color: var(--color-neutral-0);
+}
 
-		&[data-variant="filled"] {
-			@apply text-neutral-0 bg-accent-500 font-normal;
-			&:disabled {@apply bg-neutral-200 text-neutral-400;}
-			&:not(:disabled):not([aria-busy="true"]):hover {@apply bg-accent-600;}
-		}
+#__next {
+	min-height: 100vh;
+}
+
+#main {
+	@apply flex min-h-screen w-full flex-col bg-neutral-0;
+}
+
+@layer components {
+	.yearn--button {
+		@apply inline-flex h-10 items-center justify-center px-5 text-sm font-medium transition disabled:cursor-not-allowed;
 	}
 
-	& .project--nav {
-		@apply text-neutral-500 transition-colors cursor-pointer border-b-2 border-transparent;
-		&:hover {@apply text-neutral-900}
-
-		&[aria-selected="true"] {
-			@apply text-neutral-900 border-neutral-900;
-		}
+	.yearn--button[data-variant='filled'] {
+		@apply bg-accent-500 text-neutral-0;
 	}
 
-	& .yearn--modal {
-		@media (min-width: 640px){
-			@apply min-w-[40rem];
-		}
+	.yearn--button[data-variant='filled']:disabled {
+		@apply bg-neutral-200 text-neutral-400;
 	}
-} 
+
+	.yearn--button[data-variant='filled']:not(:disabled):not([aria-busy='true']):hover {
+		@apply bg-accent-600;
+	}
+
+	.yearn--button[data-variant='outlined'] {
+		@apply border border-neutral-900 text-neutral-900;
+	}
+
+	.yearn--button[data-variant='outlined']:not(:disabled):hover {
+		@apply bg-neutral-900 text-neutral-0;
+	}
+
+	.yearn--card {
+		@apply border border-neutral-200 bg-neutral-0 p-6 shadow-sm;
+	}
+
+	.yearn--modal {
+		@apply fixed inset-0 flex items-center justify-center bg-black/40;
+	}
+
+	.project--nav {
+		@apply cursor-pointer border-b-2 border-transparent text-neutral-500 transition-colors;
+	}
+
+	.project--nav:hover {
+		@apply text-neutral-900;
+	}
+
+	.project--nav[aria-selected='true'] {
+		@apply border-neutral-900 text-neutral-900;
+	}
+
+	.tab {
+		@apply border-b-2 border-transparent pb-1 text-sm font-medium uppercase tracking-wide text-neutral-500 transition-colors;
+	}
+
+	.tab[aria-selected='true'] {
+		@apply border-neutral-900 text-neutral-900;
+	}
+
+	.yearn--listbox-menu {
+		@apply absolute z-10 mt-2 max-h-80 w-full overflow-auto border border-neutral-200 bg-neutral-0 py-1 shadow-lg focus:outline-none;
+	}
+
+	.yearn--listbox-menu-item {
+		@apply cursor-pointer px-4 py-2 text-sm text-neutral-700 transition-colors hover:bg-neutral-100;
+	}
+
+	.link {
+		@apply text-accent-600 underline underline-offset-4 transition-colors hover:text-accent-500;
+	}
+}
+
+.font-number {
+	font-family:
+		'Aeonik Mono',
+		ui-monospace,
+		SFMono-Regular,
+		Menlo,
+		Monaco,
+		Consolas,
+		'Liberation Mono',
+		'Courier New',
+		monospace;
+}
+
+.scrollbar-none {
+	-ms-overflow-style: none;
+	scrollbar-width: none;
+}
+
+.scrollbar-none::-webkit-scrollbar {
+	display: none;
+}
+
+.max-w-5xl {
+	@apply max-w-[1120px];
+}

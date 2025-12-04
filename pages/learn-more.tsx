@@ -1,4 +1,4 @@
-import IconLinkOut from '@yearn-finance/web-lib/icons/IconLinkOut';
+import IconLinkOut from 'lib/yearn/icons/IconLinkOut';
 
 import type {ReactElement} from 'react';
 

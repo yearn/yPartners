@@ -1,8 +1,8 @@
-import {formatAmount} from '@yearn-finance/web-lib/utils/format.number';
+import {formatAmount} from 'lib/yearn/utils/format.number';
 
 import type {ReactElement} from 'react';
 import type {TPartnerVault} from 'types/types';
-import type {TDict} from '@yearn-finance/web-lib/utils/types';
+import type {TDict} from 'lib/yearn/utils/types';
 
 type TProps = {
 	vaults: TDict<TPartnerVault>,

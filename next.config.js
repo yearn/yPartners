@@ -25,26 +25,26 @@ module.exports = ({
 		** 			   price? (require blockchain call)
 		** USE_NETWORKS: indicate if the app should be able to change networks
 		**********************************************************************/
-		USE_WALLET: true,
-		USE_PRICES: false,
-		USE_PRICE_TRI_CRYPTO: false,
-		USE_NETWORKS: false,
-		CG_IDS: [],
-		TOKENS: [],
+		USE_WALLET: 'true',
+		USE_PRICES: 'false',
+		USE_PRICE_TRI_CRYPTO: 'false',
+		USE_NETWORKS: 'false',
+		CG_IDS: '[]',
+		TOKENS: '[]',
 
 		/* 🔵 - Yearn Finance **************************************************
 		** Config over the RPC
 		**********************************************************************/
-		WEB_SOCKET_URL: {
+		WEB_SOCKET_URL: JSON.stringify({
 			1: process.env.WS_URL_MAINNET,
 			250: process.env.WS_URL_FANTOM,
 			42161: process.env.WS_URL_ARBITRUM
-		},
-		JSON_RPC_URL: {
+		}),
+		JSON_RPC_URL: JSON.stringify({
 			1: process.env.RPC_URL_MAINNET,
 			250: process.env.RPC_URL_FANTOM,
 			42161: process.env.RPC_URL_ARBITRUM
-		},
+		}),
 		ALCHEMY_KEY: process.env.ALCHEMY_KEY,
 		INFURA_KEY: process.env.INFURA_KEY,
 		NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET,

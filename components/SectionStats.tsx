@@ -1,6 +1,6 @@
 import useSWR from 'swr';
-import {baseFetcher} from '@yearn-finance/web-lib/utils/fetchers';
-import {formatAmount} from '@yearn-finance/web-lib/utils/format.number';
+import {baseFetcher} from 'lib/yearn/utils/fetchers';
+import {formatAmount} from 'lib/yearn/utils/format.number';
 
 import type {ReactElement} from 'react';
 import type {SWRResponse} from 'swr';

@@ -3,13 +3,13 @@ import {useYearn} from 'contexts/useYearn';
 import {NETWORK_CHAINID} from 'utils';
 import {SHAREABLE_ADDRESSES} from 'utils/Partners';
 import useSWR from 'swr';
-import {toAddress} from '@yearn-finance/web-lib/utils/address';
-import {baseFetcher} from '@yearn-finance/web-lib/utils/fetchers';
+import {toAddress} from 'lib/yearn/utils/address';
+import {baseFetcher} from 'lib/yearn/utils/fetchers';
 
 import type {ReactElement} from 'react';
 import type {SWRResponse} from 'swr';
 import type {TPartnerVault, TPartnerVaultsByNetwork} from 'types/types';
-import type {TDict} from '@yearn-finance/web-lib/utils/types';
+import type {TDict} from 'lib/yearn/utils/types';
 
 type TPartnerContext = {
 	vaults: TDict<TPartnerVault>,

@@ -1,13 +1,13 @@
 import {createContext, memo, useContext, useMemo} from 'react';
 import useSWR from 'swr';
-import {useSettings} from '@yearn-finance/web-lib/contexts/useSettings';
-import {toAddress} from '@yearn-finance/web-lib/utils/address';
-import {baseFetcher} from '@yearn-finance/web-lib/utils/fetchers';
+import {useSettings} from 'lib/yearn/contexts/useSettings';
+import {toAddress} from 'lib/yearn/utils/address';
+import {baseFetcher} from 'lib/yearn/utils/fetchers';
 
 import type {ReactElement} from 'react';
 import type {SWRResponse} from 'swr';
 import type {TYearnVault} from 'types/types';
-import type {TDict, VoidPromiseFunction} from '@yearn-finance/web-lib/utils/types';
+import type {TDict, VoidPromiseFunction} from 'lib/yearn/utils/types';
 
 export type	TYearnContext = {
 	vaults: TDict<TYearnVault>,

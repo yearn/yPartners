@@ -1,4 +1,4 @@
-import {formatAmount} from '@yearn-finance/web-lib/utils/format.number';
+import {formatAmount} from 'lib/yearn/utils/format.number';
 
 export function formatXAxis(value: number): string {
 	return `${value+1}`;

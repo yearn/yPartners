@@ -7,12 +7,12 @@ import {getExplorerURL, NETWORK_CHAINID, NETWORK_LABELS} from 'utils';
 import {PROFIT_SHARE_TEIRS} from 'utils/Partners';
 import axios from 'axios';
 import {Listbox, Transition} from '@headlessui/react';
-import {Button} from '@yearn-finance/web-lib/components/Button';
-import IconCopy from '@yearn-finance/web-lib/icons/IconCopy';
-import IconLinkOut from '@yearn-finance/web-lib/icons/IconLinkOut';
-import {toAddress} from '@yearn-finance/web-lib/utils/address';
-import {copyToClipboard} from '@yearn-finance/web-lib/utils/helpers';
-import performBatchedUpdates from '@yearn-finance/web-lib/utils/performBatchedUpdates';
+import {Button} from 'lib/yearn/components/Button';
+import IconCopy from 'lib/yearn/icons/IconCopy';
+import IconLinkOut from 'lib/yearn/icons/IconLinkOut';
+import {toAddress} from 'lib/yearn/utils/address';
+import {copyToClipboard} from 'lib/yearn/utils/helpers';
+import performBatchedUpdates from 'lib/yearn/utils/performBatchedUpdates';
 
 import {usePartner} from '../../contexts/usePartner';
 import VaultChart from '../graphs/VaultChart';
@@ -22,7 +22,7 @@ import type {AxiosResponse} from 'axios';
 import type {MouseEvent, ReactElement} from 'react';
 import type {TChartBar} from 'types/chart';
 import type {TPartnerVaultsByNetwork} from 'types/types';
-import type {TDict} from '@yearn-finance/web-lib/utils/types';
+import type {TDict} from 'lib/yearn/utils/types';
 
 extend(utc);
 
@@ -327,7 +327,9 @@ function	DashboardTabsWrapper({partnerID}: {partnerID: string}): ReactElement {
 						<IconLinkOut className={'h-5 w-5 cursor-alias text-neutral-600 transition-colors hover:text-neutral-900 md:h-6 md:w-6'} />
 					</a>
 					<button
-						onClick={(): void => copyToClipboard(selectedAddress)}
+						onClick={(): void => {
+							void copyToClipboard(selectedAddress);
+						}}
 						className={ selectedIndex === -1 ? 'hidden' : ''}>
 						<span className={'sr-only'}>{'Copy address'}</span>
 						<IconCopy className={'h-5 w-5 text-neutral-600 transition-colors hover:text-neutral-900 md:h-6 md:w-6'} />

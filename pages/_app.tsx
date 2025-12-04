@@ -6,17 +6,17 @@ import {DefaultSeo} from 'next-seo';
 import {AuthContextApp, useAuth} from 'contexts/useAuth';
 import {YearnContextApp} from 'contexts/useYearn';
 import {PARTNERS, SHAREABLE_ADDRESSES} from 'utils/Partners';
-import {Button} from '@yearn-finance/web-lib/components/Button';
-import {Card} from '@yearn-finance/web-lib/components/Card';
-import {Modal} from '@yearn-finance/web-lib/components/Modal';
-import {yToast} from '@yearn-finance/web-lib/components/yToast';
-import {WithYearn} from '@yearn-finance/web-lib/contexts/WithYearn';
-import {isZeroAddress, toAddress} from '@yearn-finance/web-lib/utils/address';
-import performBatchedUpdates from '@yearn-finance/web-lib/utils/performBatchedUpdates';
+import {Button} from 'lib/yearn/components/Button';
+import {Card} from 'lib/yearn/components/Card';
+import {Modal} from 'lib/yearn/components/Modal';
+import {yToast} from 'lib/yearn/components/yToast';
+import {WithYearn} from 'lib/yearn/contexts/WithYearn';
+import {isZeroAddress, toAddress} from 'lib/yearn/utils/address';
+import performBatchedUpdates from 'lib/yearn/utils/performBatchedUpdates';
 
 import type {AppProps} from 'next/app';
 import type {ReactElement} from 'react';
-import type {TAddress} from '@yearn-finance/web-lib/utils/address';
+import type {TAddress} from 'lib/yearn/utils/address';
 
 import '../style.css';
 
@@ -253,16 +253,7 @@ function	MyApp(props: AppProps): ReactElement {
 	const	{Component, pageProps} = props;
 
 	return (
-		<WithYearn
-			options={{
-				ui: {
-					shouldUseThemes: false
-				},
-				web3: {
-					defaultChainID: 1,
-					supportedChainID: [1, 250, 42161, 1337, 31337]
-				}
-			}}>
+		<WithYearn>
 			<YearnContextApp>
 				<AuthContextApp>
 					<AppWrapper
