@@ -8,7 +8,7 @@ function	LearnMorePage(): ReactElement {
 		<div className={'mb-40 w-full bg-neutral-200 p-6'}>
 			<div className={'max-w-screen-md p-2'}>
 			
-				<h1 className={'pb-6 text-3xl'}>{'Learn More'}</h1>
+				<h1 className={'pb-6 text-3xl font-bold'}>{'Learn More'}</h1>
 				
 				<div className={'space-y-6 text-neutral-600'}>
 					<p>

@@ -12,7 +12,7 @@ function	Index(): ReactElement {
 		<main>
 			<section aria-label={'hero'} className={'mb-28 mt-[85px] grid grid-cols-12 items-center'}>
 				<div className={'col-span-12 md:col-span-8'}>
-					<h1 className={'mb-6 text-6xl text-neutral-900 md:text-8xl'}>{'Yearn Partners'}</h1>
+					<h1 className={'mb-6 text-6xl font-black text-neutral-900 md:text-8xl'}>{'Yearn Partners'}</h1>
 					<p className={'text-lg'}>{'Integrate Yearn vaults to earn 50% profit share'}</p>
 					<div className={'mt-4 flex flex-row space-x-4'}>
 						<Link href={'/team-up'}>
