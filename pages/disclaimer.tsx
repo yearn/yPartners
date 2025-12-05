@@ -1,6 +1,6 @@
 import Link from 'next/link';
-import {Card} from '@yearn-finance/web-lib/components/Card';
-import Cross from '@yearn-finance/web-lib/icons/IconCross';
+import {Card} from 'lib/yearn/components/Card';
+import Cross from 'lib/yearn/icons/IconCross';
 
 import type {ReactElement} from 'react';
 

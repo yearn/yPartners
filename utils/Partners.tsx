@@ -22,11 +22,11 @@ import	LogoSpool				from	'components/icons/partners/LogoSpool';
 import	LogoSturdy				from	'components/icons/partners/LogoSturdy';
 import 	LogoTempus 				from 	'components/icons/partners/LogoTempus';
 import 	LogoWido 				from 	'components/icons/partners/LogoWido';
-import {toAddress} 	from '@yearn-finance/web-lib/utils/address';
+import {toAddress} 	from 'lib/yearn/utils/address';
 
 import 	type {ReactElement} from 	'react';
 import	type {TPartner}		from	'types/types';
-import 	type {TDict} 		from 	'@yearn-finance/web-lib/utils/types';
+import 	type {TDict} 		from 	'lib/yearn/utils/types';
 
 const	PARTNERS: TDict<TPartner> = {
 	'qidao' : {

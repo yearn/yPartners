@@ -3,12 +3,13 @@ import IconForDevelopers from 'components/icons/IconForDevelopers';
 import IconForInstitutions from 'components/icons/IconForInstitutions';
 import IconForProtocols from 'components/icons/IconForProtocols';
 import {motion} from 'framer-motion';
+import type {Variants} from 'framer-motion';
 
 import type {ReactElement} from 'react';
-import type {TFramerTransition, TPartner} from 'types/types';
+import type {TPartner} from 'types/types';
 
-const variants = {
-	enter: (i: number): TFramerTransition => ({
+const variants: Variants = {
+	enter: (i: number) => ({
 		y: 0,
 		opacity: 1,
 		transition: {

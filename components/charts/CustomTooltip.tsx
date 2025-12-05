@@ -1,4 +1,4 @@
-import {formatAmount} from '@yearn-finance/web-lib/utils/format.number';
+import {formatAmount} from 'lib/yearn/utils/format.number';
 
 import type {ReactElement} from 'react';
 import type {TTooltipItem} from 'types/chart';

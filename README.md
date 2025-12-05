@@ -14,9 +14,10 @@ Well friend, you’ve come to the right place!
 ### Install and run
 
 1. Clone as template from GitHub
-2. Run `yarn`
-3. Run `yarn run dev`
-4. Open the browser and navigate to `http://localhost:3000`
+2. Ensure you have [Bun](https://bun.sh) installed locally
+3. Run `bun install`
+4. Run `bun run dev`
+5. Open the browser and navigate to `http://localhost:3000`
 
 ### Stack
 

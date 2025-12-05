@@ -1,6 +1,6 @@
 import type	{ReactElement}	from	'react';
-import type {TAddress} from '@yearn-finance/web-lib/utils/address';
-import type {TDict} from '@yearn-finance/web-lib/utils/types';
+import type {TAddress} from 'lib/yearn/utils/address';
+import type {TDict} from 'lib/yearn/utils/types';
 
 export type TPartnerVault = {
 	address: string,
@@ -157,15 +157,5 @@ export type TYearnVault = {
 		available: boolean,
 		address: TAddress,
 		contract: TAddress,
-	}
-}
-
-export type TFramerTransition = {
-	y: number,
-	opacity: number,
-	transition: {
-		delay: number,
-		duration: number,
-		ease: string
 	}
 }

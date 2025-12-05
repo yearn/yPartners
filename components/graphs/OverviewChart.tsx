@@ -1,11 +1,11 @@
 import {useMemo, useState}	from	'react';
 import Chart from 'components/charts/Chart';
 import {NETWORK_LABELS} from 'utils';
-import {formatAmount} from '@yearn-finance/web-lib/utils/format.number';
+import {formatAmount} from 'lib/yearn/utils/format.number';
 
 import type {ReactElement} from 'react';
 import type {TChartBar, TLegendItem, TTooltipItem} from 'types/chart';
-import type {TDict} from '@yearn-finance/web-lib/utils/types';
+import type {TDict} from 'lib/yearn/utils/types';
 
 type TOverviewChartProps = {
 	windowValue: number,

@@ -3,7 +3,7 @@ import {DashboardTabsWrapper} from 'components/dashboard/DashboardTabsWrapper';
 import {PartnerContextApp, usePartner} from 'contexts/usePartner';
 import useWindowDimensions from 'hooks/useWindowDimensions';
 import {LOGOS, SHAREABLE_ADDRESSES} from 'utils/Partners';
-import {Button} from '@yearn-finance/web-lib/components/Button';
+import {Button} from 'lib/yearn/components/Button';
 
 import type {GetStaticPathsResult, GetStaticPropsResult} from 'next';
 import type {ChangeEvent, FormEvent, ReactElement} from 'react';

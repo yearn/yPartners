@@ -1,4 +1,4 @@
-import IconLinkOut from '@yearn-finance/web-lib/icons/IconLinkOut';
+import IconLinkOut from 'lib/yearn/icons/IconLinkOut';
 
 import type {ReactElement} from 'react';
 
@@ -15,7 +15,7 @@ function	TeamUpPage(): ReactElement {
 						{'Have you ever found yourself thinking “Wow! Yearn’s yield generating vaults are a work of DeFi art. I WISH I could integrate them into what we’re building.” Well friend, you’ve come to the right place.'}
 					</p>
 					<p>
-						{'Yearn’s Partnership Program lets developers easily integrate yield-generation into their products and earn up to 50% profit share from their contributed TVL. As the kids say… “LFG!”.'}
+						{'Yearn’s Partnership Program lets developers easily integrate yield-generation into their products and earn 50% profit share from their contributed TVL. As the kids say… “LFG!”.'}
 					</p>
 					<p>
 						{'Our partnership program has been battle tested by a wide range of partners since it launched in early 2021. If you’d like to team up, we’d love to hear from you! Simply reach out using the Yearn Partners form below.'}

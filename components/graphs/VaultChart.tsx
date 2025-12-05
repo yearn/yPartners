@@ -1,5 +1,5 @@
 import {useMemo}		from	'react';
-import {truncateHex} from '@yearn-finance/web-lib/utils/address';
+import {truncateHex} from 'lib/yearn/utils/address';
 
 import Chart from '../charts/Chart';
 

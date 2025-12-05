@@ -1,17 +1,51 @@
+# OS artifacts
 .DS_Store
+Thumbs.db
+
+# Dependencies
 node_modules
+/.pnp
+.pnp.*
+
+# Build / production outputs
 /dist
-
-
-# local env files
-.env.local
-.env.*.local
+/.next
+/out
+/build
+/.turbo
+/.vercel
 
 # Log files
+*.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
+
+# Local env files
+.env
+.env.local
+.env.development
+.env.production
+.env.test
+.env.*.local
+.envrc
+.envrc.local
+!.env.example
+
+# TypeScript incremental artifacts
+*.tsbuildinfo
+
+# Tooling caches
+.eslintcache
+.npm
+.parcel-cache
+
+# Tests / coverage artifacts
+coverage
+.nyc_output
+.vitest
+storybook-static
 
 # Editor directories and files
 .idea
@@ -21,8 +55,3 @@ pnpm-debug.log*
 *.njsproj
 *.sln
 *.sw?
-
-.env
-.next
-.vercel
-tsconfig.tsbuildinfo

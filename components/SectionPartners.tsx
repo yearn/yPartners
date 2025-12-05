@@ -2,18 +2,19 @@ import {useMemo, useState} from 'react';
 import {PARTNERS} from 'utils/Partners';
 import useSWR from 'swr';
 import {motion} from 'framer-motion';
-import {useSettings} from '@yearn-finance/web-lib/contexts/useSettings';
-import {baseFetcher} from '@yearn-finance/web-lib/utils/fetchers';
+import type {Variants} from 'framer-motion';
+import {useSettings} from 'lib/yearn/contexts/useSettings';
+import {baseFetcher} from 'lib/yearn/utils/fetchers';
 
 import DefaultLogo from './icons/partners/DefaultLogo';
 
 import type {ReactElement} from 'react';
 import type {SWRResponse} from 'swr';
-import type {TFramerTransition, TPartner} from 'types/types';
-import type {TDict} from '@yearn-finance/web-lib/utils/types';
+import type {TPartner} from 'types/types';
+import type {TDict} from 'lib/yearn/utils/types';
 
-const variants = {
-	enter: (i: number): TFramerTransition => ({
+const variants: Variants = {
+	enter: (i: number) => ({
 		y: 0,
 		opacity: 1,
 		transition: {
