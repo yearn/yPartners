@@ -137,11 +137,11 @@ function	AppHeader(): ReactElement {
 								</Link>
 							</div>
 							<div>
-								<Link href={'/learn-more'}>
+								<Link href={'/faq'}>
 									<p
-										aria-selected={router.pathname === '/learn-more'}
+										aria-selected={router.pathname === '/faq'}
 										className={'project--nav'}>
-										{'Learn more'}
+										{'FAQ'}
 									</p>
 								</Link>
 							</div>

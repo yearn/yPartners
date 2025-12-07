@@ -19,9 +19,9 @@ function	Index(): ReactElement {
 								{'Apply'}
 							</Button>
 						</Link>
-						<Link href={'/learn-more'}>
+						<Link href={'/faq'}>
 							<Button className={'w-full sm:w-[150px] md:w-[200px]'} variant={'outlined'}>
-								{'Learn More'}
+								{'FAQ'}
 							</Button>
 						</Link>
 					</div>

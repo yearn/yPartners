@@ -18,7 +18,7 @@ function	TeamUpPage(): ReactElement {
 						{'Yearn’s Partnership Program lets developers easily integrate yield-generation into their products and earn 50% profit share from their contributed TVL. As the kids say… “LFG!”.'}
 					</p>
 					<p>
-						{'Our partnership program has been battle tested by a wide range of partners since it launched in early 2021. If you’d like to team up, we’d love to hear from you! Simply reach out using the Yearn Partners form below.'}
+						{'We firmly believe that the value a protocol brings to the community and ecosystem is far more than just funds parked in a vault. So we work closely with our partners to integrate and form a mutually beneficial relationship, adding value to both protocols. If you’d like to team up, we’d love to hear from you! Simply reach out using the Yearn Partners form below.'}
 					</p>
 
 					<a

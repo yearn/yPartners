@@ -1,4 +1,3 @@
-@import '@rainbow-me/rainbowkit/styles.css';
 @import './public/fonts/fonts.css';
 @tailwind base;
 @tailwind components;
