@@ -1,6 +1,5 @@
 import Link from 'next/link';
 import B2BMeme from 'components/B2BMeme';
-import SectionPartner from 'components/SectionPartners';
 import SectionStats from 'components/SectionStats';
 import SectionTargets from 'components/SectionTargets';
 import {Button} from 'lib/yearn/components/Button';
@@ -14,14 +13,14 @@ function	Index(): ReactElement {
 				<div className={'col-span-12 md:col-span-8'}>
 					<h1 className={'mb-6 text-6xl font-black text-neutral-900 md:text-8xl'}>{'Yearn Partners'}</h1>
 					<p className={'text-lg'}>{'Integrate Yearn vaults to earn 50% profit share'}</p>
-					<div className={'mt-4 flex flex-row space-x-4'}>
+					<div className={'mt-4 flex flex-col gap-3 sm:flex-row sm:space-x-4 sm:gap-0'}>
 						<Link href={'/team-up'}>
-							<Button className={'w-[150px] md:w-[200px]'}>
+							<Button className={'w-full sm:w-[150px] md:w-[200px]'}>
 								{'Apply'}
 							</Button>
 						</Link>
 						<Link href={'/learn-more'}>
-							<Button className={'w-[150px] md:w-[200px]'} variant={'outlined'}>
+							<Button className={'w-full sm:w-[150px] md:w-[200px]'} variant={'outlined'}>
 								{'Learn More'}
 							</Button>
 						</Link>
@@ -36,7 +35,6 @@ function	Index(): ReactElement {
 
 			<SectionTargets />
 
-			<SectionPartner />
 		</main>
 	);
 }

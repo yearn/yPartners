@@ -2,6 +2,16 @@ module.exports = ({
 	images: {
 		domains: ['rawcdn.githack.com']
 	},
+	webpack: (config, {isServer}) => {
+		if (!isServer) {
+			// Ignore React Native modules in browser environment
+			config.resolve.fallback = {
+				...config.resolve.fallback,
+				'@react-native-async-storage/async-storage': false
+			};
+		}
+		return config;
+	},
 	env: {
 		/* 🔵 - Yearn Finance **************************************************
 		** Stuff used for the SEO or some related elements, like the title, the

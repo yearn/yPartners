@@ -114,8 +114,8 @@ function	AppHeader(): ReactElement {
 
 	return (
 		<header>
-			<div className={'flex w-full flex-row items-center justify-between py-6'}>
-				<nav className={'flex flex-row items-center space-x-6 md:space-x-10'}>
+			<div className={'flex w-full flex-col gap-4 py-6 md:flex-row md:items-center md:justify-between'}>
+				<nav className={'flex flex-wrap items-center gap-x-4 gap-y-2 text-sm md:flex-nowrap md:gap-y-0 md:gap-x-10 md:text-base'}>
 					{!isLoggedIn && (
 						<>
 							<div>
@@ -149,10 +149,10 @@ function	AppHeader(): ReactElement {
 					)}
 				</nav>
 
-				<div className={'flex flex-row items-center space-x-6 md:space-x-10'}>
+				<div className={'flex w-full flex-row items-center md:w-auto md:justify-end'}>
 					<Button
 						variant={'filled'}
-						className={'!h-[30px]'}
+						className={'!h-[30px] w-full md:w-auto'}
 						onClick={(): void => {
 							if(isLoggedIn && address){
 								performBatchedUpdates((): void => {
@@ -237,7 +237,7 @@ function	AppWrapper(props: AppProps): ReactElement {
 		<>
 			<AppHead />
 			<div id={'app'} className={'mx-auto mb-0 grid max-w-6xl grid-cols-12 flex-col gap-x-4 md:flex-row'}>
-				<div className={'col-span-12 flex min-h-[100vh] w-full flex-col'}>
+				<div className={'col-span-12 flex min-h-[100vh] w-full flex-col px-4 sm:px-6 lg:px-0'}>
 					<AppHeader />
 					<Component
 						key={router.route}

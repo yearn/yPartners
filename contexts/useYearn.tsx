@@ -1,11 +1,7 @@
 import {createContext, memo, useContext, useMemo} from 'react';
-import useSWR from 'swr';
-import {useSettings} from 'lib/yearn/contexts/useSettings';
 import {toAddress} from 'lib/yearn/utils/address';
-import {baseFetcher} from 'lib/yearn/utils/fetchers';
 
 import type {ReactElement} from 'react';
-import type {SWRResponse} from 'swr';
 import type {TYearnVault} from 'types/types';
 import type {TDict, VoidPromiseFunction} from 'lib/yearn/utils/types';
 
@@ -22,14 +18,17 @@ const	defaultProps: TYearnContext = {
 
 const	YearnContext = createContext<TYearnContext>(defaultProps);
 export const YearnContextApp = memo(function YearnContextApp({children}: {children: ReactElement}): ReactElement {
-	const {settings: baseAPISettings} = useSettings();
+	// Disabled: API endpoint is not accessible
+	// const {settings: baseAPISettings} = useSettings();
+	// const	{data: vaults, isLoading: isLoadingVaultList, mutate: mutateVaultList} = useSWR(
+	// 	`${baseAPISettings.yDaemonBaseURI}/vaults/all?strategiesDetails=withDetails`,
+	// 	baseFetcher,
+	// 	{revalidateOnFocus: false}
+	// ) as SWRResponse;
 
-	const	{data: vaults, isLoading: isLoadingVaultList, mutate: mutateVaultList} = useSWR(
-		`${baseAPISettings.yDaemonBaseURI}/vaults/all?strategiesDetails=withDetails`,
-		baseFetcher,
-		{revalidateOnFocus: false}
-	) as SWRResponse;
-
+	const vaults: TYearnVault[] = [];
+	const isLoadingVaultList = false;
+	const mutateVaultList = async (): Promise<void> => Promise.resolve();
 
 	const	vaultsObject = useMemo((): TDict<TYearnVault> => {
 		const	_vaultsObject = (vaults || []).reduce((acc: TDict<TYearnVault>, vault: TYearnVault): TDict<TYearnVault> => {

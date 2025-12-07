@@ -11,7 +11,7 @@ export function toAddress(value: string | undefined | null): TAddress {
 
 	try {
 		return utils.getAddress(value) as TAddress;
-	} catch (_error) {
+	} catch {
 		return ZERO_ADDRESS;
 	}
 }
@@ -19,7 +19,7 @@ export function toAddress(value: string | undefined | null): TAddress {
 export function isZeroAddress(value: string | undefined | null): boolean {
 	try {
 		return utils.getAddress(value ?? ZERO_ADDRESS) === ZERO_ADDRESS;
-	} catch (_error) {
+	} catch {
 		return true;
 	}
 }

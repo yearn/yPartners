@@ -41,7 +41,7 @@ const	targets: TPartner[] = [
 
 function	Targets(): ReactElement {
 	return (
-		<section aria-label={'targets'} className={'mb-28 flex flex-row items-center space-x-8 md:mb-50'}>
+		<section aria-label={'targets'} className={'mb-28 flex flex-col space-y-8 md:mb-50 md:flex-row md:items-center md:space-y-0 md:space-x-8'}>
 			<div>
 				<div className={'flex flex-col space-y-4'}>
 					<h2 className={'text-3xl font-bold'}>{'Yearn Finance - Powerful & Secure Yield Optimizer'}</h2>
