@@ -56,7 +56,7 @@ function	TeamUpPage(): ReactElement {
 			<div className={'mx-auto max-w-screen-lg space-y-8 p-2 sm:p-4'}>
 				<div className={'space-y-4'}>
 					<h1 className={'text-3xl font-bold'}>{'Let’s Team Up!'}</h1>
-					<div className={'space-y-6 text-neutral-600'}>
+					<div className={'space-y-6 text-neutral-600 text-base sm:text-lg'}>
 						<p>
 							{'Have you ever found yourself thinking “Wow! Yearn’s yield generating vaults are a work of DeFi art. I WISH I could integrate them into what we’re building.” Well friend, you’ve come to the right place.'}
 						</p>
