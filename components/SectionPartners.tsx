@@ -67,7 +67,7 @@ function	Partners(): ReactElement {
 
 
 	return (
-		<section aria-label={'partners'} className={'mb-28 flex flex-row items-center space-x-8 md:mb-50'}>
+		<section aria-label={'partners'} className={'mb-28 flex flex-col space-y-8 md:mb-50 md:flex-row md:items-center md:space-y-0 md:space-x-8'}>
 			<div>
 				<div>
 					<h2 className={'text-3xl font-bold'}>{'Built on Yearn'}</h2>

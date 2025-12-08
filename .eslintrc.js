@@ -13,8 +13,6 @@ module.exports = {
 	},
 	rules: {
 		'@typescript-eslint/prefer-optional-chain': 'error',
-		indent: 'off',
-		'@typescript-eslint/indent': ['error', 'tab'],
 		'no-multi-spaces': ['error', {ignoreEOLComments: false}],
 		'no-mixed-spaces-and-tabs': 'error'
 	}
