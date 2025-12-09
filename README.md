@@ -1,50 +1,35 @@
 # Yearn B2B Partners Dashboard
+
+Marketing site and analytics dashboard for Yearn’s partner program. The landing page highlights fees and vault counts, the Team Up form pings a Telegram bot, and partner dashboards (e.g. `/dashboard/sturdy`) display balances and payouts pulled from Yearn Vision.
+
 ![](./public/og.png)
 
-Have you ever found yourself thinking:
+- Live site: https://partners.yearn.fi
+- Tech: Next.js 15 + TypeScript, TailwindCSS, SWR, Yearn Web Lib components
 
-> “Wow! Yearn’s yield generating vaults are a work of DeFi art. I WISH I could integrate them into what we’re building.”
+## Quick start
 
-Well friend, you’ve come to the right place!
+1. Copy environment defaults: `cp .env.example .env`
+2. Install dependencies (pnpm recommended because the lockfile is present): `pnpm install`
+3. Run the dev server: `pnpm dev` then open http://localhost:3000
 
-- Check [Yearn B2B Parners Dashboard](https://partners.yearn.finance)
+Other scripts:
+- `pnpm lint` – run ESLint
+- `pnpm build` – type-check and build for production
+- `pnpm start` – start the built app
+- `pnpm export` – generate a static export (if needed)
 
-## Development Instructions
+## Configuration
 
-### Install and run
+- Public metadata is set in `next.config.js` (`WEBSITE_NAME`, `WEBSITE_DESCRIPTION`, `WEBSITE_URI`, `PROJECT_GITHUB_URL`, theme color, OG image path). Update those values to rebrand the site.
+- Runtime environment variables live in `.env`:
+  - `YVISION_BASE_URI` – TO BE REMOVED – base API for partner balances/payouts (defaults to https://api.yearn.vision in config)
+  - `NEXT_PUBLIC_YDAEMON_BASE_URI` / `YDAEMON_BASE_URI` – TO BE REMOVED – Yearn data source fallback (currently unused because the yDaemon call is disabled)
+  - `RPC_URL_MAINNET` / `WS_URL_MAINNET` – Ethereum RPC endpoints used by the Yearn provider
+  - `NEXTAUTH_SECRET` – secret for NextAuth usage
+  - `TELEGRAM_BOT`, `TELEGRAM_RECIPIENT_USERID` – required by `pages/api/telegram.ts` to deliver Team Up form submissions
+  - `IP_TO_BLOCK` – optional comma-separated IPs to deny from the contact form
 
-1. Clone as template from GitHub
-2. Ensure you have [Bun](https://bun.sh) installed locally
-3. Run `bun install`
-4. Run `bun run dev`
-5. Open the browser and navigate to `http://localhost:3000`
+## Partner dashboards
 
-### Stack
-
-The stack used for this project is the following:
-- 💙 [Yearn Web Lib](https://github.com/yearn/web-lib) — Base for our web-lib
-- 🚀 [Next](https://nextjs.org) — JavaScript library for user interfaces
-- ▲ [Vercel](https://vercel.com) — Cloud deployment platform
-- 📄 [TypeScript](https://www.typescriptlang.org/) for static type checking
-- 💄 [ESLint](https://eslint.org/) for code linting
-
-### Tags
-
-You can change the meta tags in the `next.config.js` file:
-
-- Update `WEBSITE_URI` with the base path of your project. This will be used for link sharing and OG image.
-- Update `WEBSITE_NAME` and `WEBSITE_TITLE` with your project name
-- Update `WEBSITE_DESCRIPTION` with your project description
-- Update `PROJECT_GITHUB_URL` with your project GitHub link
-
-Then, you can go in `pages/_app.tsx` and update some more info: 
-
-- Update the content of the meta `theme-color` with your primary color
-- Update `og.jpeg` by the OG image name in the `public` folder
-- Update twitter handle if required
-
-Then, you can update the `public/manifest.json` file which will be use for the Gnosis wallet support:
-
-- Update `name` with your project name
-- Update `description` with your project description
-- Update `iconPath` with the relative path to your SVG icon (ideally, it should stay as is)
+Partner metadata (name, treasury address, logo) is defined in `utils/Partners.tsx`. The login modal expects a treasury address that maps to an entry in `PARTNERS`; successful login routes to `/dashboard/[partnerID]` where vault balances and payouts are fetched from Yearn Vision.

@@ -13,7 +13,7 @@ type TSettingsContext = {
 const defaultSettings: TSettings = {
 	yDaemonBaseURI: process.env.NEXT_PUBLIC_YDAEMON_BASE_URI
 		|| process.env.YDAEMON_BASE_URI
-		|| 'https://ydaemon.yearn.finance'
+		|| 'https://ydaemon.yearn.fi'
 };
 
 const SettingsContext = createContext<TSettingsContext>({

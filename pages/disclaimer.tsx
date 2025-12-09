@@ -49,7 +49,7 @@ function	DisclaimerPage(): ReactElement {
 						</i>
 						{'The only way to fully understand such risks is to have a strong understanding of the relevant technical systems and the incentive design mechanisms they embody–we strongly encourage you to review Yearn"s technical '}
 						<a
-							href={'https://docs.yearn.finance'}
+							href={'https://docs.yearn.fi'}
 							target={'_blank'}
 							rel={'noreferrer'}
 							className={'link'}>{'documentation'}
