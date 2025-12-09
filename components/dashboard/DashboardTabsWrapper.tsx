@@ -4,7 +4,7 @@ import IconChevronDown from 'components/icons/IconChevronDown';
 import dayjs, {extend, unix} from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import {getExplorerURL, NETWORK_CHAINID, NETWORK_LABELS} from 'utils';
-import {PROFIT_SHARE_TEIRS} from 'utils/Partners';
+import {DEFAULT_PROFIT_SHARE} from 'utils/Partners';
 import axios from 'axios';
 import {Listbox, Transition} from '@headlessui/react';
 import {Button} from 'lib/yearn/components/Button';
@@ -227,20 +227,10 @@ function	DashboardTabsWrapper({partnerID}: {partnerID: string}): ReactElement {
 
 
 				// Assign profit share tiers based on contributed TVL
-				const wrapperData = Object.values(_wrapperTotals).map((item): TChartBar => {
-					const shareTiers = Object.keys(PROFIT_SHARE_TEIRS);
-					let partnerTier = 0;
-					
-					for (const tierPercent of shareTiers) {
-						if(item.data.totalTVL > PROFIT_SHARE_TEIRS[tierPercent]){
-							partnerTier = +tierPercent;
-						}else {
-							break;
-						}
-					}
-
-					return {...item, data: {...item.data, profitShare: partnerTier}};
-				});
+				const wrapperData = Object.values(_wrapperTotals).map((item): TChartBar => ({
+					...item,
+					data: {...item.data, profitShare: DEFAULT_PROFIT_SHARE * 100}
+				}));
 
 				performBatchedUpdates((): void => {
 					set_balanceTVLs(partnerBalanceTVL);

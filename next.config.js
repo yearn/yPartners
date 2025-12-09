@@ -36,19 +36,12 @@ module.exports = ({
 		** Config over the RPC
 		**********************************************************************/
 		WEB_SOCKET_URL: JSON.stringify({
-			1: process.env.WS_URL_MAINNET,
-			250: process.env.WS_URL_FANTOM,
-			42161: process.env.WS_URL_ARBITRUM
+			1: process.env.WS_URL_MAINNET
 		}),
 		JSON_RPC_URL: JSON.stringify({
-			1: process.env.RPC_URL_MAINNET,
-			250: process.env.RPC_URL_FANTOM,
-			42161: process.env.RPC_URL_ARBITRUM
+			1: process.env.RPC_URL_MAINNET
 		}),
-		ALCHEMY_KEY: process.env.ALCHEMY_KEY,
-		INFURA_KEY: process.env.INFURA_KEY,
 		NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET,
 		YVISION_BASE_URI: 'https://api.yearn.vision'
-		// YVISION_BASE_URI: 'https://api.staging.yearn.vision'
 	}
 });
