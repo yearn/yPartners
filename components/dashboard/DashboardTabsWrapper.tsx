@@ -35,6 +35,10 @@ function	Tabs({selectedIndex, set_selectedIndex}: TProps): ReactElement {
 	const displayVaults = Object.values(vaults || []);
 	const vaultCount = displayVaults.length;
 
+	if (vaultCount === 0) {
+		return <></>;
+	}
+
 	return (
 		<>
 			<nav className={`hidden flex-row items-center space-x-10 ${vaultCount > 5 ? '' : 'md:flex'}`}>
@@ -116,6 +120,8 @@ function	Tabs({selectedIndex, set_selectedIndex}: TProps): ReactElement {
 
 function	DashboardTabsWrapper({partnerID: _partnerID}: {partnerID: string}): ReactElement {
 	const {vaults, tvlOverride, userCount, feesOverride} = usePartner();
+	const vaultList = Object.values(vaults || {});
+	const hasVaults = vaultList.length > 0;
 	const [selectedIndex, set_selectedIndex] = useState(-1);
 	const [activeWindow, set_activeWindow] = useState('1 month');
 	const [windowValue, set_windowValue] = useState(29);
@@ -124,7 +130,8 @@ function	DashboardTabsWrapper({partnerID: _partnerID}: {partnerID: string}): Rea
 	const [payoutTotals] = useState<TDict<TChartBar[]>>();
 	const [aggregationStep] = useState(0);
 
-	const selectedVault = Object.values(vaults)[selectedIndex];
+	void _partnerID;
+	const selectedVault = vaultList[selectedIndex];
 
 	const selectedAddress = selectedVault ? selectedVault.address : '';
 	const selectedChainID = selectedVault ? selectedVault.chainID : 1;
@@ -294,32 +301,36 @@ function	DashboardTabsWrapper({partnerID: _partnerID}: {partnerID: string}): Rea
 
 	return (
 		<div aria-label={'Vault Details'} className={'col-span-12 mb-4 flex flex-col bg-neutral-100'}>
-			<div className={'relative flex w-full flex-row items-center justify-between px-4 pt-4 md:px-8'}>
-				<Tabs
-					selectedIndex={selectedIndex}
-					set_selectedIndex={set_selectedIndex} />
+			{hasVaults ? (
+				<>
+					<div className={'relative flex w-full flex-row items-center justify-between px-4 pt-4 md:px-8'}>
+						<Tabs
+							selectedIndex={selectedIndex}
+							set_selectedIndex={set_selectedIndex} />
 
-				<div className={'flex flex-row items-center justify-end space-x-2 pb-0 md:pb-4 md:last:space-x-4'}>
-					<a
-						className={ selectedIndex === -1 ? 'hidden' : ''}
-						href={`${getExplorerURL(selectedChainID)}/address/${selectedAddress}`}
-						target={'_blank'}
-						rel={'noopener noreferrer'}>
-						<span className={'sr-only'}>{'Open in explorer'}</span>
-						<IconLinkOut className={'h-5 w-5 cursor-alias text-neutral-600 transition-colors hover:text-neutral-900 md:h-6 md:w-6'} />
-					</a>
-					<button
-						onClick={(): void => {
-							void copyToClipboard(selectedAddress);
-						}}
-						className={ selectedIndex === -1 ? 'hidden' : ''}>
-						<span className={'sr-only'}>{'Copy address'}</span>
-						<IconCopy className={'h-5 w-5 text-neutral-600 transition-colors hover:text-neutral-900 md:h-6 md:w-6'} />
-					</button>
-				</div>
-			</div>
+						<div className={'flex flex-row items-center justify-end space-x-2 pb-0 md:pb-4 md:last:space-x-4'}>
+							<a
+								className={ selectedIndex === -1 ? 'hidden' : ''}
+								href={`${getExplorerURL(selectedChainID)}/address/${selectedAddress}`}
+								target={'_blank'}
+								rel={'noopener noreferrer'}>
+								<span className={'sr-only'}>{'Open in explorer'}</span>
+								<IconLinkOut className={'h-5 w-5 cursor-alias text-neutral-600 transition-colors hover:text-neutral-900 md:h-6 md:w-6'} />
+							</a>
+							<button
+								onClick={(): void => {
+									void copyToClipboard(selectedAddress);
+								}}
+								className={ selectedIndex === -1 ? 'hidden' : ''}>
+								<span className={'sr-only'}>{'Copy address'}</span>
+								<IconCopy className={'h-5 w-5 text-neutral-600 transition-colors hover:text-neutral-900 md:h-6 md:w-6'} />
+							</button>
+						</div>
+					</div>
 
-			<div className={'-mt-0.5 h-0.5 w-full bg-neutral-300'} />
+					<div className={'-mt-0.5 h-0.5 w-full bg-neutral-300'} />
+				</>
+			) : null}
 
 			<div className={'mt-10 flex flex-row space-x-4'}>
 				{dataWindows.map((window): ReactElement => (
@@ -328,7 +339,7 @@ function	DashboardTabsWrapper({partnerID: _partnerID}: {partnerID: string}): Rea
 						key={window.name}
 						name={window.name}
 						value={window.value}
-						className={'w-[90px] text-xs md:w-[100px] md:text-base'}
+						className={'w-[90px] whitespace-nowrap text-xs md:w-[100px] md:text-base'}
 						variant={window.name === activeWindow ? 'filled' : 'outlined'}
 						onClick={handleWindowChange}>
 						{window.name}

@@ -10,10 +10,6 @@ function Chart(props: TChartProps): ReactElement {
 	const {type, data} = props; 
 
 	const isLegendShown = data.length > 0 && data[0].name !== 'no data';
-	
-	// function chartNavigation(): void {
-	// 	alert('Feature currently unavailable');
-	// }
 
 	return (
 		<div className={props.className}>
