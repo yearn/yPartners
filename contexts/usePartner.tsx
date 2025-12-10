@@ -1,84 +1,115 @@
 import {createContext, useContext, useMemo}	from 'react';
-import {useYearn} from 'contexts/useYearn';
-import {NETWORK_CHAINID} from 'utils';
-import {SHAREABLE_ADDRESSES} from 'utils/Partners';
+import {PARTNER_ADDRESS_GROUPS, SHAREABLE_ADDRESSES} from 'utils/Partners';
 import useSWR from 'swr';
-import {toAddress} from 'lib/yearn/utils/address';
 import {baseFetcher} from 'lib/yearn/utils/fetchers';
 
 import type {ReactElement} from 'react';
 import type {SWRResponse} from 'swr';
-import type {TPartnerVault, TPartnerVaultsByNetwork} from 'types/types';
+import type {TPartnerVault} from 'types/types';
 import type {TDict} from 'lib/yearn/utils/types';
 
 type TPartnerContext = {
 	vaults: TDict<TPartnerVault>,
 	isLoadingVaults: boolean,
+	tvlOverride?: number,
+	userCount?: number,
+	feesOverride?: number,
 }
 
 const	defaultProps: TPartnerContext = {
 	vaults: {},
-	isLoadingVaults: false
+	isLoadingVaults: false,
+	tvlOverride: undefined,
+	userCount: undefined,
+	feesOverride: undefined
 };
 
 const	Partner = createContext<TPartnerContext>(defaultProps);
+
+type TPartnerTVLResponse = {
+	vaultAddress: string,
+	decimals: number,
+	pricePerShare: string,
+	totalCurrentValue: string,
+	totalCurrentValueNormalized: number,
+	accounts: {
+		address: string,
+		shares: string,
+		currentValue: string,
+		currentValueNormalized: number
+	}[]
+};
+
+type TPartnerFeesResponse = {
+	totalFeesNormalized: number,
+	accounts: {
+		address: string,
+		totalFees: string,
+		totalFeesNormalized: number
+	}[]
+};
 
 export const PartnerContextApp = ({
 	partnerID,
 	children
 }: {partnerID: string, children: ReactElement}): ReactElement => {
-	const	{vaults: yVaults} = useYearn();
 	const currentPartner = SHAREABLE_ADDRESSES[partnerID] ? SHAREABLE_ADDRESSES[partnerID].shortName : '';
+	const depositorAddresses = currentPartner ? PARTNER_ADDRESS_GROUPS[currentPartner] || [] : [];
 
-	const	{data: balances, isLoading: isLoadingBalances} = useSWR(
-		`${process.env.YVISION_BASE_URI}/partners/${currentPartner}/balance`,
+	const {data: depositorTVL, isLoading: isLoadingDepositorTVL} = useSWR(
+		typeof window !== 'undefined' && depositorAddresses.length > 0 ? `/api/partner-tvl?addresses=${depositorAddresses.join(',')}` : null,
 		baseFetcher,
 		{revalidateOnFocus: false}
-	) as SWRResponse;
-	
-	const	{data: payouts, isLoading: isLoadingPayouts} = useSWR(
-		`${process.env.YVISION_BASE_URI}/partners/${currentPartner}/payout_total`,
+	) as SWRResponse<TPartnerTVLResponse>;
+
+	const {data: depositorFees, isLoading: isLoadingDepositorFees} = useSWR(
+		typeof window !== 'undefined' && depositorAddresses.length > 0 ? `/api/partner-fees?addresses=${depositorAddresses.join(',')}` : null,
 		baseFetcher,
 		{revalidateOnFocus: false}
-	) as SWRResponse;
+	) as SWRResponse<TPartnerFeesResponse>;
 
 	const	vaults = useMemo((): TDict<TPartnerVault> => {
-		if(!balances || !payouts) {
-			return {};
+		// Yearn Vision data usage is disabled; returning empty vault list.
+		return {};
+	}, []);
+
+	const tvlOverride = useMemo((): number | undefined => {
+		if (!depositorTVL) {
+			return undefined;
 		}
 
-		const balancesAllNetworksOject = Object.values(balances || {})[0] as TPartnerVaultsByNetwork;
-		const payoutsAllNetworksOject = Object.values(payouts || {})[0] as TPartnerVaultsByNetwork;
-		
-		const partnerVaults: TDict<TPartnerVault> = {};
-
-		for (const [networkName, vaultsForNetwork] of Object.entries(balancesAllNetworksOject || {})) {
-			const	chainID = NETWORK_CHAINID[networkName];
-			for (const [vaultAddress, currentVault] of Object.entries(vaultsForNetwork || {})) {
-				currentVault.chainID = chainID;
-				currentVault.address = toAddress(vaultAddress);
-
-				const	yVaultData = yVaults[currentVault.address];
-				if (yVaultData) {
-					const {riskScore, apy} = yVaultData;
-					currentVault.riskScore = riskScore;
-					currentVault.apy = apy.net_apy * 100;
-					currentVault.totalPayout = payoutsAllNetworksOject[networkName][vaultAddress].tvl;
-					if (currentVault.tvl > 0) {
-						partnerVaults[`${currentVault.address}_${chainID}`] = currentVault;
-					}
-				}
-			}
+		if (typeof depositorTVL.totalCurrentValueNormalized === 'number') {
+			return depositorTVL.totalCurrentValueNormalized;
 		}
 
-		return partnerVaults;
-	}, [balances, payouts, yVaults]);
+		return undefined;
+	}, [depositorTVL]);
+
+	const feesOverride = useMemo((): number | undefined => {
+		if (!depositorFees) {
+			return undefined;
+		}
+		if (typeof depositorFees.totalFeesNormalized === 'number') {
+			return depositorFees.totalFeesNormalized;
+		}
+		return undefined;
+	}, [depositorFees]);
+
+	const userCount = useMemo((): number | undefined => {
+		if (depositorAddresses.length === 0) {
+			return undefined;
+		}
+		return depositorAddresses.length;
+	}, [depositorAddresses.length]);
 
 	return (
 		<Partner.Provider
 			value={{
 				vaults: vaults,
-				isLoadingVaults: isLoadingBalances || isLoadingPayouts
+				isLoadingVaults: isLoadingDepositorTVL || isLoadingDepositorFees,
+				tvlOverride,
+				userCount,
+				feesOverride
 			}}>
 			{children}
 		</Partner.Provider>

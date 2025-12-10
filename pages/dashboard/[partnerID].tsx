@@ -1,7 +1,6 @@
 import {useEffect, useMemo, useState} from 'react';
 import {DashboardTabsWrapper} from 'components/dashboard/DashboardTabsWrapper';
 import {PartnerContextApp, usePartner} from 'contexts/usePartner';
-import useWindowDimensions from 'hooks/useWindowDimensions';
 import {LOGOS, SHAREABLE_ADDRESSES} from 'utils/Partners';
 import {Button} from 'lib/yearn/components/Button';
 
@@ -13,7 +12,6 @@ function formatDate(date: Date): string {
 }
 
 function Index({partnerID}: {partnerID: string}): ReactElement {
-	const {width} = useWindowDimensions();
 	const currentDate = new Date();
 	const currentYear = currentDate.getFullYear();
 	const lastMonth = currentDate.getMonth() - 1;
@@ -69,7 +67,7 @@ function Index({partnerID}: {partnerID: string}): ReactElement {
 			<section aria-label={'hero'} className={'mb-8 mt-3 grid grid-cols-8 md:mb-14 md:mt-[75px] md:grid-cols-12'}>
 
 				<div className={'col-span-3 md:hidden'}>
-					{ width < 768 && LOGOS[currentPartnerName]}
+					{LOGOS[currentPartnerName]}
 				</div>
 
 				<div className={'col-span-8 lg:col-span-9'}>
@@ -119,7 +117,7 @@ function Index({partnerID}: {partnerID: string}): ReactElement {
 				</div>
 
 				<div className={'hidden md:col-span-4 md:block lg:col-span-3'}>
-					{ width >= 768 && LOGOS[currentPartnerName]}
+					{LOGOS[currentPartnerName]}
 				</div>
 
 			</section>

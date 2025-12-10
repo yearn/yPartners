@@ -12,6 +12,7 @@ Marketing site and analytics dashboard for Yearn’s partner program. The landin
 1. Copy environment defaults: `cp .env.example .env`
 2. Install dependencies (pnpm recommended because the lockfile is present): `pnpm install`
 3. Run the dev server: `pnpm dev` then open http://localhost:3000
+4. Use address 0xFd1D36995d76c0F75bbe4637C84C06E4A68bBB3a for login testing
 
 Other scripts:
 - `pnpm lint` – run ESLint
@@ -23,8 +24,7 @@ Other scripts:
 
 - Public metadata is set in `next.config.js` (`WEBSITE_NAME`, `WEBSITE_DESCRIPTION`, `WEBSITE_URI`, `PROJECT_GITHUB_URL`, theme color, OG image path). Update those values to rebrand the site.
 - Runtime environment variables live in `.env`:
-  - `YVISION_BASE_URI` – TO BE REMOVED – base API for partner balances/payouts (defaults to https://api.yearn.vision in config)
-  - `NEXT_PUBLIC_YDAEMON_BASE_URI` / `YDAEMON_BASE_URI` – TO BE REMOVED – Yearn data source fallback (currently unused because the yDaemon call is disabled)
+- `YVISION_BASE_URI` – TO BE REMOVED – base API for partner balances/payouts (defaults to https://api.yearn.vision in config)
   - `RPC_URL_MAINNET` / `WS_URL_MAINNET` – Ethereum RPC endpoints used by the Yearn provider
   - `NEXTAUTH_SECRET` – secret for NextAuth usage
   - `TELEGRAM_BOT`, `TELEGRAM_RECIPIENT_USERID` – required by `pages/api/telegram.ts` to deliver Team Up form submissions

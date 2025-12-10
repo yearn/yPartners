@@ -35,9 +35,6 @@ module.exports = ({
 		/* 🔵 - Yearn Finance **************************************************
 		** Config over the RPC
 		**********************************************************************/
-		WEB_SOCKET_URL: JSON.stringify({
-			1: process.env.WS_URL_MAINNET
-		}),
 		JSON_RPC_URL: JSON.stringify({
 			1: process.env.RPC_URL_MAINNET
 		}),

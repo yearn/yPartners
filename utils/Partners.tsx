@@ -4,6 +4,7 @@ import {toAddress} from 'lib/yearn/utils/address';
 import type {ReactElement} from 'react';
 import type {TPartner} from 'types/types';
 import type {TDict} from 'lib/yearn/utils/types';
+import type {TAddress} from 'lib/yearn/utils/address';
 
 const PARTNERS: TDict<TPartner> = {
 	sturdy: {
@@ -16,6 +17,14 @@ const PARTNERS: TDict<TPartner> = {
 
 const SHAREABLE_ADDRESSES: {[key: string]: {name: string, shortName: string}} = {
 	[toAddress('0xFd1D36995d76c0F75bbe4637C84C06E4A68bBB3a')]: {name: 'Sturdy', shortName: 'sturdy'}
+};
+
+const PARTNER_ADDRESS_GROUPS: {[key: string]: TAddress[]} = {
+	sturdy: [
+		toAddress('0xc337C76158c131beDf95a5D4e0C27EC8eFdb7f02'),
+		toAddress('0x13B053f017B6C68e089267Ffc3f10EE92ED95a79'),
+		toAddress('0xA2F263426ef09d43057d6be798A6672A4401ecC5')
+	]
 };
 
 type TPartnerLogo = {
@@ -32,5 +41,6 @@ export {
 	LOGOS,
 	PARTNERS,
 	SHAREABLE_ADDRESSES,
+	PARTNER_ADDRESS_GROUPS,
 	DEFAULT_PROFIT_SHARE
 };

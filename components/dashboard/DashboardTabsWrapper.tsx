@@ -1,16 +1,11 @@
 import {Fragment, useMemo, useState} from 'react';
 import OverviewChart from 'components/graphs/OverviewChart';
 import IconChevronDown from 'components/icons/IconChevronDown';
-import dayjs, {extend, unix} from 'dayjs';
-import utc from 'dayjs/plugin/utc';
-import {getExplorerURL, NETWORK_CHAINID, NETWORK_LABELS} from 'utils';
-import {DEFAULT_PROFIT_SHARE} from 'utils/Partners';
-import axios from 'axios';
+import {getExplorerURL, NETWORK_LABELS} from 'utils';
 import {Listbox, Transition} from '@headlessui/react';
 import {Button} from 'lib/yearn/components/Button';
 import IconCopy from 'lib/yearn/icons/IconCopy';
 import IconLinkOut from 'lib/yearn/icons/IconLinkOut';
-import {toAddress} from 'lib/yearn/utils/address';
 import {copyToClipboard} from 'lib/yearn/utils/helpers';
 import performBatchedUpdates from 'lib/yearn/utils/performBatchedUpdates';
 
@@ -18,18 +13,14 @@ import {usePartner} from '../../contexts/usePartner';
 import VaultChart from '../graphs/VaultChart';
 import SummaryMetrics from './SummaryMetrics';
 
-import type {AxiosResponse} from 'axios';
 import type {MouseEvent, ReactElement} from 'react';
 import type {TChartBar} from 'types/chart';
-import type {TPartnerVaultsByNetwork} from 'types/types';
 import type {TDict} from 'lib/yearn/utils/types';
-
-extend(utc);
 
 const dataWindows = [
 	{name: '1 week', value: 7},
 	{name: '1 month', value: 29},
-	{name: '1 year', value: 365},
+	{name: '3 month', value: 90},
 	{name: 'All time', value: 45}
 ];
 
@@ -123,15 +114,15 @@ function	Tabs({selectedIndex, set_selectedIndex}: TProps): ReactElement {
 	);
 }
 
-function	DashboardTabsWrapper({partnerID}: {partnerID: string}): ReactElement {
-	const {vaults} = usePartner();
+function	DashboardTabsWrapper({partnerID: _partnerID}: {partnerID: string}): ReactElement {
+	const {vaults, tvlOverride, userCount, feesOverride} = usePartner();
 	const [selectedIndex, set_selectedIndex] = useState(-1);
 	const [activeWindow, set_activeWindow] = useState('1 month');
 	const [windowValue, set_windowValue] = useState(29);
-	const [balanceTVLs, set_balanceTVLs] = useState<TDict<TChartBar[]>>();
-	const [wrapperTotals, set_wrapperTotals] = useState<TChartBar[]>();
-	const [payoutTotals, set_payoutTotals] = useState<TDict<TChartBar[]>>();
-	const [aggregationStep, set_aggregationStep] = useState(0);
+	const [balanceTVLs] = useState<TDict<TChartBar[]>>();
+	const [wrapperTotals] = useState<TChartBar[]>();
+	const [payoutTotals] = useState<TDict<TChartBar[]>>();
+	const [aggregationStep] = useState(0);
 
 	const selectedVault = Object.values(vaults)[selectedIndex];
 
@@ -149,149 +140,150 @@ function	DashboardTabsWrapper({partnerID}: {partnerID: string}): ReactElement {
 
 
 	useMemo((): void => {
-		const baseBalanceURI = `${process.env.YVISION_BASE_URI}/partners/${partnerID}/balance`;
-		const basePayoutURI = `${process.env.YVISION_BASE_URI}/partners/${partnerID}/payout_total`;
+		/* Visual generation and data fetching temporarily disabled. */
+		// const baseBalanceURI = `${process.env.YVISION_BASE_URI}/partners/${partnerID}/balance`;
+		// const basePayoutURI = `${process.env.YVISION_BASE_URI}/partners/${partnerID}/payout_total`;
+		//
+		// const now = dayjs().unix();
+		// const startOfToday = dayjs().utc().startOf('D').unix();
+		//
+		// const balanceEndpoints = [`${baseBalanceURI}?ts=${now}`];
+		// const payoutEndpoints = [`${basePayoutURI}?ts=${now}`];
+		// 	
+		// for (let i = 1; i < windowValue; i++) {
+		// 	const ts = startOfToday - (86400 * i);
+		// 	balanceEndpoints.push(`${baseBalanceURI}?ts=${ts}`);
+		// 	payoutEndpoints.push(`${basePayoutURI}?ts=${ts}`);
+		// }
+		//
+		// const earliestTimestamp = startOfToday - (86400 * (windowValue-1));
+		// // reverse so requests resolve with first elements being the oldest
+		// balanceEndpoints.reverse();
+		// payoutEndpoints.reverse();
+		//
+		// const partnerBalanceTVL: TDict<TChartBar[]> = {};
+		// const _wrapperTotals: TDict<TChartBar> = {};
+		//
+		// Promise.all(balanceEndpoints.map(async (endpoint): Promise<AxiosResponse> => axios.get(endpoint))).then(
+		// 	(responses): void => {
+		// 		responses.forEach(({data}): void => {
+		// 			const vaultsAllNetworksOject = Object.values(data || {})[0] as TPartnerVaultsByNetwork;
+		//
+		// 			for (const [networkName, vaultsForNetwork] of Object.entries(vaultsAllNetworksOject || {})) {
+		// 				const	chainID = NETWORK_CHAINID[networkName];
+		//
+		// 				for (const [vaultAddress, currentVault] of Object.entries(vaultsForNetwork || {})) {
+		// 					const vaultBalanceArray = partnerBalanceTVL[`${toAddress(vaultAddress)}_${chainID}`];
+		// 					const date = unix(data.ts).format('MMM DD YYYY');
+		// 					const shortDate = unix(data.ts).format('MMM DD');
+		// 					const {token} = currentVault;
+		// 					
+		// 					if (currentVault.tvl > 0 || vaultBalanceArray?.length > 0) {
+		// 						const dataPoint = {name: date, shortDate, data: {balanceTVL: currentVault.tvl}, token};
+		//
+		// 						if(vaultBalanceArray){
+		// 							partnerBalanceTVL[`${toAddress(vaultAddress)}_${chainID}`].push(dataPoint);
+		// 						}else{
+		// 							const missingData = [];
+		//
+		// 							if(data.ts > earliestTimestamp){
+		// 								const numToAdd = Math.floor((data.ts - earliestTimestamp) / 86400);
+		//
+		// 								for (let i = 0; i < numToAdd; i++) {
+		// 									const ts = earliestTimestamp + (86400 * i);
+		// 									const _date = unix(ts).format('MMM DD YYYY');
+		// 									const _shortDate = unix(ts).format('MMM DD');
+		//
+		// 									const missingDataPoint = {name: _date, shortDate: _shortDate, data: {balanceTVL: 0}, token};
+		// 									missingData.push(missingDataPoint);
+		// 								}
+		// 							}
+		//
+		// 							missingData.push(dataPoint);
+		// 							partnerBalanceTVL[`${toAddress(vaultAddress)}_${chainID}`] = missingData;
+		// 						}
+		// 
+		// 						// Sum TVLs by day for aggregate wrapper balance chart
+		// 						const dailyTVL = _wrapperTotals[date];
+		// 
+		// 						if(dailyTVL){
+		// 							_wrapperTotals[date] = {...dailyTVL, data: {totalTVL: dailyTVL.data.totalTVL + currentVault.tvl}};
+		// 						}else{
+		// 							_wrapperTotals[date] = {name: date, shortDate, data: {totalTVL: currentVault.tvl}};
+		// 						}
+		// 					}
+		//
+		// 				}
+		// 			}
+		// 		});
+		//
+		//
+		// 		// Assign profit share tiers based on contributed TVL
+		// 		const wrapperData = Object.values(_wrapperTotals).map((item): TChartBar => ({
+		// 			...item,
+		// 			data: {...item.data, profitShare: DEFAULT_PROFIT_SHARE * 100}
+		// 		}));
+		//
+		// 		performBatchedUpdates((): void => {
+		// 			set_balanceTVLs(partnerBalanceTVL);
+		// 			set_wrapperTotals(wrapperData);
+		// 			set_aggregationStep((prevStep): number => (prevStep + 1));
+		// 		});
+		// 	});
+		//
+		// 	
+		// const partnerPayoutTotals: TDict<TChartBar[]> = {};
+		//
+		// Promise.all(payoutEndpoints.map(async (endpoint): Promise<AxiosResponse> => axios.get(endpoint))).then(
+		// 	(responses): void => {
+		// 		responses.forEach(({data}): void => {
+		// 			const vaultsAllNetworksOject = Object.values(data || {})[0] as TPartnerVaultsByNetwork;
+		//
+		// 			for (const [networkName, vaultsForNetwork] of Object.entries(vaultsAllNetworksOject || {})) {
+		// 				const	chainID = NETWORK_CHAINID[networkName];
+		//
+		// 				for (const [vaultAddress, currentVault] of Object.entries(vaultsForNetwork || {})) {
+		// 					const vaultPayoutArray = partnerPayoutTotals[`${toAddress(vaultAddress)}_${chainID}`];
+		// 					const date = unix(data.ts).format('MMM DD YYYY');
+		// 					const shortDate = unix(data.ts).format('MMM DD');
+		// 					const {token} = currentVault;
+		// 					
+		// 					if (currentVault.tvl > 0) {
+		// 						const dataPoint = {name: date, shortDate, data: {feePayout: currentVault.tvl}, token};
+		//
+		// 						if(vaultPayoutArray){
+		// 							partnerPayoutTotals[`${toAddress(vaultAddress)}_${chainID}`].push(dataPoint);
+		// 						}else{
+		// 							const missingData = [];
+		//
+		// 							if(data.ts > earliestTimestamp){
+		// 								const numToAdd = Math.floor((data.ts - earliestTimestamp) / 86400);
+		// 								for (let i = 0; i < numToAdd; i++) {
+		// 									const ts = earliestTimestamp + (86400 * i);
+		// 									const _date = unix(ts).format('MMM DD YYYY');
+		// 									const _shortDate = unix(ts).format('MMM DD');
+		//
+		// 									const _datapoint = {name: _date, shortDate: _shortDate, data: {feePayout: 0}, token};
+		// 									missingData.push(_datapoint);
+		// 								}
+		// 							}
+		//
+		// 							missingData.push(dataPoint);
+		//
+		// 							partnerPayoutTotals[`${toAddress(vaultAddress)}_${chainID}`] = missingData;
+		// 						}
+		// 					}
+		// 				}
+		// 			}
+		// 		});
+		//
+		// 		performBatchedUpdates((): void => {
+		// 			set_payoutTotals(partnerPayoutTotals);
+		// 			set_aggregationStep((prevStep): number => (prevStep + 1));
+		// 		});
+		// 	});
 
-		const now = dayjs().unix();
-		const startOfToday = dayjs().utc().startOf('D').unix();
-
-		const balanceEndpoints = [`${baseBalanceURI}?ts=${now}`];
-		const payoutEndpoints = [`${basePayoutURI}?ts=${now}`];
-			
-		for (let i = 1; i < windowValue; i++) {
-			const ts = startOfToday - (86400 * i);
-			balanceEndpoints.push(`${baseBalanceURI}?ts=${ts}`);
-			payoutEndpoints.push(`${basePayoutURI}?ts=${ts}`);
-		}
-
-		const earliestTimestamp = startOfToday - (86400 * (windowValue-1));
-		// reverse so requests resolve with first elements being the oldest
-		balanceEndpoints.reverse();
-		payoutEndpoints.reverse();
-
-		const partnerBalanceTVL: TDict<TChartBar[]> = {};
-		const _wrapperTotals: TDict<TChartBar> = {};
-
-		Promise.all(balanceEndpoints.map(async (endpoint): Promise<AxiosResponse> => axios.get(endpoint))).then(
-			(responses): void => {
-				responses.forEach(({data}): void => {
-					const vaultsAllNetworksOject = Object.values(data || {})[0] as TPartnerVaultsByNetwork;
-
-					for (const [networkName, vaultsForNetwork] of Object.entries(vaultsAllNetworksOject || {})) {
-						const	chainID = NETWORK_CHAINID[networkName];
-
-						for (const [vaultAddress, currentVault] of Object.entries(vaultsForNetwork || {})) {
-							const vaultBalanceArray = partnerBalanceTVL[`${toAddress(vaultAddress)}_${chainID}`];
-							const date = unix(data.ts).format('MMM DD YYYY');
-							const shortDate = unix(data.ts).format('MMM DD');
-							const {token} = currentVault;
-							
-							if (currentVault.tvl > 0 || vaultBalanceArray?.length > 0) {
-								const dataPoint = {name: date, shortDate, data: {balanceTVL: currentVault.tvl}, token};
-
-								if(vaultBalanceArray){
-									partnerBalanceTVL[`${toAddress(vaultAddress)}_${chainID}`].push(dataPoint);
-								}else{
-									const missingData = [];
-
-									if(data.ts > earliestTimestamp){
-										const numToAdd = Math.floor((data.ts - earliestTimestamp) / 86400);
-
-										for (let i = 0; i < numToAdd; i++) {
-											const ts = earliestTimestamp + (86400 * i);
-											const _date = unix(ts).format('MMM DD YYYY');
-											const _shortDate = unix(ts).format('MMM DD');
-
-											const missingDataPoint = {name: _date, shortDate: _shortDate, data: {balanceTVL: 0}, token};
-											missingData.push(missingDataPoint);
-										}
-									}
-
-									missingData.push(dataPoint);
-									partnerBalanceTVL[`${toAddress(vaultAddress)}_${chainID}`] = missingData;
-								}
-	
-								// Sum TVLs by day for aggregate wrapper balance chart
-								const dailyTVL = _wrapperTotals[date];
-	
-								if(dailyTVL){
-									_wrapperTotals[date] = {...dailyTVL, data: {totalTVL: dailyTVL.data.totalTVL + currentVault.tvl}};
-								}else{
-									_wrapperTotals[date] = {name: date, shortDate, data: {totalTVL: currentVault.tvl}};
-								}
-							}
-
-						}
-					}
-				});
-
-
-				// Assign profit share tiers based on contributed TVL
-				const wrapperData = Object.values(_wrapperTotals).map((item): TChartBar => ({
-					...item,
-					data: {...item.data, profitShare: DEFAULT_PROFIT_SHARE * 100}
-				}));
-
-				performBatchedUpdates((): void => {
-					set_balanceTVLs(partnerBalanceTVL);
-					set_wrapperTotals(wrapperData);
-					set_aggregationStep((prevStep): number => (prevStep + 1));
-				});
-			});
-
-			
-		const partnerPayoutTotals: TDict<TChartBar[]> = {};
-
-		Promise.all(payoutEndpoints.map(async (endpoint): Promise<AxiosResponse> => axios.get(endpoint))).then(
-			(responses): void => {
-				responses.forEach(({data}): void => {
-					const vaultsAllNetworksOject = Object.values(data || {})[0] as TPartnerVaultsByNetwork;
-
-					for (const [networkName, vaultsForNetwork] of Object.entries(vaultsAllNetworksOject || {})) {
-						const	chainID = NETWORK_CHAINID[networkName];
-
-						for (const [vaultAddress, currentVault] of Object.entries(vaultsForNetwork || {})) {
-							const vaultPayoutArray = partnerPayoutTotals[`${toAddress(vaultAddress)}_${chainID}`];
-							const date = unix(data.ts).format('MMM DD YYYY');
-							const shortDate = unix(data.ts).format('MMM DD');
-							const {token} = currentVault;
-							
-							if (currentVault.tvl > 0) {
-								const dataPoint = {name: date, shortDate, data: {feePayout: currentVault.tvl}, token};
-
-								if(vaultPayoutArray){
-									partnerPayoutTotals[`${toAddress(vaultAddress)}_${chainID}`].push(dataPoint);
-								}else{
-									const missingData = [];
-
-									if(data.ts > earliestTimestamp){
-										const numToAdd = Math.floor((data.ts - earliestTimestamp) / 86400);
-										for (let i = 0; i < numToAdd; i++) {
-											const ts = earliestTimestamp + (86400 * i);
-											const _date = unix(ts).format('MMM DD YYYY');
-											const _shortDate = unix(ts).format('MMM DD');
-
-											const _datapoint = {name: _date, shortDate: _shortDate, data: {feePayout: 0}, token};
-											missingData.push(_datapoint);
-										}
-									}
-
-									missingData.push(dataPoint);
-
-									partnerPayoutTotals[`${toAddress(vaultAddress)}_${chainID}`] = missingData;
-								}
-							}
-						}
-					}
-				});
-
-				performBatchedUpdates((): void => {
-					set_payoutTotals(partnerPayoutTotals);
-					set_aggregationStep((prevStep): number => (prevStep + 1));
-				});
-			});
-
-	}, [partnerID, set_aggregationStep, windowValue]);
+	}, []);
 
 
 	if (aggregationStep === 2 && Object.values(balanceTVLs || []).length === 0) {
@@ -347,7 +339,10 @@ function	DashboardTabsWrapper({partnerID}: {partnerID: string}): ReactElement {
 			<SummaryMetrics
 				vaults={vaults}
 				vault={selectedVault}
-				selectedIndex={selectedIndex}/>
+				selectedIndex={selectedIndex}
+				tvlOverride={tvlOverride}
+				feesOverride={feesOverride}
+				userCount={userCount}/>
 
 			{aggregationStep < 2 || !balanceTVLs || !wrapperTotals || !payoutTotals ? 
 				<h1>{'Generating visuals...'}</h1> : (
