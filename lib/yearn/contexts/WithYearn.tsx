@@ -1,6 +1,5 @@
 import {SWRConfig} from 'swr';
 import type {ReactElement, ReactNode} from 'react';
-import {SettingsProvider} from './useSettings';
 
 type TWithYearnProps = {
 	children: ReactNode;
@@ -8,11 +7,9 @@ type TWithYearnProps = {
 
 export function WithYearn({children}: TWithYearnProps): ReactElement {
 	return (
-		<SettingsProvider>
-			<SWRConfig value={{revalidateOnFocus: false}}>
-				{children}
-			</SWRConfig>
-		</SettingsProvider>
+		<SWRConfig value={{revalidateOnFocus: false}}>
+			{children}
+		</SWRConfig>
 	);
 }
 

@@ -1,29 +1,14 @@
 import {useEffect, useMemo, useState} from 'react';
 import {DashboardTabsWrapper} from 'components/dashboard/DashboardTabsWrapper';
 import {PartnerContextApp, usePartner} from 'contexts/usePartner';
-import useWindowDimensions from 'hooks/useWindowDimensions';
 import {LOGOS, SHAREABLE_ADDRESSES} from 'utils/Partners';
-import {Button} from 'lib/yearn/components/Button';
 
 import type {GetStaticPathsResult, GetStaticPropsResult} from 'next';
-import type {ChangeEvent, FormEvent, ReactElement} from 'react';
-
-function formatDate(date: Date): string {
-	return date.toLocaleDateString('en-CA');
-}
+import type {ReactElement} from 'react';
 
 function Index({partnerID}: {partnerID: string}): ReactElement {
-	const {width} = useWindowDimensions();
-	const currentDate = new Date();
-	const currentYear = currentDate.getFullYear();
-	const lastMonth = currentDate.getMonth() - 1;
-	const today = formatDate(currentDate);
-	const firstDayLastMonth = formatDate(new Date(new Date().setFullYear(currentYear, lastMonth, 1)));
-
 	const {isLoadingVaults} = usePartner();
 	const [lastSync, set_lastSync] = useState('');
-	const [reportStart, set_reportStart] = useState(firstDayLastMonth);
-	const [reportEnd, set_reportEnd] = useState(today);
 
 	const currentPartner = SHAREABLE_ADDRESSES[partnerID];
 	const currentPartnerName = currentPartner ? currentPartner.name : '';
@@ -36,21 +21,6 @@ function Index({partnerID}: {partnerID: string}): ReactElement {
 		set_lastSync(latestSync);
 	}, [set_lastSync]);
 
-
-	function downloadReport(e: FormEvent<HTMLFormElement>): void {
-		e.preventDefault();
-		alert('Feature currently unavailable');
-	}
-
-	function handleReportDateChange(e: ChangeEvent<HTMLInputElement>): void {
-		const rangeValue = e.target.value;
-
-		if(e.target.name === 'range-start'){
-			set_reportStart(rangeValue);
-		}else {
-			set_reportEnd(rangeValue);
-		}
-	}
 
 	const	VaultGraphs = useMemo((): ReactElement => {
 		if (currentPartner && isLoadingVaults) {
@@ -69,7 +39,7 @@ function Index({partnerID}: {partnerID: string}): ReactElement {
 			<section aria-label={'hero'} className={'mb-8 mt-3 grid grid-cols-8 md:mb-14 md:mt-[75px] md:grid-cols-12'}>
 
 				<div className={'col-span-3 md:hidden'}>
-					{ width < 768 && LOGOS[currentPartnerName]}
+					{LOGOS[currentPartnerName]}
 				</div>
 
 				<div className={'col-span-8 lg:col-span-9'}>
@@ -78,48 +48,10 @@ function Index({partnerID}: {partnerID: string}): ReactElement {
 					</h1>
 
 					<p className={'mb-6 w-3/4 text-neutral-500 md:mb-10'}>{`Last updated ${lastSync}`}</p>
-
-					<form onSubmit={downloadReport}>
-						<div className={'mt-2 grid-cols-1 items-end space-y-4 md:flex md:flex-row md:justify-start'}>
-							<div className={'grid grid-cols-2'} >
-								<div className={'grid grid-rows-2 items-end md:w-[170px] md:pr-4 lg:w-[180px]'}>
-									<label className={'text-neutral-500'} htmlFor={'start'}>{'From'}</label>
-									<input
-										className={'text-neutral-500'}
-										type={'date'}
-										id={'start'}
-										name={'range-start'}
-										value={reportStart}
-										onChange={handleReportDateChange}
-										min={'2021-01-01'}
-										max={reportEnd} />
-								</div>
-
-								<div className={'grid grid-rows-2 items-end md:w-[170px] md:pr-4 lg:w-[180px]'}>
-									<label className={'text-neutral-500'} htmlFor={'end'}>{'To'}</label>
-									<input
-										className={'text-neutral-500'}
-										type={'date'}
-										id={'end'}
-										name={'range-end'}
-										value={reportEnd}
-										onChange={handleReportDateChange}
-										min={'2021-01-01'}
-										max={today} />
-								</div>
-							</div>
-
-							<Button
-								className={'w-full md:w-[180px] md:text-base lg:w-[200px]'}
-								variant={'filled'}>
-								{'Download Report'}
-							</Button>
-						</div>
-					</form>
 				</div>
 
 				<div className={'hidden md:col-span-4 md:block lg:col-span-3'}>
-					{ width >= 768 && LOGOS[currentPartnerName]}
+					{LOGOS[currentPartnerName]}
 				</div>
 
 			</section>
