@@ -33,3 +33,4 @@ Other scripts:
 ## Partner dashboards
 
 Partner metadata (name, treasury address, logo) is defined in `utils/Partners.tsx`. The login modal expects a treasury address that maps to an entry in `PARTNERS`; successful login routes to `/dashboard/[partnerID]` where vault balances and payouts are fetched from Yearn Vision.
+
