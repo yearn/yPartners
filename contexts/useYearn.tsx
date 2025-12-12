@@ -18,14 +18,6 @@ const	defaultProps: TYearnContext = {
 
 const	YearnContext = createContext<TYearnContext>(defaultProps);
 export const YearnContextApp = memo(function YearnContextApp({children}: {children: ReactElement}): ReactElement {
-	// Disabled: API endpoint is not accessible
-	// const {settings: baseAPISettings} = useSettings();
-	// const	{data: vaults, isLoading: isLoadingVaultList, mutate: mutateVaultList} = useSWR(
-	// 	`${baseAPISettings.yDaemonBaseURI}/vaults/all?strategiesDetails=withDetails`,
-	// 	baseFetcher,
-	// 	{revalidateOnFocus: false}
-	// ) as SWRResponse;
-
 	const vaults: TYearnVault[] = [];
 	const isLoadingVaultList = false;
 	const mutateVaultList = async (): Promise<void> => Promise.resolve();

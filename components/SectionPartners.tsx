@@ -1,15 +1,11 @@
-import {useMemo, useState} from 'react';
+import {useMemo} from 'react';
 import {PARTNERS} from 'utils/Partners';
-import useSWR from 'swr';
 import {motion} from 'framer-motion';
 import type {Variants} from 'framer-motion';
-import {useSettings} from 'lib/yearn/contexts/useSettings';
-import {baseFetcher} from 'lib/yearn/utils/fetchers';
 
 import DefaultLogo from './icons/partners/DefaultLogo';
 
 import type {ReactElement} from 'react';
-import type {SWRResponse} from 'swr';
 import type {TPartner} from 'types/types';
 import type {TDict} from 'lib/yearn/utils/types';
 
@@ -27,43 +23,16 @@ const variants: Variants = {
 };
 
 function	Partners(): ReactElement {
-	const {settings: baseAPISettings} = useSettings();
-	const	[partnerList, set_partnerList] = useState<TPartner[]>([]);
+	const partnerList = useMemo((): TPartner[] => {
+		const entries: TDict<TPartner> = {};
 
-	const	{data: partners} = useSWR(
-		`${baseAPISettings.yDaemonBaseURI}/partners/all`,
-		baseFetcher,
-		{revalidateOnFocus: false}
-	) as SWRResponse;
-
-
-	useMemo((): void => {
-		const _partners: TDict<TPartner> = {};
-
-		for (const [, vaultsForNetwork] of Object.entries(partners || {})) {
-			for (const [, currentVault] of Object.entries(vaultsForNetwork || {})) {
-				const shortName = currentVault.name.toLowerCase();
-				const {description} = currentVault;
-				const logo = PARTNERS[shortName] ? PARTNERS[shortName].logo : <DefaultLogo className={'text-900'} />;
-
-				if(PARTNERS[shortName]){
-					_partners[shortName] = {name: currentVault.full_name, shortName, description, logo};
-				}
-			}
+		for (const [shortName, partner] of Object.entries(PARTNERS)) {
+			const logo = partner.logo || <DefaultLogo className={'text-900'} />;
+			entries[shortName] = {...partner, logo};
 		}
-		
-		const	_partnerList = Object.values(_partners);
 
-		// Fisher Yates shuffle - for "random" order
-		for (let i = _partnerList.length -1; i > 0; i--) {
-			const j = Math.floor(Math.random() * i);
-			const k = _partnerList[i];
-			_partnerList[i] = _partnerList[j];
-			_partnerList[j] = k;
-		}
-		
-		set_partnerList(_partnerList.slice(0, 9));
-	}, [partners]);
+		return Object.values(entries);
+	}, []);
 
 
 	return (
