@@ -100,20 +100,17 @@ function buildEmptyResponse(addresses: string[], vaultAddress: string): TRespons
 
 async function queryEnvioGraphQL<T>(query: string, variables: Record<string, unknown>): Promise<T> {
 	const envioUrl = process.env.ENVIO_GRAPHQL_URL;
-	const envioPassword = process.env.ENVIO_PASSWORD;
 
-	if (!envioUrl || !envioPassword) {
-		throw new Error('ENVIO_GRAPHQL_URL and ENVIO_PASSWORD must be configured');
+	if (!envioUrl) {
+		throw new Error('ENVIO_GRAPHQL_URL must be configured');
 	}
 
 	const payload = JSON.stringify({query, variables});
-	const auth = Buffer.from(`:${envioPassword}`).toString('base64');
 
 	const response = await fetch(envioUrl, {
 		method: 'POST',
 		headers: {
-			'Content-Type': 'application/json',
-			'Authorization': `Basic ${auth}`
+			'Content-Type': 'application/json'
 		},
 		body: payload
 	});
@@ -350,7 +347,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
 		return;
 	}
 
-	const hasEnvioConfig = Boolean(process.env.ENVIO_GRAPHQL_URL && process.env.ENVIO_PASSWORD);
+	const hasEnvioConfig = Boolean(process.env.ENVIO_GRAPHQL_URL);
 	if (!rpcUrl || !vaultAddress || !hasEnvioConfig) {
 		console.warn('[partner-fees] Missing configuration, returning empty payload');
 		res.status(200).json(buildEmptyResponse(addresses, vaultAddress));
