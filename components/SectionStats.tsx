@@ -5,42 +5,18 @@ import {formatAmount} from 'lib/yearn/utils/format.number';
 import type {ReactElement} from 'react';
 import type {SWRResponse} from 'swr';
 
-async function graphqlFetcher(url: string): Promise<{vaults_count: number}> {
-	console.log('[graphqlFetcher] Fetching vaults from:', url);
+async function vaultCountFetcher(url: string): Promise<{vaults_count: number}> {
+	return baseFetcher(url) as Promise<{vaults_count: number}>;
+}
 
-	try {
-		const response = await fetch(url, {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json'
-			},
-			body: JSON.stringify({
-				query: 'query GetYearnV3Vaults { vaults(v3: true, yearn: true) { address } }'
-			})
-		});
-
-		if (!response.ok) {
-			const error = `Failed to fetch ${url}: ${response.status} ${response.statusText}`;
-			console.error('[graphqlFetcher] Error:', error);
-			throw new Error(error);
-		}
-
-		const data = await response.json();
-		const count = data?.data?.vaults?.length || 0;
-		console.log('[graphqlFetcher] Success: Found', count, 'vaults');
-		return {
-			vaults_count: count
-		};
-	} catch (error) {
-		console.error('[graphqlFetcher] Exception:', url, error);
-		throw error;
-	}
+async function feesFetcher(url: string): Promise<{total30d: number}> {
+	return baseFetcher(url) as Promise<{total30d: number}>;
 }
 
 function	SectionStats(): ReactElement {
 	const	{data: count, error: countError} = useSWR(
-		'https://kong.yearn.fi/api/gql',
-		graphqlFetcher,
+		'/api/vault-count',
+		vaultCountFetcher,
 		{
 			revalidateOnFocus: false,
 			onError: (err: Error) => console.error('[SWR] Vaults count fetch error:', err)
@@ -48,8 +24,8 @@ function	SectionStats(): ReactElement {
 	) as SWRResponse;
 
 	const	{data: fees, error: feesError} = useSWR(
-		'https://api.llama.fi/summary/fees/yearn',
-		baseFetcher,
+		'/api/fees',
+		feesFetcher,
 		{
 			revalidateOnFocus: false,
 			onError: (err: Error) => console.error('[SWR] Fees fetch error:', err)

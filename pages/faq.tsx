@@ -10,6 +10,12 @@ function	FAQPage(): ReactElement {
 				<section className={'mt-12 rounded-lg border border-neutral-300 bg-white p-6 shadow-sm'}>
 					<div className={'space-y-6 text-neutral-700 text-base sm:text-lg'}>
 						<div>
+							<p className={'text-lg font-semibold text-neutral-900 sm:text-xl'}>{'What is this partners program about?'}</p>
+							<p>
+								{'If you want to enable users to deposit into Yearn vaults from your dApp, you can partner with Yearn and earn half of the fees from your users depositing into Yearn vaults. This applies only to Yearn v3 vaults and active yLockers, as we do not currently wish to incentivize building on older Yearn projects.'}
+							</p>
+						</div>
+						<div>
 							<p className={'text-lg font-semibold text-neutral-900 sm:text-xl'}>{'What are the benefits for partners?'}</p>
 							<p>
 								{'Yearn vaults earn fees, and partners get a 50% split of the fees earned by the TVL that they have direct to Yearn vaults.'}
@@ -26,7 +32,7 @@ function	FAQPage(): ReactElement {
 									target={'_blank'}>
 									{'Yearn 4626 Router contract'}
 								</a>
-								{' that acts as a passthrough to Yearn vaults, and this Router contract will be specific to your partnership.'}
+								{' that acts as a passthrough to Yearn vaults, and this Router contract will be specific to your partnership. Currently, partnering with Yearn is not permissionless as there is no way to automatically claim fees without manual effort.'}
 							</p>
 						</div>
 						<div>
