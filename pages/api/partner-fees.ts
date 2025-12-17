@@ -295,19 +295,12 @@ function calculatePosition(events: TEvent[]): {snapshots: TSnapshot[], currentSh
 	return {snapshots, currentShares};
 }
 
-async function getBlockTimestamp(provider: ethers.providers.JsonRpcProvider, blockNumber: number): Promise<number> {
-	const block = await provider.getBlock(blockNumber);
-	return block.timestamp;
-}
-
 async function getCutoffBlock(provider: ethers.providers.JsonRpcProvider, days?: number): Promise<number | null> {
 	if (!days || days <= 0) {
 		return null; // No filter, return all history
 	}
 
 	const currentBlock = await provider.getBlockNumber();
-	const currentTimestamp = await getBlockTimestamp(provider, currentBlock);
-	const cutoffTimestamp = currentTimestamp - (days * 24 * 60 * 60);
 
 	// Approximate blocks per day (~7200 for 12s block time)
 	const estimatedBlocksPerDay = 7200;
