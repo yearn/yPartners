@@ -118,13 +118,12 @@ function	Tabs({selectedIndex, set_selectedIndex}: TProps): ReactElement {
 	);
 }
 
-function	DashboardTabsWrapper({partnerID: _partnerID}: {partnerID: string}): ReactElement {
-	const {vaults, tvlOverride, userCount, feesOverride} = usePartner();
+function	DashboardTabsWrapper({partnerID: _partnerID, windowValue, onWindowChange}: {partnerID: string, windowValue: number, onWindowChange: (value: number) => void}): ReactElement {
+	const {vaults, tvlOverride, userCount, feesOverride, isLoadingFees} = usePartner();
 	const vaultList = Object.values(vaults || {});
 	const hasVaults = vaultList.length > 0;
 	const [selectedIndex, set_selectedIndex] = useState(-1);
 	const [activeWindow, set_activeWindow] = useState('1 month');
-	const [windowValue, set_windowValue] = useState(29);
 	const [balanceTVLs] = useState<TDict<TChartBar[]>>();
 	const [wrapperTotals] = useState<TChartBar[]>();
 	const [payoutTotals] = useState<TDict<TChartBar[]>>();
@@ -141,7 +140,7 @@ function	DashboardTabsWrapper({partnerID: _partnerID}: {partnerID: string}): Rea
 		const {name, value} = e.currentTarget;
 		performBatchedUpdates((): void => {
 			set_activeWindow(name);
-			set_windowValue(+value);
+			onWindowChange(+value);
 		});
 	}
 
@@ -353,10 +352,11 @@ function	DashboardTabsWrapper({partnerID: _partnerID}: {partnerID: string}): Rea
 				selectedIndex={selectedIndex}
 				tvlOverride={tvlOverride}
 				feesOverride={feesOverride}
-				userCount={userCount}/>
+				userCount={userCount}
+				isLoadingFees={isLoadingFees}/>
 
-			{aggregationStep < 2 || !balanceTVLs || !wrapperTotals || !payoutTotals ? 
-				<h1>{'Generating visuals...'}</h1> : (
+			{aggregationStep < 2 || !balanceTVLs || !wrapperTotals || !payoutTotals ?
+				null : (
 					<>			
 						{Object.values(vaults || []).map((_, idx): ReactElement | null => {
 							return idx === selectedIndex ? <VaultChart

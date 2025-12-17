@@ -11,6 +11,7 @@ import type {TDict} from 'lib/yearn/utils/types';
 type TPartnerContext = {
 	vaults: TDict<TPartnerVault>,
 	isLoadingVaults: boolean,
+	isLoadingFees: boolean,
 	tvlOverride?: number,
 	userCount?: number,
 	feesOverride?: number,
@@ -19,6 +20,7 @@ type TPartnerContext = {
 const	defaultProps: TPartnerContext = {
 	vaults: {},
 	isLoadingVaults: false,
+	isLoadingFees: false,
 	tvlOverride: undefined,
 	userCount: undefined,
 	feesOverride: undefined
@@ -51,8 +53,9 @@ type TPartnerFeesResponse = {
 
 export const PartnerContextApp = ({
 	partnerID,
-	children
-}: {partnerID: string, children: ReactElement}): ReactElement => {
+	children,
+	windowDays
+}: {partnerID: string, children: ReactElement, windowDays?: number}): ReactElement => {
 	const currentPartner = SHAREABLE_ADDRESSES[partnerID] ? SHAREABLE_ADDRESSES[partnerID].shortName : '';
 	const depositorAddresses = currentPartner ? PARTNER_ADDRESS_GROUPS[currentPartner] || [] : [];
 	const isSSR = typeof window === 'undefined';
@@ -63,8 +66,12 @@ export const PartnerContextApp = ({
 		{revalidateOnFocus: false}
 	) as SWRResponse<TPartnerTVLResponse>;
 
+	const feesUrl = typeof window !== 'undefined' && depositorAddresses.length > 0
+		? `/api/partner-fees?addresses=${depositorAddresses.join(',')}${windowDays ? `&days=${windowDays}` : ''}`
+		: null;
+
 	const {data: depositorFees, isLoading: isLoadingDepositorFees} = useSWR(
-		typeof window !== 'undefined' && depositorAddresses.length > 0 ? `/api/partner-fees?addresses=${depositorAddresses.join(',')}` : null,
+		feesUrl,
 		baseFetcher,
 		{revalidateOnFocus: false}
 	) as SWRResponse<TPartnerFeesResponse>;
@@ -77,8 +84,18 @@ export const PartnerContextApp = ({
 			// During SSR mark as loading so server and client render the same markup.
 			return true;
 		}
-		return isLoadingDepositorTVL || isLoadingDepositorFees;
-	}, [depositorAddresses.length, isSSR, isLoadingDepositorTVL, isLoadingDepositorFees]);
+		return isLoadingDepositorTVL;
+	}, [depositorAddresses.length, isSSR, isLoadingDepositorTVL]);
+
+	const isLoadingFees = useMemo((): boolean => {
+		if (depositorAddresses.length === 0) {
+			return false;
+		}
+		if (isSSR) {
+			return true;
+		}
+		return isLoadingDepositorFees;
+	}, [depositorAddresses.length, isSSR, isLoadingDepositorFees]);
 
 	const	vaults = useMemo((): TDict<TPartnerVault> => {
 		// Yearn Vision data usage is disabled; returning empty vault list.
@@ -119,6 +136,7 @@ export const PartnerContextApp = ({
 			value={{
 				vaults: vaults,
 				isLoadingVaults,
+				isLoadingFees,
 				tvlOverride,
 				userCount,
 				feesOverride

@@ -6,7 +6,7 @@ import {LOGOS, SHAREABLE_ADDRESSES} from 'utils/Partners';
 import type {GetStaticPathsResult, GetStaticPropsResult} from 'next';
 import type {ReactElement} from 'react';
 
-function Index({partnerID}: {partnerID: string}): ReactElement {
+function Index({partnerID, windowValue, onWindowChange}: {partnerID: string, windowValue: number, onWindowChange: (value: number) => void}): ReactElement {
 	const {isLoadingVaults} = usePartner();
 	const [lastSync, set_lastSync] = useState('');
 
@@ -16,9 +16,9 @@ function Index({partnerID}: {partnerID: string}): ReactElement {
 
 	useEffect((): void => {
 		const latestSync = new Date().toLocaleString('default',
-			{month: 'long', day: '2-digit', year: 'numeric', hour: 'numeric', minute:'numeric'});
+			{month: 'long', day: '2-digit', year: 'numeric', hour: 'numeric', minute:'numeric', timeZone: 'UTC'});
 
-		set_lastSync(latestSync);
+		set_lastSync(`${latestSync} UTC`);
 	}, [set_lastSync]);
 
 
@@ -30,9 +30,12 @@ function Index({partnerID}: {partnerID: string}): ReactElement {
 		}
 
 		return (
-			<DashboardTabsWrapper partnerID={currentPartnerShortname} />
+			<DashboardTabsWrapper
+				partnerID={currentPartnerShortname}
+				windowValue={windowValue}
+				onWindowChange={onWindowChange} />
 		);
-	}, [currentPartner, isLoadingVaults, currentPartnerShortname]);
+	}, [currentPartner, isLoadingVaults, currentPartnerShortname, windowValue, onWindowChange]);
 
 	return (
 		<main className={'mb-20 pb-20'}>
@@ -65,9 +68,14 @@ function Index({partnerID}: {partnerID: string}): ReactElement {
 
 
 function	PartnerDashboardWrapper({partnerID}: {partnerID: string}): ReactElement {
+	const [windowValue, set_windowValue] = useState(29); // Default to 1 month
+
 	return (
-		<PartnerContextApp partnerID={partnerID}>
-			<Index partnerID={partnerID} />
+		<PartnerContextApp partnerID={partnerID} windowDays={windowValue}>
+			<Index
+				partnerID={partnerID}
+				windowValue={windowValue}
+				onWindowChange={set_windowValue} />
 		</PartnerContextApp>
 	);
 }
