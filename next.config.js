@@ -1,6 +1,9 @@
 module.exports = ({
 	images: {
-		domains: ['rawcdn.githack.com']
+		remotePatterns: [{
+			protocol: 'https',
+			hostname: 'rawcdn.githack.com'
+		}]
 	},
 	env: {
 		/* 🔵 - Yearn Finance **************************************************
