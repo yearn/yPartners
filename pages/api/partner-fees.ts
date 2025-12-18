@@ -295,24 +295,51 @@ function calculatePosition(events: TEvent[]): {snapshots: TSnapshot[], currentSh
 	return {snapshots, currentShares};
 }
 
+async function getBlockTimestamp(provider: ethers.providers.JsonRpcProvider, blockNumber: number): Promise<number> {
+	const block = await provider.getBlock(blockNumber);
+	return block.timestamp;
+}
+
+async function getCutoffBlock(provider: ethers.providers.JsonRpcProvider, days?: number): Promise<number | null> {
+	if (!days || days <= 0) {
+		return null; // No filter, return all history
+	}
+
+	const currentBlock = await provider.getBlockNumber();
+	const currentTimestamp = await getBlockTimestamp(provider, currentBlock);
+	const cutoffTimestamp = currentTimestamp - (days * 24 * 60 * 60);
+
+	// Approximate blocks per day (~7200 for 12s block time)
+	const estimatedBlocksPerDay = 7200;
+	const estimatedCutoffBlock = currentBlock - (days * estimatedBlocksPerDay);
+
+	return Math.max(0, estimatedCutoffBlock);
+}
+
 async function calculateIncrementalProfitAndFees(
 	provider: ethers.providers.JsonRpcProvider,
 	snapshots: TSnapshot[],
 	performanceFeeBps: number,
 	currentPps: BigNumber,
 	decimals: number,
-	vault: string
+	vault: string,
+	cutoffBlock: number | null = null
 ): Promise<BigNumber> {
-	if (snapshots.length === 0) {
+	// Filter snapshots by cutoff block if specified
+	const filteredSnapshots = cutoffBlock !== null
+		? snapshots.filter((snapshot): boolean => snapshot.blockNumber >= cutoffBlock)
+		: snapshots;
+
+	if (filteredSnapshots.length === 0) {
 		return BigNumber.from(0);
 	}
 
 	const scale = BigNumber.from(10).pow(decimals);
 	let netProfit = BigNumber.from(0);
 	let previousShares = BigNumber.from(0);
-	let previousPps = await getPricePerShareAtBlock(provider, vault, snapshots[0].blockNumber);
+	let previousPps = await getPricePerShareAtBlock(provider, vault, filteredSnapshots[0].blockNumber);
 
-	for (const snapshot of snapshots) {
+	for (const snapshot of filteredSnapshots) {
 		const snapshotPps = await getPricePerShareAtBlock(provider, vault, snapshot.blockNumber);
 		const deltaPps = snapshotPps.sub(previousPps);
 		netProfit = netProfit.add(previousShares.mul(deltaPps).div(scale));
@@ -341,6 +368,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
 	const rpcUrl = process.env.RPC_URL_MAINNET;
 	const vaultAddress = process.env.V3_VAULT_ADDRESS || DEFAULT_VAULT_ADDRESS;
 	const addresses = parseAddresses(req.query.addresses || req.query.address);
+	const daysParam = req.query.days;
+	const days = daysParam ? parseInt(Array.isArray(daysParam) ? daysParam[0] : daysParam, 10) : undefined;
 
 	if (addresses.length === 0) {
 		res.status(200).json(buildEmptyResponse(addresses, vaultAddress));
@@ -356,10 +385,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
 
 	try {
 		const provider = new ethers.providers.JsonRpcProvider(rpcUrl);
-		const [currentPpsRaw, decimalsRaw, performanceFeeBps] = await Promise.all([
+		const [currentPpsRaw, decimalsRaw, performanceFeeBps, cutoffBlock] = await Promise.all([
 			getPricePerShareAtBlock(provider, vaultAddress),
 			provider.call({to: vaultAddress, data: DECIMALS_SELECTOR}),
-			getPerformanceFeeBps(provider, vaultAddress)
+			getPerformanceFeeBps(provider, vaultAddress),
+			getCutoffBlock(provider, days)
 		]);
 
 		const decimals = BigNumber.from(decimalsRaw).toNumber();
@@ -382,7 +412,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
 				performanceFeeBps,
 				currentPpsRaw,
 				decimals,
-				vaultAddress
+				vaultAddress,
+				cutoffBlock
 			);
 
 			totalFees = totalFees.add(feesPaid);

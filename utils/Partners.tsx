@@ -22,6 +22,8 @@ const SHAREABLE_ADDRESSES: {[key: string]: {name: string, shortName: string}} = 
 const PARTNER_ADDRESS_GROUPS: {[key: string]: TAddress[]} = {
 	sturdy: [
 		toAddress('0xc337C76158c131beDf95a5D4e0C27EC8eFdb7f02'),
+		toAddress('0x93A62dA5a14C80f265DAbC077fCEE437B1a0Efde'),
+		toAddress('0xAe7d8Db82480E6d8e3873ecbF22cf17b3D8A7308'),
 		toAddress('0x13B053f017B6C68e089267Ffc3f10EE92ED95a79'),
 		toAddress('0xA2F263426ef09d43057d6be798A6672A4401ecC5')
 	]
