@@ -152,7 +152,7 @@ function	Targets(): ReactElement {
 				<div className={'flex flex-col space-y-4'}>
 					<div className={'space-y-3'}>
 						<h3 className={'text-xl font-semibold text-neutral-800'}>{'Build entire products with Yearn'}</h3>
-						<div className={'mb-8 overflow-hidden rounded-2xl border-2 border-neutral-300 bg-white p-8'}>
+						<div className={'mb-8 overflow-hidden rounded-2xl border-2 border-neutral-300 bg-white p-4 md:p-8'}>
 							<div className={'overflow-hidden'}>
 								<div
 									className={'flex'}
@@ -165,7 +165,7 @@ function	Targets(): ReactElement {
 											key={`${logo.name}-${index}`}
 											className={'flex basis-1/3 flex-shrink-0 items-center justify-center px-3'}>
 											<a
-												className={'flex h-full w-full items-center justify-center rounded-xl border border-neutral-200 bg-neutral-50 p-6'}
+												className={'flex h-full w-full items-center justify-center rounded-xl border border-neutral-200 bg-neutral-50 p-3 md:p-6'}
 												href={logo.href}
 												target={'_blank'}
 												rel={'noreferrer noopener'}>
@@ -174,7 +174,7 @@ function	Targets(): ReactElement {
 													src={logo.src}
 													width={320}
 													height={160}
-													className={'h-28 w-auto object-contain'}
+													className={'h-32 w-auto object-contain md:h-28'}
 												/>
 											</a>
 										</div>
@@ -183,7 +183,7 @@ function	Targets(): ReactElement {
 							</div>
 						</div>
 						<h3 className={'mt-8 text-xl font-semibold text-neutral-800'}>{'Embed Yearn-curated Vaults'}</h3>
-						<div className={'mb-8 overflow-hidden rounded-2xl border-2 border-neutral-300 bg-white p-8'}>
+						<div className={'mb-8 overflow-hidden rounded-2xl border-2 border-neutral-300 bg-white p-4 md:p-8'}>
 							<div className={'overflow-hidden'}>
 								<div
 									className={'flex'}
@@ -196,7 +196,7 @@ function	Targets(): ReactElement {
 											key={`${logo.name}-${index}`}
 											className={'flex basis-1/3 flex-shrink-0 items-center justify-center px-3'}>
 											<a
-												className={'flex h-full w-full items-center justify-center rounded-xl border border-neutral-200 bg-neutral-50 p-6'}
+												className={'flex h-full w-full items-center justify-center rounded-xl border border-neutral-200 bg-neutral-50 p-3 md:p-6'}
 												href={logo.href}
 												target={'_blank'}
 												rel={'noreferrer noopener'}>
@@ -205,7 +205,7 @@ function	Targets(): ReactElement {
 													src={logo.src}
 													width={320}
 													height={160}
-													className={'h-28 w-auto object-contain'}
+													className={'h-32 w-auto object-contain md:h-28'}
 												/>
 											</a>
 										</div>

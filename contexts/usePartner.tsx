@@ -1,12 +1,14 @@
 import {createContext, useContext, useMemo}	from 'react';
-import {PARTNER_ADDRESS_GROUPS, SHAREABLE_ADDRESSES} from 'utils/Partners';
+import {PARTNER_ADDRESS_GROUPS, PARTNER_VAULT_CONFIG, SHAREABLE_ADDRESSES} from 'utils/Partners';
 import useSWR from 'swr';
 import {baseFetcher} from 'lib/yearn/utils/fetchers';
+import {toAddress} from 'lib/yearn/utils/address';
 
 import type {ReactElement} from 'react';
 import type {SWRResponse} from 'swr';
 import type {TPartnerVault} from 'types/types';
 import type {TDict} from 'lib/yearn/utils/types';
+import type {TAddress} from 'lib/yearn/utils/address';
 
 type TPartnerContext = {
 	vaults: TDict<TPartnerVault>,
@@ -15,6 +17,8 @@ type TPartnerContext = {
 	tvlOverride?: number,
 	userCount?: number,
 	feesOverride?: number,
+	chainId?: number,
+	vaultAddress?: TAddress,
 }
 
 const	defaultProps: TPartnerContext = {
@@ -23,7 +27,9 @@ const	defaultProps: TPartnerContext = {
 	isLoadingFees: false,
 	tvlOverride: undefined,
 	userCount: undefined,
-	feesOverride: undefined
+	feesOverride: undefined,
+	chainId: undefined,
+	vaultAddress: undefined
 };
 
 const	Partner = createContext<TPartnerContext>(defaultProps);
@@ -51,6 +57,12 @@ type TPartnerFeesResponse = {
 	}[]
 };
 
+type TVaultCombo = {
+	chainId: number;
+	vaultAddress: TAddress;
+	addresses: TAddress[];
+};
+
 export const PartnerContextApp = ({
 	partnerID,
 	children,
@@ -60,21 +72,48 @@ export const PartnerContextApp = ({
 	const depositorAddresses = currentPartner ? PARTNER_ADDRESS_GROUPS[currentPartner] || [] : [];
 	const isSSR = typeof window === 'undefined';
 
-	const {data: depositorTVL, isLoading: isLoadingDepositorTVL} = useSWR(
-		typeof window !== 'undefined' && depositorAddresses.length > 0 ? `/api/partner-tvl?addresses=${depositorAddresses.join(',')}` : null,
-		baseFetcher,
-		{revalidateOnFocus: false}
-	) as SWRResponse<TPartnerTVLResponse>;
+	// Extract all chain/vault combinations for this partner
+	const vaultCombos = useMemo((): TVaultCombo[] => {
+		if (!currentPartner || !PARTNER_VAULT_CONFIG[currentPartner]) {
+			return [];
+		}
 
-	const feesUrl = typeof window !== 'undefined' && depositorAddresses.length > 0
-		? `/api/partner-fees?addresses=${depositorAddresses.join(',')}${windowDays ? `&days=${windowDays}` : ''}`
-		: null;
+		const combos: TVaultCombo[] = [];
+		const chainConfig = PARTNER_VAULT_CONFIG[currentPartner];
 
-	const {data: depositorFees, isLoading: isLoadingDepositorFees} = useSWR(
-		feesUrl,
-		baseFetcher,
-		{revalidateOnFocus: false}
-	) as SWRResponse<TPartnerFeesResponse>;
+		Object.entries(chainConfig).forEach(([chainIdStr, vaultConfig]) => {
+			const chainId = Number(chainIdStr);
+			Object.entries(vaultConfig).forEach(([vaultAddress, addresses]) => {
+				combos.push({
+					chainId,
+					vaultAddress: toAddress(vaultAddress),
+					addresses
+				});
+			});
+		});
+
+		return combos;
+	}, [currentPartner]);
+
+	// Make API calls for each vault combination
+	const tvlCalls = vaultCombos.map((combo) => {
+		const key = typeof window !== 'undefined' && combo.addresses.length > 0
+			? `/api/partner-tvl?addresses=${combo.addresses.join(',')}&vaultAddress=${combo.vaultAddress}&chainId=${combo.chainId}`
+			: null;
+		// eslint-disable-next-line react-hooks/rules-of-hooks
+		return useSWR(key, baseFetcher, {revalidateOnFocus: false}) as SWRResponse<TPartnerTVLResponse>;
+	});
+
+	const feesCalls = vaultCombos.map((combo) => {
+		const key = typeof window !== 'undefined' && combo.addresses.length > 0
+			? `/api/partner-fees?addresses=${combo.addresses.join(',')}&vaultAddress=${combo.vaultAddress}&chainId=${combo.chainId}${windowDays ? `&days=${windowDays}` : ''}`
+			: null;
+		// eslint-disable-next-line react-hooks/rules-of-hooks
+		return useSWR(key, baseFetcher, {revalidateOnFocus: false}) as SWRResponse<TPartnerFeesResponse>;
+	});
+
+	const isLoadingDepositorTVL = tvlCalls.some((call) => call.isLoading);
+	const isLoadingDepositorFees = feesCalls.some((call) => call.isLoading);
 
 	const isLoadingVaults = useMemo((): boolean => {
 		if (depositorAddresses.length === 0) {
@@ -102,27 +141,53 @@ export const PartnerContextApp = ({
 		return {};
 	}, []);
 
+	// Aggregate TVL from all vault combinations
 	const tvlOverride = useMemo((): number | undefined => {
-		if (!depositorTVL) {
+		if (tvlCalls.length === 0) {
 			return undefined;
 		}
 
-		if (typeof depositorTVL.totalCurrentValueNormalized === 'number') {
-			return depositorTVL.totalCurrentValueNormalized;
+		// If any call is still loading, return undefined
+		if (tvlCalls.some((call) => call.isLoading)) {
+			return undefined;
 		}
 
-		return undefined;
-	}, [depositorTVL]);
+		let totalTVL = 0;
+		let hasData = false;
 
+		tvlCalls.forEach((call) => {
+			if (call.data && typeof call.data.totalCurrentValueNormalized === 'number') {
+				totalTVL += call.data.totalCurrentValueNormalized;
+				hasData = true;
+			}
+		});
+
+		return hasData ? totalTVL : undefined;
+	}, [tvlCalls]);
+
+	// Aggregate fees from all vault combinations
 	const feesOverride = useMemo((): number | undefined => {
-		if (!depositorFees) {
+		if (feesCalls.length === 0) {
 			return undefined;
 		}
-		if (typeof depositorFees.totalFeesNormalized === 'number') {
-			return depositorFees.totalFeesNormalized;
+
+		// If any call is still loading, return undefined
+		if (feesCalls.some((call) => call.isLoading)) {
+			return undefined;
 		}
-		return undefined;
-	}, [depositorFees]);
+
+		let totalFees = 0;
+		let hasData = false;
+
+		feesCalls.forEach((call) => {
+			if (call.data && typeof call.data.totalFeesNormalized === 'number') {
+				totalFees += call.data.totalFeesNormalized;
+				hasData = true;
+			}
+		});
+
+		return hasData ? totalFees : undefined;
+	}, [feesCalls]);
 
 	const userCount = useMemo((): number | undefined => {
 		if (depositorAddresses.length === 0) {
@@ -130,6 +195,10 @@ export const PartnerContextApp = ({
 		}
 		return depositorAddresses.length;
 	}, [depositorAddresses.length]);
+
+	// For backward compatibility, return the first chain/vault combination
+	// Note: tvlOverride and feesOverride are aggregated across ALL chains/vaults
+	const firstCombo = vaultCombos[0];
 
 	return (
 		<Partner.Provider
@@ -139,7 +208,9 @@ export const PartnerContextApp = ({
 				isLoadingFees,
 				tvlOverride,
 				userCount,
-				feesOverride
+				feesOverride,
+				chainId: firstCombo?.chainId,
+				vaultAddress: firstCombo?.vaultAddress
 			}}>
 			{children}
 		</Partner.Provider>
