@@ -131,11 +131,14 @@ function parseEventId(eventId: string): {block: number, log: number} {
 	return {block: parseInt(parts[1], 10), log: parseInt(parts[2], 10)};
 }
 
-async function getDepositEvents(address: string): Promise<TDepositEvent[]> {
+async function getDepositEvents(address: string, vaultAddress: string): Promise<TDepositEvent[]> {
 	const query = `
-		query GetDepositorDeposits($depositorAddress: String!) {
+		query GetDepositorDeposits($depositorAddress: String!, $vaultAddress: String!) {
 			Deposit(
-				where: { owner: { _eq: $depositorAddress } }
+				where: {
+					owner: { _eq: $depositorAddress }
+					vaultAddress: { _eq: $vaultAddress }
+				}
 				order_by: { id: asc }
 			) {
 				id
@@ -147,15 +150,21 @@ async function getDepositEvents(address: string): Promise<TDepositEvent[]> {
 		}
 	`;
 
-	const result = await queryEnvioGraphQL<{Deposit: TDepositEvent[]}>(query, {depositorAddress: address.toLowerCase()});
+	const result = await queryEnvioGraphQL<{Deposit: TDepositEvent[]}>(query, {
+		depositorAddress: address.toLowerCase(),
+		vaultAddress: vaultAddress.toLowerCase()
+	});
 	return result?.Deposit || [];
 }
 
-async function getWithdrawEvents(address: string): Promise<TWithdrawEvent[]> {
+async function getWithdrawEvents(address: string, vaultAddress: string): Promise<TWithdrawEvent[]> {
 	const query = `
-		query GetDepositorWithdrawals($depositorAddress: String!) {
+		query GetDepositorWithdrawals($depositorAddress: String!, $vaultAddress: String!) {
 			Withdraw(
-				where: { owner: { _eq: $depositorAddress } }
+				where: {
+					owner: { _eq: $depositorAddress }
+					vaultAddress: { _eq: $vaultAddress }
+				}
 				order_by: { id: asc }
 			) {
 				id
@@ -168,15 +177,22 @@ async function getWithdrawEvents(address: string): Promise<TWithdrawEvent[]> {
 		}
 	`;
 
-	const result = await queryEnvioGraphQL<{Withdraw: TWithdrawEvent[]}>(query, {depositorAddress: address.toLowerCase()});
+	const result = await queryEnvioGraphQL<{Withdraw: TWithdrawEvent[]}>(query, {
+		depositorAddress: address.toLowerCase(),
+		vaultAddress: vaultAddress.toLowerCase()
+	});
 	return result?.Withdraw || [];
 }
 
-async function getTransferEvents(address: string): Promise<TTransferEvent[]> {
+async function getTransferEvents(address: string, vaultAddress: string): Promise<TTransferEvent[]> {
 	const query = `
-		query GetDepositorTransfers($depositorAddress: String!, $zeroAddress: String!) {
+		query GetDepositorTransfers($depositorAddress: String!, $zeroAddress: String!, $vaultAddress: String!) {
 			transfersFrom: Transfer(
-				where: { sender: { _eq: $depositorAddress }, receiver: { _neq: $zeroAddress } }
+				where: {
+					sender: { _eq: $depositorAddress }
+					receiver: { _neq: $zeroAddress }
+					vaultAddress: { _eq: $vaultAddress }
+				}
 				order_by: { id: asc }
 			) {
 				id
@@ -185,7 +201,11 @@ async function getTransferEvents(address: string): Promise<TTransferEvent[]> {
 				value
 			}
 			transfersTo: Transfer(
-				where: { receiver: { _eq: $depositorAddress }, sender: { _neq: $zeroAddress } }
+				where: {
+					receiver: { _eq: $depositorAddress }
+					sender: { _neq: $zeroAddress }
+					vaultAddress: { _eq: $vaultAddress }
+				}
 				order_by: { id: asc }
 			) {
 				id
@@ -196,7 +216,11 @@ async function getTransferEvents(address: string): Promise<TTransferEvent[]> {
 		}
 	`;
 
-	const variables = {depositorAddress: address.toLowerCase(), zeroAddress: ZERO_ADDRESS.toLowerCase()};
+	const variables = {
+		depositorAddress: address.toLowerCase(),
+		zeroAddress: ZERO_ADDRESS.toLowerCase(),
+		vaultAddress: vaultAddress.toLowerCase()
+	};
 	const result = await queryEnvioGraphQL<{transfersFrom: TTransferEvent[], transfersTo: TTransferEvent[]}>(query, variables);
 	return [...(result?.transfersFrom || []), ...(result?.transfersTo || [])];
 }
@@ -359,7 +383,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
 	}
 
 	const rpcUrl = process.env.RPC_URL_MAINNET;
-	const vaultAddress = process.env.V3_VAULT_ADDRESS || DEFAULT_VAULT_ADDRESS;
+	const vaultAddressParam = req.query.vaultAddress;
+	const vaultAddress = vaultAddressParam
+		? toAddress(Array.isArray(vaultAddressParam) ? vaultAddressParam[0] : vaultAddressParam)
+		: toAddress(DEFAULT_VAULT_ADDRESS);
 	const addresses = parseAddresses(req.query.addresses || req.query.address);
 	const daysParam = req.query.days;
 	const days = daysParam ? parseInt(Array.isArray(daysParam) ? daysParam[0] : daysParam, 10) : undefined;
@@ -392,9 +419,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
 
 		for (const address of addresses) {
 			const [deposits, withdrawals, transfers] = await Promise.all([
-				getDepositEvents(address),
-				getWithdrawEvents(address),
-				getTransferEvents(address)
+				getDepositEvents(address, vaultAddress),
+				getWithdrawEvents(address, vaultAddress),
+				getTransferEvents(address, vaultAddress)
 			]);
 
 			const timeline = buildEventTimeline(deposits, withdrawals, transfers, address);

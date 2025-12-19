@@ -73,7 +73,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
 	}
 
 	const rpcUrl = process.env.RPC_URL_MAINNET;
-	const vaultAddress = process.env.V3_VAULT_ADDRESS || DEFAULT_VAULT_ADDRESS;
+	const vaultAddressParam = req.query.vaultAddress;
+	const vaultAddress = vaultAddressParam
+		? toAddress(Array.isArray(vaultAddressParam) ? vaultAddressParam[0] : vaultAddressParam)
+		: toAddress(DEFAULT_VAULT_ADDRESS);
 	const addresses = parseAddresses(req.query.addresses || req.query.address);
 
 	if (addresses.length === 0) {
