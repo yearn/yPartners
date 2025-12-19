@@ -1,6 +1,8 @@
 import {Fragment, useMemo, useState} from 'react';
 import OverviewChart from 'components/graphs/OverviewChart';
 import IconChevronDown from 'components/icons/IconChevronDown';
+import BalanceProfitChart from 'components/charts/BalanceProfitChart';
+import AccountFeesTable from 'components/dashboard/AccountFeesTable';
 import {getExplorerURL, NETWORK_LABELS} from 'utils';
 import {Listbox, Transition} from '@headlessui/react';
 import {Button} from 'lib/yearn/components/Button';
@@ -119,7 +121,7 @@ function	Tabs({selectedIndex, set_selectedIndex}: TProps): ReactElement {
 }
 
 function	DashboardTabsWrapper({partnerID: _partnerID, windowValue, onWindowChange}: {partnerID: string, windowValue: number, onWindowChange: (value: number) => void}): ReactElement {
-	const {vaults, tvlOverride, userCount, feesOverride, isLoadingFees} = usePartner();
+	const {vaults, tvlOverride, userCount, feesOverride, isLoadingFees, isLoadingChart, chartSnapshots, accountFees} = usePartner();
 	const vaultList = Object.values(vaults || {});
 	const hasVaults = vaultList.length > 0;
 	const [selectedIndex, set_selectedIndex] = useState(-1);
@@ -354,6 +356,14 @@ function	DashboardTabsWrapper({partnerID: _partnerID, windowValue, onWindowChang
 				feesOverride={feesOverride}
 				userCount={userCount}
 				isLoadingFees={isLoadingFees}/>
+
+			<div className={'mt-8 px-4 md:px-8'}>
+				<BalanceProfitChart snapshots={chartSnapshots} isLoading={isLoadingChart} />
+			</div>
+
+			<div className={'mt-8 px-4 md:px-8'}>
+				<AccountFeesTable accountFees={accountFees} />
+			</div>
 
 			{aggregationStep < 2 || !balanceTVLs || !wrapperTotals || !payoutTotals ?
 				null : (
