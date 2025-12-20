@@ -40,7 +40,15 @@ type TSnapshot = {
 type TAccountFees = {
 	address: string,
 	totalFees: string,
-	totalFeesNormalized: number
+	totalFeesNormalized: number,
+	currentShares: string,
+	currentSharesNormalized: number
+};
+
+type TChartSnapshot = {
+	block: number,
+	shares: number,
+	profit: number
 };
 
 type TResponse =
@@ -50,7 +58,8 @@ type TResponse =
 			performanceFeeBps: number,
 			totalFees: string,
 			totalFeesNormalized: number,
-			accounts: TAccountFees[]
+			accounts: TAccountFees[],
+			snapshots: TChartSnapshot[]
 		}
 	| {error: string};
 
@@ -93,8 +102,11 @@ function buildEmptyResponse(addresses: string[], vaultAddress: string): TRespons
 		accounts: addresses.map((address): TAccountFees => ({
 			address,
 			totalFees: '0',
-			totalFeesNormalized: 0
-		}))
+			totalFeesNormalized: 0,
+			currentShares: '0',
+			currentSharesNormalized: 0
+		})),
+		snapshots: []
 	};
 }
 
@@ -351,6 +363,7 @@ async function calculateIncrementalProfitAndFees(
 		return BigNumber.from(0);
 	}
 
+	// Keep sequential for faster initial fee calculation (metrics load first)
 	const scale = BigNumber.from(10).pow(decimals);
 	let netProfit = BigNumber.from(0);
 	let previousShares = BigNumber.from(0);
@@ -375,6 +388,102 @@ async function calculateIncrementalProfitAndFees(
 	return grossProfit.sub(netProfit);
 }
 
+function aggregateSnapshots(snapshots: TSnapshot[]): TSnapshot[] {
+	if (snapshots.length === 0) {
+		return [];
+	}
+
+	// Group snapshots by block number and sum shares
+	const blockMap = new Map<number, BigNumber>();
+
+	for (const snapshot of snapshots) {
+		const currentShares = blockMap.get(snapshot.blockNumber) || BigNumber.from(0);
+		blockMap.set(snapshot.blockNumber, currentShares.add(snapshot.sharesBalance));
+	}
+
+	// Convert back to snapshot array and sort by block
+	const aggregated: TSnapshot[] = [];
+	for (const [blockNumber, sharesBalance] of blockMap.entries()) {
+		aggregated.push({
+			blockNumber,
+			eventType: 'deposit', // Type doesn't matter for chart
+			sharesBalance
+		});
+	}
+
+	return aggregated.sort((a, b) => a.blockNumber - b.blockNumber);
+}
+
+async function prepareChartSnapshots(
+	provider: ethers.providers.JsonRpcProvider,
+	snapshots: TSnapshot[],
+	decimals: number,
+	currentPps: BigNumber,
+	currentShares: BigNumber,
+	vault: string
+): Promise<TChartSnapshot[]> {
+	if (snapshots.length === 0) {
+		return [];
+	}
+
+	// OPTIMIZATION: Batch all RPC calls in parallel instead of sequential
+	// Collect all unique block numbers
+	const blockNumbers = snapshots.map((s) => s.blockNumber);
+
+	// Fetch all price-per-share values in parallel
+	const ppsPromises = blockNumbers.map((block) => getPricePerShareAtBlock(provider, vault, block));
+	const ppsValues = await Promise.all(ppsPromises);
+
+	// Create a map for quick lookup
+	const ppsMap = new Map<number, BigNumber>();
+	blockNumbers.forEach((block, idx) => {
+		ppsMap.set(block, ppsValues[idx]);
+	});
+
+	// Now calculate profit using the pre-fetched values
+	const scale = BigNumber.from(10).pow(decimals);
+	const chartData: TChartSnapshot[] = [];
+	let profit = BigNumber.from(0);
+	let previousShares = BigNumber.from(0);
+	let previousPps = ppsMap.get(snapshots[0].blockNumber)!;
+
+	for (const snapshot of snapshots) {
+		const snapshotPps = ppsMap.get(snapshot.blockNumber)!;
+		const deltaPps = snapshotPps.sub(previousPps);
+		profit = profit.add(previousShares.mul(deltaPps).div(scale));
+		previousShares = snapshot.sharesBalance;
+		previousPps = snapshotPps;
+
+		chartData.push({
+			block: snapshot.blockNumber,
+			shares: Number(ethers.utils.formatUnits(snapshot.sharesBalance, decimals)),
+			profit: Number(ethers.utils.formatUnits(profit, decimals))
+		});
+	}
+
+	// Add final data point with current state
+	profit = profit.add(previousShares.mul(currentPps.sub(previousPps)).div(scale));
+
+	try {
+		const currentBlock = await provider.getBlockNumber();
+		chartData.push({
+			block: currentBlock,
+			shares: Number(ethers.utils.formatUnits(currentShares, decimals)),
+			profit: Number(ethers.utils.formatUnits(profit, decimals))
+		});
+	} catch {
+		// If we can't get current block, use last snapshot block + offset
+		const lastBlock = snapshots[snapshots.length - 1].blockNumber + 1000;
+		chartData.push({
+			block: lastBlock,
+			shares: Number(ethers.utils.formatUnits(currentShares, decimals)),
+			profit: Number(ethers.utils.formatUnits(profit, decimals))
+		});
+	}
+
+	return chartData;
+}
+
 export default async function handler(req: NextApiRequest, res: NextApiResponse<TResponse>): Promise<void> {
 	if (req.method !== 'GET') {
 		res.setHeader('Allow', 'GET');
@@ -390,6 +499,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
 	const addresses = parseAddresses(req.query.addresses || req.query.address);
 	const daysParam = req.query.days;
 	const days = daysParam ? parseInt(Array.isArray(daysParam) ? daysParam[0] : daysParam, 10) : undefined;
+	const includeSnapshotsParam = req.query.includeSnapshots;
+	const includeSnapshots = includeSnapshotsParam === 'true' || includeSnapshotsParam === '1';
 
 	if (addresses.length === 0) {
 		res.status(200).json(buildEmptyResponse(addresses, vaultAddress));
@@ -416,6 +527,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
 
 		const accountFees: TAccountFees[] = [];
 		let totalFees = BigNumber.from(0);
+		let allSnapshots: TSnapshot[] = [];
+		let totalCurrentShares = BigNumber.from(0);
 
 		for (const address of addresses) {
 			const [deposits, withdrawals, transfers] = await Promise.all([
@@ -425,7 +538,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
 			]);
 
 			const timeline = buildEventTimeline(deposits, withdrawals, transfers, address);
-			const {snapshots} = calculatePosition(timeline);
+			const {snapshots, currentShares} = calculatePosition(timeline);
 			const feesPaid = await calculateIncrementalProfitAndFees(
 				provider,
 				snapshots,
@@ -437,11 +550,29 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
 			);
 
 			totalFees = totalFees.add(feesPaid);
+			totalCurrentShares = totalCurrentShares.add(currentShares);
+			allSnapshots = allSnapshots.concat(snapshots);
 			accountFees.push({
 				address,
 				totalFees: feesPaid.toString(),
-				totalFeesNormalized: Number(ethers.utils.formatUnits(feesPaid, decimals || 6))
+				totalFeesNormalized: Number(ethers.utils.formatUnits(feesPaid, decimals || 6)),
+				currentShares: currentShares.toString(),
+				currentSharesNormalized: Number(ethers.utils.formatUnits(currentShares, decimals))
 			});
+		}
+
+		// Conditionally generate chart snapshots (expensive operation)
+		let chartSnapshots: TChartSnapshot[] = [];
+		if (includeSnapshots) {
+			const aggregatedSnapshots = aggregateSnapshots(allSnapshots);
+			chartSnapshots = await prepareChartSnapshots(
+				provider,
+				aggregatedSnapshots,
+				decimals,
+				currentPpsRaw,
+				totalCurrentShares,
+				vaultAddress
+			);
 		}
 
 		res.status(200).json({
@@ -450,7 +581,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
 			performanceFeeBps,
 			totalFees: totalFees.toString(),
 			totalFeesNormalized: Number(ethers.utils.formatUnits(totalFees, decimals || 6)),
-			accounts: accountFees
+			accounts: accountFees,
+			snapshots: chartSnapshots
 		});
 	} catch (error) {
 		console.error('[partner-fees] Failed to fetch partner fees', error);
