@@ -8,6 +8,12 @@ type TAccountFees = {
 	totalFeesNormalized: number;
 	currentShares: string;
 	currentSharesNormalized: number;
+	netProfit?: string;
+	netProfitNormalized?: number;
+	grossProfit?: string;
+	grossProfitNormalized?: number;
+	weightedAvgEntryPps?: string;
+	weightedAvgEntryPpsNormalized?: number;
 };
 
 type TProps = {
@@ -112,7 +118,7 @@ function AccountFeesTable({accountFees}: TProps): ReactElement {
 								onClick={() => handleSort('totalFeesNormalized')}
 								className={'cursor-pointer px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-neutral-700 hover:bg-neutral-100'}>
 								<div className={'flex items-center justify-end'}>
-									{'Total Fees (USDC)'}
+									{'Total Fees (USD)'}
 									<SortIcon column={'totalFeesNormalized'} />
 								</div>
 							</th>

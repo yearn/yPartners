@@ -61,7 +61,7 @@ function BalanceProfitChart({snapshots, isLoading}: TProps): ReactElement {
 					<YAxis
 						yAxisId={'right'}
 						orientation={'right'}
-						label={{value: 'Profit (USDC)', angle: 90, position: 'insideRight'}}
+						label={{value: 'Profit (USD)', angle: 90, position: 'insideRight'}}
 						tick={{fontSize: 12}}
 						stroke={'#10b981'}
 					/>
@@ -77,7 +77,7 @@ function BalanceProfitChart({snapshots, isLoading}: TProps): ReactElement {
 							if (name === 'Shares') {
 								return [value.toFixed(2), 'Shares'];
 							}
-							return [`$${value.toFixed(2)}`, 'Profit (USDC)'];
+							return [`$${value.toFixed(2)}`, 'Profit (USD)'];
 						}}
 						labelFormatter={(label) => `Block: ${label}`}
 					/>
@@ -102,7 +102,7 @@ function BalanceProfitChart({snapshots, isLoading}: TProps): ReactElement {
 						stroke={'#10b981'}
 						strokeWidth={2}
 						dot={false}
-						name={'Profit (USDC)'}
+						name={'Profit (USD)'}
 						isAnimationActive={false}
 					/>
 				</ComposedChart>

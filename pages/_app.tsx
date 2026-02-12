@@ -20,14 +20,18 @@ import type {TAddress} from 'lib/yearn/utils/address';
 
 import '../style.css';
 
+const SITE_NAME = 'Yearn Partners';
+const SITE_DESCRIPTION = 'Yearn is the permissionless DeFi base layer enabling infinite possibilities for buildooors';
+const SITE_URL = 'https://partners.yearn.fi/';
+
 function	AppHead(): ReactElement {
 	return (
 		<>
 			<Head>
-				<title>{process.env.WEBSITE_NAME}</title>
+				<title>{SITE_NAME}</title>
 				<meta httpEquiv={'X-UA-Compatible'} content={'IE=edge'} />
 				<meta name={'viewport'} content={'width=device-width, initial-scale=1'} />
-				<meta name={'description'} content={process.env.WEBSITE_NAME} />
+				<meta name={'description'} content={SITE_DESCRIPTION} />
 				<meta name={'msapplication-TileColor'} content={'#000000'} />
 				<meta name={'theme-color'} content={'#000000'} />
 
@@ -65,19 +69,19 @@ function	AppHead(): ReactElement {
 				<meta charSet={'utf-8'} />
 			</Head>
 			<DefaultSeo
-				title={process.env.WEBSITE_NAME}
-				defaultTitle={process.env.WEBSITE_NAME}
-				description={process.env.WEBSITE_DESCRIPTION}
+				title={SITE_NAME}
+				defaultTitle={SITE_NAME}
+				description={SITE_DESCRIPTION}
 				openGraph={{
 					type: 'website',
 					locale: 'en_US',
-					url: process.env.WEBSITE_URI,
-					site_name: process.env.WEBSITE_NAME,
-					title: process.env.WEBSITE_NAME,
-					description: process.env.WEBSITE_DESCRIPTION,
+					url: SITE_URL,
+					site_name: SITE_NAME,
+					title: SITE_NAME,
+					description: SITE_DESCRIPTION,
 					images: [
 						{
-							url: `${process.env.WEBSITE_URI}og.png`,
+							url: `${SITE_URL}og.png`,
 							width: 1200,
 							height: 675,
 							alt: 'Yearn'

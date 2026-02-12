@@ -1,6 +1,7 @@
 import {useEffect, useMemo, useState} from 'react';
 import {DashboardTabsWrapper} from 'components/dashboard/DashboardTabsWrapper';
 import {PartnerContextApp, usePartner} from 'contexts/usePartner';
+import DefaultLogo from 'components/icons/partners/DefaultLogo';
 import {LOGOS, SHAREABLE_ADDRESSES} from 'utils/Partners';
 
 import type {GetStaticPathsResult, GetStaticPropsResult} from 'next';
@@ -11,8 +12,8 @@ function Index({partnerID, windowValue, onWindowChange}: {partnerID: string, win
 	const [lastSync, set_lastSync] = useState('');
 
 	const currentPartner = SHAREABLE_ADDRESSES[partnerID];
-	const currentPartnerName = currentPartner ? currentPartner.name : '';
 	const currentPartnerShortname = currentPartner ? currentPartner.shortName : '';
+	const currentPartnerLogo = LOGOS[currentPartnerShortname] || <DefaultLogo className={'text-900 h-3/4 w-3/4'} />;
 
 	useEffect((): void => {
 		const latestSync = new Date().toLocaleString('default',
@@ -42,7 +43,7 @@ function Index({partnerID, windowValue, onWindowChange}: {partnerID: string, win
 			<section aria-label={'hero'} className={'mb-8 mt-3 grid grid-cols-8 md:mb-14 md:mt-[75px] md:grid-cols-12'}>
 
 				<div className={'col-span-3 md:hidden'}>
-					{LOGOS[currentPartnerName]}
+					{currentPartnerLogo}
 				</div>
 
 				<div className={'col-span-8 lg:col-span-9'}>
@@ -54,7 +55,7 @@ function Index({partnerID, windowValue, onWindowChange}: {partnerID: string, win
 				</div>
 
 				<div className={'hidden md:col-span-4 md:block lg:col-span-3'}>
-					{LOGOS[currentPartnerName]}
+					{currentPartnerLogo}
 				</div>
 
 			</section>

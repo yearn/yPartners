@@ -3,6 +3,9 @@ module.exports = ({
 		remotePatterns: [{
 			protocol: 'https',
 			hostname: 'rawcdn.githack.com'
+		}, {
+			protocol: 'https',
+			hostname: 'token-assets-one.vercel.app'
 		}]
 	},
 	env: {
@@ -10,10 +13,6 @@ module.exports = ({
 		** Stuff used for the SEO or some related elements, like the title, the
 		** github url etc.
 		**********************************************************************/
-		WEBSITE_URI: 'https://partners.yearn.fi/',
-		WEBSITE_NAME: 'Yearn Partners',
-		WEBSITE_TITLE: 'Yearn Partners',
-		WEBSITE_DESCRIPTION: 'Yearn is the permissionless DeFi base layer enabling infinite possibilities for buildooors',
 		PROJECT_GITHUB_URL: 'https://github.com/yearn/yearn-template',
 
 		/* 🔵 - Yearn Finance **************************************************

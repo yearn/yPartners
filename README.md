@@ -1,18 +1,19 @@
 # Yearn B2B Partners Dashboard
 
-Marketing site and analytics dashboard for Yearn’s partner program. The landing page highlights fees and vault counts, the Team Up form pings a Telegram bot, and partner dashboards (e.g. `/dashboard/sturdy`) display balances and payouts pulled from Yearn Vision.
+Marketing site and analytics dashboard for Yearn’s partner program. The landing page highlights fees and vault counts, the Team Up form pings a Telegram bot, and partner dashboards (e.g. `/dashboard/0x...treasury`) display balances and payouts pulled via the local API routes.
 
 ![](./public/og.png)
 
 - Live site: https://partners.yearn.fi
 - Tech: Next.js 15 + TypeScript, TailwindCSS, SWR, Yearn Web Lib components
+- Token/chain icons: loaded from `https://token-assets-one.vercel.app` (see `lib/crypto/tokenLogos.ts` and `next.config.js`)
 
 ## Quick start
 
 1. Copy environment defaults: `cp .env.example .env`
 2. Install dependencies (pnpm recommended because the lockfile is present): `pnpm install`
 3. Run the dev server: `pnpm dev` then open http://localhost:3000
-4. Use address 0xFd1D36995d76c0F75bbe4637C84C06E4A68bBB3a for login testing
+4. Use address 0x93A62dA5a14C80f265DAbC077fCEE437B1a0Efde for login testing
 
 Other scripts:
 - `pnpm lint` – run ESLint
@@ -22,17 +23,28 @@ Other scripts:
 
 ## Configuration
 
-- Public metadata is set in `next.config.js` (`WEBSITE_NAME`, `WEBSITE_DESCRIPTION`, `WEBSITE_URI`, `PROJECT_GITHUB_URL`, theme color, OG image path). Update those values to rebrand the site.
+- Public metadata is set in `pages/_app.tsx` (site name, description, theme color, OG image). Update those values to rebrand the site.
 - Runtime environment variables live in `.env`:
-- `YVISION_BASE_URI` – TO BE REMOVED – base API for partner balances/payouts (defaults to https://api.yearn.vision in config)
-  - `RPC_URL_MAINNET` / `WS_URL_MAINNET` – Ethereum RPC endpoints used by the Yearn provider
+  - `YVISION_BASE_URI` – legacy (currently unused; historical Yearn Vision base)
+  - `ENVIO_GRAPHQL_URL` – required Envio GraphQL endpoint used by `/api/partner-fees`
+  - `KONG_GRAPHQL_URL` – optional Kong GraphQL endpoint for vault metadata (defaults to https://kong.yearn.fi/api/gql)
+  - `RPC_URL_MAINNET_PUBLIC`, `RPC_URL_MAINNET_PRIVATE` – preferred public/latest and private/archive RPCs
+  - `RPC_URL_BASE_PUBLIC`, `RPC_URL_BASE_PRIVATE` – preferred public/latest and private/archive RPCs
+  - `RPC_URL_ARBITRUM_PUBLIC`, `RPC_URL_ARBITRUM_PRIVATE` – preferred public/latest and private/archive RPCs
+  - `RPC_URL_POLYGON_PUBLIC`, `RPC_URL_POLYGON_PRIVATE` – preferred public/latest and private/archive RPCs
+  - `RPC_URL_MAINNET`, `RPC_URL_BASE`, `RPC_URL_ARBITRUM`, `RPC_URL_POLYGON` – legacy fallback RPCs if the split envs are unset
   - `NEXTAUTH_SECRET` – secret for NextAuth usage
+  - `COINGECKO_API_KEY` – optional API key for Coingecko price lookups (used to convert non-USD vault values to USD)
   - `TELEGRAM_BOT`, `TELEGRAM_RECIPIENT_USERID` – required by `pages/api/telegram.ts` to deliver Team Up form submissions
   - `IP_TO_BLOCK` – optional comma-separated IPs to deny from the contact form
 
 ## Partner dashboards
 
-Partner metadata (name, treasury address, logo) is defined in `utils/Partners.tsx`. The login modal expects a treasury address that maps to an entry in `PARTNERS`; successful login routes to `/dashboard/[partnerID]` where vault balances and payouts are fetched from Yearn Vision.
+Partner metadata (name, treasury address, logo) is defined in `utils/Partners.tsx`. The login modal expects a treasury address that maps to an entry in `PARTNERS`; successful login routes to `/dashboard/[partnerID]` where vault balances and payouts are fetched via:
+- `/api/partner-tvl`
+- `/api/partner-fees` (with/without snapshots)
+
+These endpoints aggregate over the vault + depositor configuration in `PARTNER_VAULT_CONFIG` and return normalized totals, asset metadata, and per-account breakdowns.
 
 ### Adding a new partner
 
@@ -116,11 +128,10 @@ Then import it in `utils/Partners.tsx`:
 import LogoYourPartner from 'components/icons/partners/LogoYourPartner';
 ```
 
-And add it to the `LOGOS` object:
+And add it to the `LOGOS` object (keyed by `shortName`):
 ```typescript
 const LOGOS: TPartnerLogo = {
-  Sturdy: <LogoSturdy isColored={true} className={'text-900 h-3/4 w-3/4'} />,
-  'Your Partner Name': <LogoYourPartner isColored={true} className={'text-900 h-3/4 w-3/4'} />
+  yourpartner: <LogoYourPartner className={'text-900 h-3/4 w-3/4'} />
 };
 ```
 
@@ -154,3 +165,8 @@ After adding your partner, rebuild the app with `pnpm build` and the new dashboa
 - `/dashboard/0x1234567890123456789012345678901234567890` (using treasury address)
 - Or via the login modal using the treasury address
 
+## Known limitations
+
+- Yearn Vision-driven chart aggregation is currently disabled; the large historical chart fetch block in `components/dashboard/DashboardTabsWrapper.tsx` is commented out.
+- `usePartner` currently returns an empty `vaults` object (legacy Yearn Vision data path disabled), so per-vault tabs and charts are not populated from that source.
+- The dashboard currently relies on the local `/api/partner-tvl` and `/api/partner-fees` routes for totals; these endpoints are the supported path while the legacy flow is commented out.
