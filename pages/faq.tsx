@@ -36,6 +36,14 @@ function	FAQPage(): ReactElement {
 							</p>
 						</div>
 						<div>
+							<p className={'text-lg font-semibold text-neutral-900 sm:text-xl'}>{'What is the onchain address of the wrapper contract?'}</p>
+							<p>
+								{'The wrapper contract address is '}
+								<code>{'0x3744Df2673097d738aCaa3E463E6D638867757f2'}</code>
+								{' on Ethereum mainnet, Base, Arbitrum, and Katana.'}
+							</p>
+						</div>
+						<div>
 							<p className={'text-lg font-semibold text-neutral-900 sm:text-xl'}>{'If my protocol becomes a partner, how do I know the amount of fees accrued to my protocol? When do I get my payout?'}</p>
 							<p>
 								{'Easy, Yearn will provide a login for you to view a dashboard showing the fees accumulated to your protocol. You receive a payout each month to your protocol address.'}
