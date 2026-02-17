@@ -1,5 +1,9 @@
 import {BigNumber, ethers} from 'ethers';
 import type {NextApiRequest, NextApiResponse} from 'next';
+import {getTokenPriceUsdWithDebug} from 'lib/crypto/coingecko';
+import {getRpcUrlLatest} from 'lib/crypto/rpc';
+import {getTokenSymbol} from 'lib/crypto/tokenMetadata';
+import {getKongVaultMetadata} from 'lib/yearn/kong';
 import {toAddress} from 'lib/yearn/utils/address';
 
 type TAccountValue = {
@@ -11,6 +15,9 @@ type TAccountValue = {
 
 type TResponseBody = {
 	vaultAddress: string,
+	assetAddress: string,
+	assetPriceUsd: number,
+	assetSymbol: string,
 	decimals: number,
 	pricePerShare: string,
 	totalCurrentValue: string,
@@ -20,11 +27,14 @@ type TResponseBody = {
 
 const DEFAULT_VAULT_ADDRESS = '0xBe53A109B494E5c9f97b9Cd39Fe969BE68BF6204';
 const DEFAULT_DECIMALS = 18;
+const ZERO_ADDRESS = ethers.constants.AddressZero;
+const REQUEST_TIMEOUT_MS = 12_000;
 
 const VAULT_ABI = [
 	'function balanceOf(address) view returns (uint256)',
 	'function pricePerShare() view returns (uint256)',
-	'function decimals() view returns (uint8)'
+	'function decimals() view returns (uint8)',
+	'function asset() view returns (address)'
 ];
 
 function	parseAddresses(addressParam: string | string[] | undefined): string[] {
@@ -52,6 +62,9 @@ function	parseAddresses(addressParam: string | string[] | undefined): string[] {
 function buildEmptyResponse(addresses: string[], vaultAddress: string): TResponseBody {
 	return {
 		vaultAddress,
+		assetAddress: ethers.constants.AddressZero,
+		assetPriceUsd: 0,
+		assetSymbol: 'Unknown token',
 		decimals: DEFAULT_DECIMALS,
 		pricePerShare: '0',
 		totalCurrentValue: '0',
@@ -65,6 +78,21 @@ function buildEmptyResponse(addresses: string[], vaultAddress: string): TRespons
 	};
 }
 
+function withTimeout<T>(promise: Promise<T>, label: string, timeoutMs: number = REQUEST_TIMEOUT_MS): Promise<T> {
+	return new Promise((resolve, reject) => {
+		const timeoutId = setTimeout(() => {
+			reject(new Error(`[partner-tvl] ${label} timed out after ${timeoutMs}ms`));
+		}, timeoutMs);
+		promise.then((value) => {
+			clearTimeout(timeoutId);
+			resolve(value);
+		}).catch((error) => {
+			clearTimeout(timeoutId);
+			reject(error);
+		});
+	});
+}
+
 export default async function handler(req: NextApiRequest, res: NextApiResponse<TResponseBody>): Promise<void> {
 	if (req.method !== 'GET') {
 		res.setHeader('Allow', 'GET');
@@ -72,12 +100,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
 		return;
 	}
 
-	const rpcUrl = process.env.RPC_URL_MAINNET;
+	res.setHeader('Cache-Control', 's-maxage=60, stale-while-revalidate=300');
+
 	const vaultAddressParam = req.query.vaultAddress;
 	const vaultAddress = vaultAddressParam
 		? toAddress(Array.isArray(vaultAddressParam) ? vaultAddressParam[0] : vaultAddressParam)
 		: toAddress(DEFAULT_VAULT_ADDRESS);
 	const addresses = parseAddresses(req.query.addresses || req.query.address);
+	const chainIdParam = req.query.chainId;
+	const parsedChainId = chainIdParam ? parseInt(Array.isArray(chainIdParam) ? chainIdParam[0] : chainIdParam, 10) : NaN;
+	const chainId = Number.isFinite(parsedChainId) ? parsedChainId : 1;
+	const rpcUrl = getRpcUrlLatest(chainId);
 
 	if (addresses.length === 0) {
 		res.status(200).json(buildEmptyResponse(addresses, vaultAddress));
@@ -85,32 +118,105 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
 	}
 
 	if (!rpcUrl) {
-		console.warn('[partner-tvl] RPC_URL_MAINNET missing, returning empty payload');
+		console.warn(`[partner-tvl] No RPC URL for chain ${chainId}, returning empty payload`);
 		res.status(200).json(buildEmptyResponse(addresses, vaultAddress));
 		return;
 	}
 
 	try {
-		const provider = new ethers.providers.JsonRpcProvider(rpcUrl);
+		const provider = new ethers.providers.JsonRpcProvider(rpcUrl, chainId);
 		const vaultContract = new ethers.Contract(vaultAddress, VAULT_ABI, provider);
 
-		const [pricePerShare, decimals] = await Promise.all([
-			vaultContract.pricePerShare(),
-			vaultContract.decimals()
+		const kongMetadataResult = await Promise.allSettled([
+			withTimeout(getKongVaultMetadata(chainId, vaultAddress), 'getKongVaultMetadata')
 		]);
+		const kongMetadata = kongMetadataResult[0].status === 'fulfilled'
+			? kongMetadataResult[0].value
+			: null;
+		let pricePerShare: BigNumber | null = null;
+		let decimals: number | null = kongMetadata?.decimals ?? null;
+		let assetAddress: string | null = kongMetadata?.assetAddress ?? null;
 
+		if (kongMetadata?.pricePerShare) {
+			try {
+				pricePerShare = BigNumber.from(kongMetadata.pricePerShare);
+			} catch {
+				pricePerShare = null;
+			}
+		}
+
+		if (!pricePerShare || decimals === null || !assetAddress) {
+			const [rpcPricePerShareRaw, rpcDecimalsRaw, rpcAssetAddressRaw] = await Promise.all([
+				withTimeout(vaultContract.pricePerShare(), 'vault.pricePerShare'),
+				withTimeout(vaultContract.decimals(), 'vault.decimals'),
+				withTimeout(vaultContract.asset(), 'vault.asset')
+			]);
+			const rpcPricePerShare = rpcPricePerShareRaw as BigNumber;
+			const rpcDecimals = rpcDecimalsRaw as BigNumber | number;
+			const rpcAssetAddress = rpcAssetAddressRaw as string;
+			pricePerShare = pricePerShare ?? rpcPricePerShare;
+			decimals = decimals ?? (BigNumber.isBigNumber(rpcDecimals) ? rpcDecimals.toNumber() : Number(rpcDecimals));
+			assetAddress = assetAddress ?? toAddress(rpcAssetAddress);
+		}
+
+		if (!pricePerShare || decimals === null || !assetAddress) {
+			throw new Error('Missing vault metadata');
+		}
+
+			let assetPriceUsd: number | undefined;
+			let assetSymbol: string | undefined;
+			let pricingDebugDetails = '';
+			if (assetAddress.toLowerCase() !== ZERO_ADDRESS.toLowerCase()) {
+				const [priceResult, symbolResult] = await Promise.allSettled([
+					withTimeout(getTokenPriceUsdWithDebug(chainId, assetAddress), 'getTokenPriceUsd'),
+					withTimeout(getTokenSymbol(provider, assetAddress), 'getTokenSymbol')
+				]);
+				if (priceResult.status === 'fulfilled') {
+					const lookup = priceResult.value;
+					assetPriceUsd = typeof lookup.price === 'number' ? lookup.price : undefined;
+					if (assetPriceUsd === undefined) {
+						const message = lookup.message ? lookup.message.replace(/"/g, '\'') : undefined;
+						const details = [
+							lookup.reason ? `reason=${lookup.reason}` : undefined,
+							typeof lookup.status === 'number' ? `status=${lookup.status}` : undefined,
+							lookup.rateLimitRemaining ? `remaining=${lookup.rateLimitRemaining}` : undefined,
+							lookup.rateLimitReset ? `reset=${lookup.rateLimitReset}` : undefined,
+							message ? `message="${message}"` : undefined
+						].filter(Boolean);
+						pricingDebugDetails = details.join(' ');
+					}
+				} else {
+					const errorMessage = priceResult.reason instanceof Error ? priceResult.reason.message : String(priceResult.reason);
+					pricingDebugDetails = `reason=request_failed message="${errorMessage.replace(/"/g, '\'')}"`;
+				}
+				assetSymbol = symbolResult.status === 'fulfilled' ? (symbolResult.value ?? undefined) : undefined;
+			} else {
+				assetSymbol = 'Unknown token';
+			}
+			if (assetPriceUsd === undefined) {
+				const errorMessage = `Unable to resolve USD price for asset ${assetAddress} on chain ${chainId}${pricingDebugDetails ? ` (${pricingDebugDetails})` : ''}`;
+				console.warn(`[partner-tvl] ${errorMessage}`);
+				res.status(200).json({
+					error: errorMessage
+				});
+				return;
+			}
+		const priceUsd = assetPriceUsd;
 		const divisor = BigNumber.from(10).pow(decimals);
 		const accounts: TAccountValue[] = [];
 
 		for (const address of addresses) {
-			const shares: BigNumber = await vaultContract.balanceOf(address);
+			const shares: BigNumber = await withTimeout(
+				vaultContract.balanceOf(address),
+				'vault.balanceOf'
+			);
 			const currentValue = shares.mul(pricePerShare).div(divisor);
 
 			accounts.push({
 				address,
 				shares: shares.toString(),
 				currentValue: currentValue.toString(),
-				currentValueNormalized: Number(ethers.utils.formatUnits(currentValue, decimals))
+				currentValueNormalized: Number(ethers.utils.formatUnits(currentValue, decimals)) * priceUsd
 			});
 		}
 
@@ -120,10 +226,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
 
 		res.status(200).json({
 			vaultAddress,
+			assetAddress: toAddress(assetAddress),
+			assetPriceUsd,
+			assetSymbol: assetSymbol ?? 'Unknown token',
 			decimals: Number(decimals),
 			pricePerShare: pricePerShare.toString(),
 			totalCurrentValue: totalCurrentValue.toString(),
-			totalCurrentValueNormalized: Number(ethers.utils.formatUnits(totalCurrentValue, decimals)),
+			totalCurrentValueNormalized: Number(ethers.utils.formatUnits(totalCurrentValue, decimals)) * priceUsd,
 			accounts
 		});
 	} catch (error) {

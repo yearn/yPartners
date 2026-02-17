@@ -1,5 +1,5 @@
-import LogoSturdy from 'components/icons/partners/LogoSturdy';
 import LogoDeFiSaver from 'components/icons/partners/LogoDeFiSaver';
+import LogoYearn from 'components/icons/LogoYearn';
 import {toAddress} from 'lib/yearn/utils/address';
 
 import type {ReactElement} from 'react';
@@ -9,10 +9,10 @@ import type {TAddress} from 'lib/yearn/utils/address';
 
 const PARTNERS: TDict<TPartner> = {
 	sturdy: {
-		name: 'Sturdy',
-		shortName: 'sturdy',
-		treasury: [toAddress('0xFd1D36995d76c0F75bbe4637C84C06E4A68bBB3a')],
-		logo: <LogoSturdy className={'text-900'} />
+		name: 'Yearn',
+		shortName: 'yearn',
+		treasury: [toAddress('0x93A62dA5a14C80f265DAbC077fCEE437B1a0Efde')],
+		logo: <LogoYearn className={'text-900'} />
 	},
 	defisaver: {
 		name: 'DeFi Saver',
@@ -52,15 +52,32 @@ type TPartnerVaultConfig = {
 };
 
 const PARTNER_VAULT_CONFIG: TPartnerVaultConfig = {
-	sturdy: {
+	yearn: {
 		1: {
 			[toAddress('0xBe53A109B494E5c9f97b9Cd39Fe969BE68BF6204')]: [
-				toAddress('0xc337C76158c131beDf95a5D4e0C27EC8eFdb7f02'),
-				toAddress('0x93A62dA5a14C80f265DAbC077fCEE437B1a0Efde'),
-				toAddress('0xAe7d8Db82480E6d8e3873ecbF22cf17b3D8A7308'),
-				toAddress('0x13B053f017B6C68e089267Ffc3f10EE92ED95a79'),
-				toAddress('0xA2F263426ef09d43057d6be798A6672A4401ecC5')
-			]
+				toAddress('0x93A62dA5a14C80f265DAbC077fCEE437B1a0Efde')
+			],
+			[toAddress('0x028eC7330ff87667b6dfb0D94b954c820195336c')]: [
+				toAddress('0x93A62dA5a14C80f265DAbC077fCEE437B1a0Efde')
+			],
+			[toAddress('0xAe7d8Db82480E6d8e3873ecbF22cf17b3D8A7308')]: [
+				toAddress('0x93A62dA5a14C80f265DAbC077fCEE437B1a0Efde')
+			],
+			[toAddress('0xAc37729B76db6438CE62042AE1270ee574CA7571')]: [
+				toAddress('0x93A62dA5a14C80f265DAbC077fCEE437B1a0Efde')
+			],
+			[toAddress('0x92545bCE636E6eE91D88D2D017182cD0bd2fC22e')]: [
+				toAddress('0x93A62dA5a14C80f265DAbC077fCEE437B1a0Efde')
+			],
+			[toAddress('0xBF319dDC2Edc1Eb6FDf9910E39b37Be221C8805F')]: [
+				toAddress('0x93A62dA5a14C80f265DAbC077fCEE437B1a0Efde')
+			],
+			[toAddress('0xc56413869c6CDf96496f2b1eF801fEDBdFA7dDB0')]: [
+				toAddress('0x93A62dA5a14C80f265DAbC077fCEE437B1a0Efde')
+			],
+			[toAddress('0x182863131F9a4630fF9E27830d945B1413e347E8')]: [
+				toAddress('0x93A62dA5a14C80f265DAbC077fCEE437B1a0Efde')
+			],
 		}
 	},
 	defisaver: {
@@ -98,8 +115,8 @@ type TPartnerLogo = {
 }
 
 const LOGOS: TPartnerLogo = {
-	Sturdy: <LogoSturdy isColored={true} className={'text-900 h-3/4 w-3/4'} />,
-	'DeFi Saver': <LogoDeFiSaver isColored={true} className={'text-900 h-3/4 w-3/4'} />
+	yearn: <LogoYearn className={'text-900 h-3/4 w-3/4'} />,
+	defisaver: <LogoDeFiSaver isColored={true} className={'text-900 h-3/4 w-3/4'} />
 };
 
 const DEFAULT_PROFIT_SHARE = 0.5;
