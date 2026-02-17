@@ -434,15 +434,15 @@ function	DashboardTabsWrapper({partnerID: _partnerID, windowValue, onWindowChang
 			) : null}
 
 			{shouldShowVaultDropdown ? (
-				<div className={'mt-6 px-4 md:px-8'}>
-					<label className={'text-sm font-medium text-neutral-700'}>{'Vault'}</label>
-					<Listbox
-						value={selectedVaultKey}
-						onChange={(value: string): void => setSelectedVaultKey(value)}>
-						{({open}): ReactElement => (
-							<div className={'relative mt-2 w-80'}>
-								<Listbox.Button
-									className={'flex h-10 w-full items-center justify-between rounded-md border border-neutral-200 bg-white px-3 text-sm text-neutral-900 shadow-sm hover:border-neutral-300'}>
+						<div className={'mt-6 px-4 md:px-8'}>
+							<label className={'text-sm font-medium text-neutral-700'}>{'Vault'}</label>
+							<Listbox
+								value={selectedVaultKey}
+								onChange={(value: string): void => setSelectedVaultKey(value)}>
+								{({open}): ReactElement => (
+									<div className={'relative mt-2 w-full max-w-80 md:w-80'}>
+										<Listbox.Button
+											className={'flex h-10 w-full items-center justify-between rounded-md border border-neutral-200 bg-white px-3 text-sm text-neutral-900 shadow-sm hover:border-neutral-300'}>
 									{selectedCombo ? (
 										<VaultOptionLabel
 											tokenLogoSrc={selectedTokenLogoSrc}
@@ -496,17 +496,17 @@ function	DashboardTabsWrapper({partnerID: _partnerID, windowValue, onWindowChang
 				</div>
 			) : null}
 
-			<div className={'mt-10 flex flex-row space-x-4'}>
-				{dataWindows.map((window): ReactElement => (
-					<Button
-						disabled={window.value === 365}
-						key={window.name}
-						name={window.name}
-						value={window.value}
-						className={'w-[90px] whitespace-nowrap text-xs md:w-[100px] md:text-base'}
-						variant={window.name === activeWindow ? 'filled' : 'outlined'}
-						onClick={handleWindowChange}>
-						{window.name}
+				<div className={'mt-10 flex flex-wrap gap-2 md:flex-nowrap md:gap-4'}>
+					{dataWindows.map((window): ReactElement => (
+						<Button
+							disabled={window.value === 365}
+							key={window.name}
+							name={window.name}
+							value={window.value}
+							className={'w-auto min-w-[84px] whitespace-nowrap text-xs md:w-[100px] md:text-base'}
+							variant={window.name === activeWindow ? 'filled' : 'outlined'}
+							onClick={handleWindowChange}>
+							{window.name}
 					</Button>
 				))}
 			</div>

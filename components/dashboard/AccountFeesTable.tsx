@@ -98,7 +98,7 @@ function AccountFeesTable({accountFees}: TProps): ReactElement {
 							<th
 								scope={'col'}
 								onClick={() => handleSort('address')}
-								className={'cursor-pointer px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-neutral-700 hover:bg-neutral-100'}>
+								className={'sticky left-0 z-20 cursor-pointer bg-neutral-50 px-3 py-2 text-left text-[11px] font-medium uppercase tracking-wider text-neutral-700 hover:bg-neutral-100 sm:px-6 sm:py-3 sm:text-xs md:static md:z-auto'}>
 								<div className={'flex items-center'}>
 									{'Address'}
 									<SortIcon column={'address'} />
@@ -107,7 +107,7 @@ function AccountFeesTable({accountFees}: TProps): ReactElement {
 							<th
 								scope={'col'}
 								onClick={() => handleSort('currentSharesNormalized')}
-								className={'cursor-pointer px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-neutral-700 hover:bg-neutral-100'}>
+								className={'cursor-pointer px-3 py-2 text-right text-[11px] font-medium uppercase tracking-wider text-neutral-700 hover:bg-neutral-100 sm:px-6 sm:py-3 sm:text-xs'}>
 								<div className={'flex items-center justify-end'}>
 									{'Current Shares'}
 									<SortIcon column={'currentSharesNormalized'} />
@@ -116,7 +116,7 @@ function AccountFeesTable({accountFees}: TProps): ReactElement {
 							<th
 								scope={'col'}
 								onClick={() => handleSort('totalFeesNormalized')}
-								className={'cursor-pointer px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-neutral-700 hover:bg-neutral-100'}>
+								className={'cursor-pointer px-3 py-2 text-right text-[11px] font-medium uppercase tracking-wider text-neutral-700 hover:bg-neutral-100 sm:px-6 sm:py-3 sm:text-xs'}>
 								<div className={'flex items-center justify-end'}>
 									{'Total Fees (USD)'}
 									<SortIcon column={'totalFeesNormalized'} />
@@ -129,13 +129,13 @@ function AccountFeesTable({accountFees}: TProps): ReactElement {
 							<tr
 								key={account.address}
 								className={idx % 2 === 0 ? 'bg-white hover:bg-neutral-50' : 'bg-neutral-50 hover:bg-neutral-100'}>
-								<td className={'whitespace-nowrap px-6 py-4 text-sm font-mono text-neutral-900'}>
+								<td className={`sticky left-0 z-10 whitespace-nowrap px-3 py-2 text-xs font-mono text-neutral-900 sm:px-6 sm:py-4 sm:text-sm md:static md:z-auto ${idx % 2 === 0 ? 'bg-white' : 'bg-neutral-50'}`}>
 									{account.address}
 								</td>
-								<td className={'whitespace-nowrap px-6 py-4 text-right text-sm text-neutral-900'}>
+								<td className={'whitespace-nowrap px-3 py-2 text-right text-xs text-neutral-900 sm:px-6 sm:py-4 sm:text-sm'}>
 									{account.currentSharesNormalized.toFixed(2)}
 								</td>
-								<td className={'whitespace-nowrap px-6 py-4 text-right text-sm text-neutral-900'}>
+								<td className={'whitespace-nowrap px-3 py-2 text-right text-xs text-neutral-900 sm:px-6 sm:py-4 sm:text-sm'}>
 									{`$${account.totalFeesNormalized.toFixed(2)}`}
 								</td>
 							</tr>

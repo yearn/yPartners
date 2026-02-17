@@ -46,13 +46,13 @@ function Index({partnerID, windowValue, onWindowChange}: {partnerID: string, win
 					{currentPartnerLogo}
 				</div>
 
-				<div className={'col-span-8 lg:col-span-9'}>
-					<h1 className={`my-4 text-neutral-900 md:text-8xl ${currentPartner?.name === 'Abracadabra.Money' ? 'text-[3.5rem]':'text-6xl'}`}>
-						{currentPartner?.name === 'Abracadabra.Money' ? 'Abracadabra': currentPartner?.name}
-					</h1>
+					<div className={'col-span-8 lg:col-span-9'}>
+						<h1 className={`my-4 break-words leading-tight text-neutral-900 md:text-8xl ${currentPartner?.name === 'Abracadabra.Money' ? 'text-4xl sm:text-[3.5rem]' : 'text-4xl sm:text-5xl'}`}>
+							{currentPartner?.name === 'Abracadabra.Money' ? 'Abracadabra': currentPartner?.name}
+						</h1>
 
-					<p className={'mb-6 w-3/4 text-neutral-500 md:mb-10'}>{`Last updated ${lastSync}`}</p>
-				</div>
+						<p className={'mb-6 w-full text-neutral-500 md:mb-10 md:w-3/4'}>{`Last updated ${lastSync}`}</p>
+					</div>
 
 				<div className={'hidden md:col-span-4 md:block lg:col-span-3'}>
 					{currentPartnerLogo}
