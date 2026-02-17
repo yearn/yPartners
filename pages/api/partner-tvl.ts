@@ -124,7 +124,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
 	}
 
 	try {
-		const provider = new ethers.providers.JsonRpcProvider(rpcUrl);
+		const provider = new ethers.providers.JsonRpcProvider(rpcUrl, chainId);
 		const vaultContract = new ethers.Contract(vaultAddress, VAULT_ABI, provider);
 
 		const kongMetadataResult = await Promise.allSettled([

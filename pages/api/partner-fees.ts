@@ -700,8 +700,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
 			console.warn(`[partner-fees] Archive RPC missing for chain ${chainId}; falling back to public RPC`);
 		}
 
-		const latestProvider = new ethers.providers.JsonRpcProvider(latestRpcUrl);
-		const archiveProvider = new ethers.providers.JsonRpcProvider(archiveRpcUrl);
+		const latestProvider = new ethers.providers.JsonRpcProvider(latestRpcUrl, chainId);
+		const archiveProvider = new ethers.providers.JsonRpcProvider(archiveRpcUrl, chainId);
 		const [performanceFeeBpsResult, cutoffBlockResult, kongMetadataResult] = await Promise.allSettled([
 			withTimeout(getPerformanceFeeBps(latestProvider, vaultAddress), 'getPerformanceFeeBps'),
 			withTimeout(getCutoffBlock(latestProvider, days), 'getCutoffBlock'),
