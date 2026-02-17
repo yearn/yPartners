@@ -33,6 +33,30 @@ function	Index(): ReactElement {
 
 			<SectionStats />
 
+			<section aria-label={'partner-steps'} className={'mb-28'}>
+				<div className={'rounded-2xl border-2 border-neutral-300 bg-white p-6 md:p-8'}>
+					<h2 className={'mb-4 text-3xl font-bold text-neutral-900'}>
+						{'Become a partner in 3 easy steps:'}
+					</h2>
+					<ol className={'list-decimal space-y-3 pl-6 text-lg text-neutral-900'}>
+						<li>
+							{'Fill out the '}
+							<Link href={'/team-up'} className={'underline'}>
+								{'contact form'}
+							</Link>
+						</li>
+						<li>
+							{
+								'Configure your frontend to direct deposits through our referral contract at 0x3744Df2673097d738aCaa3E463E6D638867757f2 with the chosen referral code'
+							}
+						</li>
+						<li>
+							{'Notify us that you\'re ready to begin, and we start sharing profits!'}
+						</li>
+					</ol>
+				</div>
+			</section>
+
 			<SectionTargets />
 
 		</main>
