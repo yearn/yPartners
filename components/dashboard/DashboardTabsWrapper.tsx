@@ -177,12 +177,11 @@ function	Tabs({selectedIndex, set_selectedIndex}: TProps): ReactElement {
 }
 
 function	DashboardTabsWrapper({partnerID: _partnerID, windowValue, onWindowChange}: {partnerID: string, windowValue: number, onWindowChange: (value: number) => void}): ReactElement {
-	const {vaults, tvlOverride, userCount, feesOverride, isLoadingFees, isLoadingChart, chartSnapshots, accountFees, vaultComboData, apiErrors} = usePartner();
+	const {vaults, tvlOverride, userCount, feesOverride, isLoadingFees, isLoadingChart, chartSnapshots, accountFees, vaultComboData, apiErrors, selectedVaultKey, setSelectedVaultKey} = usePartner();
 	const vaultList = Object.values(vaults || {});
 	const hasVaults = vaultList.length > 0;
 	const [selectedIndex, set_selectedIndex] = useState(-1);
 	const [activeWindow, set_activeWindow] = useState('1 month');
-	const [selectedVaultKey, setSelectedVaultKey] = useState('total');
 	const [balanceTVLs] = useState<TDict<TChartBar[]>>();
 	const [wrapperTotals] = useState<TChartBar[]>();
 	const [payoutTotals] = useState<TDict<TChartBar[]>>();

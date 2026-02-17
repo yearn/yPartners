@@ -1,6 +1,6 @@
 import {BigNumber, ethers} from 'ethers';
 import type {NextApiRequest, NextApiResponse} from 'next';
-import {getTokenPriceUsd} from 'lib/crypto/coingecko';
+import {getTokenPriceUsdWithDebug} from 'lib/crypto/coingecko';
 import {getRpcUrlLatest} from 'lib/crypto/rpc';
 import {getTokenSymbol} from 'lib/crypto/tokenMetadata';
 import {getKongVaultMetadata} from 'lib/yearn/kong';
@@ -163,24 +163,44 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
 			throw new Error('Missing vault metadata');
 		}
 
-		let assetPriceUsd: number | undefined;
-		let assetSymbol: string | undefined;
-		if (assetAddress.toLowerCase() !== ZERO_ADDRESS.toLowerCase()) {
-			const [priceResult, symbolResult] = await Promise.allSettled([
-				withTimeout(getTokenPriceUsd(chainId, assetAddress), 'getTokenPriceUsd'),
-				withTimeout(getTokenSymbol(provider, assetAddress), 'getTokenSymbol')
-			]);
-			assetPriceUsd = priceResult.status === 'fulfilled' ? (priceResult.value ?? undefined) : undefined;
-			assetSymbol = symbolResult.status === 'fulfilled' ? (symbolResult.value ?? undefined) : undefined;
-		} else {
-			assetSymbol = 'Unknown token';
-		}
-		if (assetPriceUsd === undefined) {
-			res.status(200).json({
-				error: `Unable to resolve USD price for asset ${assetAddress} on chain ${chainId}`
-			});
-			return;
-		}
+			let assetPriceUsd: number | undefined;
+			let assetSymbol: string | undefined;
+			let pricingDebugDetails = '';
+			if (assetAddress.toLowerCase() !== ZERO_ADDRESS.toLowerCase()) {
+				const [priceResult, symbolResult] = await Promise.allSettled([
+					withTimeout(getTokenPriceUsdWithDebug(chainId, assetAddress), 'getTokenPriceUsd'),
+					withTimeout(getTokenSymbol(provider, assetAddress), 'getTokenSymbol')
+				]);
+				if (priceResult.status === 'fulfilled') {
+					const lookup = priceResult.value;
+					assetPriceUsd = typeof lookup.price === 'number' ? lookup.price : undefined;
+					if (assetPriceUsd === undefined) {
+						const message = lookup.message ? lookup.message.replace(/"/g, '\'') : undefined;
+						const details = [
+							lookup.reason ? `reason=${lookup.reason}` : undefined,
+							typeof lookup.status === 'number' ? `status=${lookup.status}` : undefined,
+							lookup.rateLimitRemaining ? `remaining=${lookup.rateLimitRemaining}` : undefined,
+							lookup.rateLimitReset ? `reset=${lookup.rateLimitReset}` : undefined,
+							message ? `message="${message}"` : undefined
+						].filter(Boolean);
+						pricingDebugDetails = details.join(' ');
+					}
+				} else {
+					const errorMessage = priceResult.reason instanceof Error ? priceResult.reason.message : String(priceResult.reason);
+					pricingDebugDetails = `reason=request_failed message="${errorMessage.replace(/"/g, '\'')}"`;
+				}
+				assetSymbol = symbolResult.status === 'fulfilled' ? (symbolResult.value ?? undefined) : undefined;
+			} else {
+				assetSymbol = 'Unknown token';
+			}
+			if (assetPriceUsd === undefined) {
+				const errorMessage = `Unable to resolve USD price for asset ${assetAddress} on chain ${chainId}${pricingDebugDetails ? ` (${pricingDebugDetails})` : ''}`;
+				console.warn(`[partner-tvl] ${errorMessage}`);
+				res.status(200).json({
+					error: errorMessage
+				});
+				return;
+			}
 		const priceUsd = assetPriceUsd;
 		const divisor = BigNumber.from(10).pow(decimals);
 		const accounts: TAccountValue[] = [];
