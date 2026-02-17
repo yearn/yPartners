@@ -46,9 +46,9 @@ function	Index(): ReactElement {
 							</Link>
 						</li>
 						<li>
-							{
-								'Configure your frontend to direct deposits through our referral contract at 0x3744Df2673097d738aCaa3E463E6D638867757f2 with the chosen referral code'
-							}
+							{'Configure your frontend to direct deposits through our referral contract at 0x3744Df2673097d738aCaa3E463E6D638867757f2 with the chosen referral code (more info in '}
+							<Link href={'/faq'} className={'underline'}>{'FAQ'}</Link>
+							{')'}
 						</li>
 						<li>
 							{'Notify us that you\'re ready to begin, and we start sharing profits!'}
