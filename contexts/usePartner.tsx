@@ -107,6 +107,12 @@ type TPartnerFeesResponse = {
 	snapshots: TChartSnapshot[]
 };
 
+type TVaultAssetMetadataResponse = {
+	chainId: number,
+	vaultAddress: string,
+	assetAddress: string | null
+};
+
 type TVaultCombo = {
 	chainId: number;
 	vaultAddress: TAddress;
@@ -124,6 +130,7 @@ type TVaultComboData = {
 	chainId: number;
 	vaultAddress: TAddress;
 	addresses: TAddress[];
+	assetAddress?: string;
 	tvl?: TPartnerTVLResponse;
 	fees?: TPartnerFeesResponse;
 	chart?: TPartnerFeesResponse;
@@ -151,6 +158,10 @@ function buildPartnerTVLUrl(combo: TVaultCombo): string {
 
 function buildPartnerFeesUrl(combo: TVaultCombo, windowDays: number | undefined, includeSnapshots: boolean): string {
 	return `/api/partner-fees?addresses=${combo.addresses.join(',')}&vaultAddress=${combo.vaultAddress}&chainId=${combo.chainId}${windowDays ? `&days=${windowDays}` : ''}&includeSnapshots=${includeSnapshots ? 'true' : 'false'}`;
+}
+
+function buildVaultAssetMetadataUrl(combo: TVaultCombo): string {
+	return `/api/vault-asset?vaultAddress=${combo.vaultAddress}&chainId=${combo.chainId}`;
 }
 
 export const PartnerContextApp = ({
@@ -218,11 +229,17 @@ export const PartnerContextApp = ({
 	}, [vaultCombos, selectedVaultKey, firstComboKey]);
 
 	const shouldFetchCombos = !isSSR && activeCombos.length > 0;
+	const shouldFetchVaultMetadata = !isSSR && vaultCombos.length > 0;
 	const comboIdentityKey = useMemo((): string => {
 		return activeCombos
 			.map((combo): string => `${combo.chainId}:${combo.vaultAddress.toLowerCase()}:${combo.addresses.join(',').toLowerCase()}`)
 			.join('|');
 	}, [activeCombos]);
+	const vaultMetadataIdentityKey = useMemo((): string => {
+		return vaultCombos
+			.map((combo): string => `${combo.chainId}:${combo.vaultAddress.toLowerCase()}`)
+			.join('|');
+	}, [vaultCombos]);
 
 	const {data: tvlResults, isLoading: isLoadingDepositorTVL} = useSWR<(TPartnerTVLResponse | TAPIError)[]>(
 		shouldFetchCombos ? ['partner-tvl', comboIdentityKey] : null,
@@ -239,12 +256,31 @@ export const PartnerContextApp = ({
 		),
 		{revalidateOnFocus: false}
 	);
+	const {data: vaultAssetMetadataResults} = useSWR<(TVaultAssetMetadataResponse | TAPIError)[]>(
+		shouldFetchVaultMetadata ? ['vault-asset', vaultMetadataIdentityKey] : null,
+		async (): Promise<(TVaultAssetMetadataResponse | TAPIError)[]> => Promise.all(
+			vaultCombos.map((combo) => baseFetcher<TVaultAssetMetadataResponse | TAPIError>(buildVaultAssetMetadataUrl(combo)))
+		),
+		{revalidateOnFocus: false}
+	);
 
 	const tvlCalls = tvlResults ?? [];
 	const feesCalls = feesResults ?? [];
+	const vaultAssetMetadataCalls = vaultAssetMetadataResults ?? [];
 	const activeComboKeys = useMemo((): Set<string> => {
 		return new Set(activeCombos.map((combo) => getComboKey(combo)));
 	}, [activeCombos]);
+	const vaultAssetAddressByKey = useMemo((): Map<string, string> => {
+		const map = new Map<string, string>();
+		vaultCombos.forEach((combo, idx): void => {
+			const metadataCall = vaultAssetMetadataCalls[idx];
+			if (!metadataCall || isAPIError(metadataCall) || !metadataCall.assetAddress) {
+				return;
+			}
+			map.set(getComboKey(combo), toAddress(metadataCall.assetAddress));
+		});
+		return map;
+	}, [vaultCombos, vaultAssetMetadataCalls]);
 	const tvlCallsByKey = useMemo((): Map<string, TPartnerTVLResponse | TAPIError> => {
 		const map = new Map<string, TPartnerTVLResponse | TAPIError>();
 		activeCombos.forEach((combo, idx): void => {
@@ -406,6 +442,7 @@ export const PartnerContextApp = ({
 				chainId: combo.chainId,
 				vaultAddress: combo.vaultAddress,
 				addresses: combo.addresses,
+				assetAddress: vaultAssetAddressByKey.get(key),
 				tvl: tvlCall && !isAPIError(tvlCall) ? tvlCall : undefined,
 				fees: feesCall && !isAPIError(feesCall) ? feesCall : undefined,
 				chart: feesCall && !isAPIError(feesCall) ? feesCall : undefined,
@@ -414,7 +451,7 @@ export const PartnerContextApp = ({
 				isLoadingChart: isActive ? Boolean(isLoadingDepositorFees) : false
 			};
 		});
-	}, [activeComboKeys, feesCallsByKey, tvlCallsByKey, vaultCombos, isLoadingDepositorTVL, isLoadingDepositorFees]);
+	}, [activeComboKeys, feesCallsByKey, tvlCallsByKey, vaultCombos, vaultAssetAddressByKey, isLoadingDepositorTVL, isLoadingDepositorFees]);
 
 	const apiErrors = useMemo((): string[] => {
 		const errors: string[] = [];

@@ -38,7 +38,7 @@ type TProps = {
 const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
 
 function getComboAssetAddress(combo?: TVaultComboData): string | undefined {
-	return combo?.fees?.assetAddress ?? combo?.tvl?.assetAddress;
+	return combo?.fees?.assetAddress ?? combo?.tvl?.assetAddress ?? combo?.assetAddress;
 }
 
 function getComboAssetSymbol(combo?: TVaultComboData): string | undefined {
