@@ -27,7 +27,7 @@ function	FAQPage(): ReactElement {
 								{'First, get in touch with us by filling the contact form. Then, configure your dApp to deposit to Yearn v3 vaults using our referral contract at 0x3744Df2673097d738aCaa3E463E6D638867757f2 on supported chains (mainnet, Base, Arbitrum, Katana). We will discuss which referral code to use for the deposit call. The code for this referral contract is '}
 								<a
 									className={'text-primary-600 underline'}
-									href={'https://github.com/yearn/Yearn-ERC4626-Router'}
+									href={'https://github.com/engn33r/referral-wrapper'}
 									rel={'noreferrer'}
 									target={'_blank'}>
 									{'here'}
