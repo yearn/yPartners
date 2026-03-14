@@ -51,7 +51,7 @@ function	FAQPage(): ReactElement {
 								{' on Ethereum mainnet, Base, Arbitrum, and Katana. The code for it is stored '}
 								<a
 									className={'text-primary-600 underline'}
-									href={'https://github.com/yearn/Yearn-ERC4626-Router'}
+									href={'https://github.com/engn33r/referral-wrapper'}
 									rel={'noreferrer'}
 									target={'_blank'}>
 									{'here.'}
