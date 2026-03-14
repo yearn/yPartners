@@ -54,7 +54,7 @@ To add a new partner to the dashboard, edit `utils/Partners.tsx` and add entries
 
 ```typescript
 const PARTNERS: TDict<TPartner> = {
-  sturdy: { ... },  // existing partner
+  yearn: { ... },  // existing partner
 
   // Add your new partner here
   yourpartner: {
@@ -74,7 +74,7 @@ The `treasury` address will be used for authentication and URL routing (e.g., `/
 
 ```typescript
 const PARTNER_VAULT_CONFIG: TPartnerVaultConfig = {
-  sturdy: { ... },  // existing partner
+  yearn: { ... },  // existing partner
 
   // Add your new partner's vault configuration
   yourpartner: {

@@ -27,7 +27,7 @@ function	FAQPage(): ReactElement {
 								{'First, get in touch with us by filling the contact form. Then, configure your dApp to deposit to Yearn v3 vaults using our referral contract at 0x3744Df2673097d738aCaa3E463E6D638867757f2 on supported chains (mainnet, Base, Arbitrum, Katana). We will discuss which referral code to use for the deposit call. The code for this referral contract is '}
 								<a
 									className={'text-primary-600 underline'}
-									href={'https://github.com/yearn/Yearn-ERC4626-Router'}
+									href={'https://github.com/engn33r/referral-wrapper'}
 									rel={'noreferrer'}
 									target={'_blank'}>
 									{'here'}
@@ -40,7 +40,7 @@ function	FAQPage(): ReactElement {
 									target={'_blank'}>
 									{'here'}
 								</a>
-								{'. Lastly, we need to flip the switch by making the login page work for you so you can start tracking how many fees you earn over time.'}
+								{'. You will start earning fees as soon as users start depositing through the referral contract using your referral code! Lastly, to allow you to watch your progress, we need to flip the switch by making the login page work for you, which shows your earnings over time.'}
 							</p>
 						</div>
 						<div>
@@ -51,7 +51,7 @@ function	FAQPage(): ReactElement {
 								{' on Ethereum mainnet, Base, Arbitrum, and Katana. The code for it is stored '}
 								<a
 									className={'text-primary-600 underline'}
-									href={'https://referral-wrapper-demo.onrender.com/'}
+									href={'https://github.com/engn33r/referral-wrapper'}
 									rel={'noreferrer'}
 									target={'_blank'}>
 									{'here.'}
