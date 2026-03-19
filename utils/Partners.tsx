@@ -19,6 +19,12 @@ const PARTNERS: TDict<TPartner> = {
 		shortName: 'defisaver',
 		treasury: [toAddress('0x81cA52CfE66421d0ceF82d5F33230e43b5F23D2B')],
 		logo: <LogoDeFiSaver className={'text-900'} />
+	},
+	ceazor: {
+		name: 'Ceazor',
+		shortName: 'ceazor',
+		treasury: [toAddress('0x8244F0746396E06bD26F68C00E9b48b70b771472')],
+		logo: <img src="/partners/ceazor.jpg" alt="Ceazor" className="text-900" />
 	}
 };
 
@@ -92,6 +98,15 @@ const PARTNER_VAULT_CONFIG: TPartnerVaultConfig = {
 				toAddress('0xA2F263426ef09d43057d6be798A6672A4401ecC5')
 			]
 		}
+	},
+	ceazor: {
+		1: {
+			// TODO: Add vault address and depositor addresses for DeFi Saver
+			// Example: [toAddress('0xVaultAddress')]: [toAddress('0xDepositorAddress1'), ...]
+			[toAddress('0xBe53A109B494E5c9f97b9Cd39Fe969BE68BF6204')]: [
+				toAddress('0x3c5Aac016EF2F178e8699D6208796A2D67557fe2')
+			]
+		}
 	}
 };
 
@@ -116,7 +131,8 @@ type TPartnerLogo = {
 
 const LOGOS: TPartnerLogo = {
 	yearn: <LogoYearn className={'text-900 h-3/4 w-3/4'} />,
-	defisaver: <LogoDeFiSaver isColored={true} className={'text-900 h-3/4 w-3/4'} />
+	defisaver: <LogoDeFiSaver isColored={true} className={'text-900 h-3/4 w-3/4'} />,
+	ceazor: <img src="/partners/ceazor.jpg" alt="Ceazor" className="h-3/4 w-3/4 object-contain" />
 };
 
 const DEFAULT_PROFIT_SHARE = 0.5;
