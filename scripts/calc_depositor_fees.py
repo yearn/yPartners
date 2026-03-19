@@ -62,7 +62,7 @@ def load_local_env(file_path: str) -> None:
 DOTENV_FILE = os.path.join(os.getcwd(), '.env')
 load_local_env(DOTENV_FILE)
 
-ENVIO_GRAPHQL_URL = os.environ.get('ENVIO_GRAPHQL_URL', 'https://indexer.hyperindex.xyz/3fec0a4/v1/graphql')
+ENVIO_GRAPHQL_URL = os.environ.get('ENVIO_GRAPHQL_URL')
 ENVIO_PASSWORD = os.environ.get('ENVIO_PASSWORD', 'testing')
 DEFAULT_VAULT_ADDRESS = '0xBe53A109B494E5c9f97b9Cd39Fe969BE68BF6204'
 DEFAULT_CHAIN_ID = 1

@@ -34,7 +34,7 @@ Other scripts:
   - `RPC_URL_POLYGON_PUBLIC`, `RPC_URL_POLYGON_PRIVATE` – preferred public/latest and private/archive RPCs
   - `RPC_URL_MAINNET`, `RPC_URL_BASE`, `RPC_URL_ARBITRUM`, `RPC_URL_POLYGON` – legacy fallback RPCs if the split envs are unset
   - `NEXTAUTH_SECRET` – secret for NextAuth usage
-  - `COINGECKO_API_KEY` – optional API key for Coingecko price lookups (used to convert non-USD vault values to USD)
+  - Price data is fetched from DefiLlama (no API key required) to convert non-USD vault values to USD
   - `TELEGRAM_BOT`, `TELEGRAM_RECIPIENT_USERID` – required by `pages/api/telegram.ts` to deliver Team Up form submissions
   - `IP_TO_BLOCK` – optional comma-separated IPs to deny from the contact form
 

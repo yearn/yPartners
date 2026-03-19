@@ -1,6 +1,6 @@
 import {BigNumber, ethers} from 'ethers';
 import type {NextApiRequest, NextApiResponse} from 'next';
-import {getTokenPriceUsdWithDebug} from 'lib/crypto/coingecko';
+import {getTokenPriceUsdWithDebug} from 'lib/crypto/defillama';
 import {getRpcUrlLatest} from 'lib/crypto/rpc';
 import {getTokenSymbol} from 'lib/crypto/tokenMetadata';
 import {getKongVaultMetadata} from 'lib/yearn/kong';
