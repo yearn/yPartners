@@ -771,8 +771,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
 						const details = [
 							lookup.reason ? `reason=${lookup.reason}` : undefined,
 							typeof lookup.status === 'number' ? `status=${lookup.status}` : undefined,
-							lookup.rateLimitRemaining ? `remaining=${lookup.rateLimitRemaining}` : undefined,
-							lookup.rateLimitReset ? `reset=${lookup.rateLimitReset}` : undefined,
 							message ? `message="${message}"` : undefined
 						].filter(Boolean);
 						pricingDebugDetails = details.join(' ');
