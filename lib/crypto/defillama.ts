@@ -17,8 +17,6 @@ export type TTokenPriceUsdLookup = {
 	source: 'cache' | 'network';
 	reason?: TTokenPriceLookupReason;
 	status?: number;
-	rateLimitRemaining?: string;
-	rateLimitReset?: string;
 	message?: string;
 };
 
