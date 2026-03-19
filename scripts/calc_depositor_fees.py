@@ -797,7 +797,7 @@ def get_performance_fee_rate(
             raise RuntimeError('maxFee is zero')
         ratio_bps = performance_fee * 10000 // max_fee
         if log:
-            logger.info('Performance fee %.2f%% (calculated from on-chain)', ratio_bps / 100)
+            logger.info('Performance fee %.2f%% (calculated from onchain)', ratio_bps / 100)
         return ratio_bps
     except Exception as exc:
         logger.warning('Could not fetch performance fee rate (%s) - using default 10%%', exc)
@@ -869,7 +869,7 @@ def calculate_incremental_profit_and_fees(
         previous_shares = snapshot.shares_balance
         previous_pps = snapshot_pps
 
-    # Add profit from the last snapshot to the current on-chain PPS.
+    # Add profit from the last snapshot to the current onchain PPS.
     net_profit += previous_shares * (current_pps - previous_pps) // scale
 
     basis_points = 10000

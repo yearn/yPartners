@@ -8,8 +8,8 @@ import type {TDict} from 'lib/yearn/utils/types';
 import type {TAddress} from 'lib/yearn/utils/address';
 
 const PARTNERS: TDict<TPartner> = {
-	sturdy: {
-		name: 'Yearn',
+	yearn: {
+		name: 'Yearn (demo)',
 		shortName: 'yearn',
 		treasury: [toAddress('0x93A62dA5a14C80f265DAbC077fCEE437B1a0Efde')],
 		logo: <LogoYearn className={'text-900'} />
