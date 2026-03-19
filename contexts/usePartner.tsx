@@ -184,7 +184,7 @@ export const PartnerContextApp = ({
 	const {data: referralConfigResult, isLoading: isLoadingReferrals} = useSWR<TPartnerReferralConfig | TAPIError>(
 		shouldFetchReferrals ? ['partner-referrals', partnerID] : null,
 		async (): Promise<TPartnerReferralConfig | TAPIError> =>
-			baseFetcher<TPartnerReferralConfig | TAPIError>(`/api/partner-referrals?referrer=${partnerID}&chainId=1`),
+			baseFetcher<TPartnerReferralConfig | TAPIError>(`/api/partner-referrals?referrer=${partnerID}`),
 		{revalidateOnFocus: false}
 	);
 

@@ -1,7 +1,11 @@
 import type {NextApiRequest, NextApiResponse} from 'next';
 import {toAddress} from 'lib/yearn/utils/address';
 
+// Chains where YearnReferralWrapper (0x3744Df2673097d738aCaa3E463E6D638867757f2) is deployed
+const SUPPORTED_CHAIN_IDS = new Set([1, 8453, 42161, 747474]);
+
 type TReferralDeposit = {
+	id: string;
 	receiver: string;
 	referrer: string;
 	vault: string;
@@ -14,6 +18,19 @@ type TPartnerVaultConfig = {
 };
 
 type TResponseBody = TPartnerVaultConfig | {error: string};
+
+// Envio multi-chain event IDs are formatted as "{chainId}_{blockNumber}_{logIndex}"
+function parseChainIdFromEventId(eventId: string): number | null {
+	const parts = eventId.split('_');
+	if (parts.length < 3) {
+		return null;
+	}
+	const chainId = parseInt(parts[0], 10);
+	if (!Number.isFinite(chainId) || !SUPPORTED_CHAIN_IDS.has(chainId)) {
+		return null;
+	}
+	return chainId;
+}
 
 async function queryEnvioGraphQL<T>(query: string, variables: Record<string, unknown>): Promise<T> {
 	const envioUrl = process.env.ENVIO_GRAPHQL_URL;
@@ -52,6 +69,7 @@ async function getReferralDeposits(referrerAddress: string): Promise<TReferralDe
 				}
 				order_by: { id: asc }
 			) {
+				id
 				receiver
 				referrer
 				vault
@@ -76,7 +94,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
 	res.setHeader('Cache-Control', 's-maxage=60, stale-while-revalidate=300');
 
 	const referrerParam = req.query.referrer;
-	const chainIdParam = req.query.chainId;
 
 	if (!referrerParam) {
 		res.status(400).json({error: 'referrer parameter is required'});
@@ -84,8 +101,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
 	}
 
 	const referrerAddress = toAddress(Array.isArray(referrerParam) ? referrerParam[0] : referrerParam);
-	const parsedChainId = chainIdParam ? parseInt(Array.isArray(chainIdParam) ? chainIdParam[0] : chainIdParam, 10) : NaN;
-	const chainId = Number.isFinite(parsedChainId) ? parsedChainId : 1;
 
 	const hasEnvioConfig = Boolean(process.env.ENVIO_GRAPHQL_URL);
 	if (!hasEnvioConfig) {
@@ -97,11 +112,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
 	try {
 		const deposits = await getReferralDeposits(referrerAddress);
 
-		// Build the vault config structure
-		// Since envio doesn't include chain_id in the response, we assume all results are from the requested chain
+		// Build the vault config structure grouped by chain.
+		// Chain ID is parsed from the envio event ID (format: "{chainId}_{blockNumber}_{logIndex}").
 		const config: TPartnerVaultConfig = {};
 
 		for (const deposit of deposits) {
+			const chainId = parseChainIdFromEventId(deposit.id);
+			if (chainId === null) {
+				continue;
+			}
+
 			const vault = toAddress(deposit.vault);
 			const receiver = toAddress(deposit.receiver);
 
@@ -113,7 +133,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
 				config[chainId][vault] = [];
 			}
 
-			// Add receiver if not already in the list
 			if (!config[chainId][vault].includes(receiver)) {
 				config[chainId][vault].push(receiver);
 			}
