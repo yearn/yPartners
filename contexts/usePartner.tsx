@@ -8,6 +8,7 @@ import type {ReactElement} from 'react';
 import type {TPartnerVault} from 'types/types';
 import type {TDict} from 'lib/yearn/utils/types';
 import type {TAddress} from 'lib/yearn/utils/address';
+import type {TChainConfig} from 'utils/Partners';
 
 type TAccountFees = {
 	address: string,
@@ -143,6 +144,12 @@ type TAPIError = {
 	error: string;
 };
 
+type TPartnerReferralConfig = {
+	[chainId: number]: {
+		[vaultAddress: string]: string[];
+	};
+};
+
 function isAPIError(value: unknown): value is TAPIError {
 	return Boolean(
 		value &&
@@ -170,19 +177,82 @@ export const PartnerContextApp = ({
 	windowDays
 }: {partnerID: string, children: ReactElement, windowDays?: number}): ReactElement => {
 	const currentPartner = SHAREABLE_ADDRESSES[partnerID] ? SHAREABLE_ADDRESSES[partnerID].shortName : '';
-	const depositorAddresses = currentPartner ? PARTNER_ADDRESS_GROUPS[currentPartner] || [] : [];
 	const isSSR = typeof window === 'undefined';
+
+	// Fetch dynamic referral data for ceazor partner
+	const shouldFetchReferrals = !isSSR && currentPartner === 'ceazor' && partnerID;
+	const {data: referralConfigResult, isLoading: isLoadingReferrals} = useSWR<TPartnerReferralConfig | TAPIError>(
+		shouldFetchReferrals ? ['partner-referrals', partnerID] : null,
+		async (): Promise<TPartnerReferralConfig | TAPIError> =>
+			baseFetcher<TPartnerReferralConfig | TAPIError>(`/api/partner-referrals?referrer=${partnerID}&chainId=1`),
+		{revalidateOnFocus: false}
+	);
+
+	// Merge static config with dynamic referral config
+	const mergedVaultConfig = useMemo((): TChainConfig => {
+		const staticConfig = PARTNER_VAULT_CONFIG[currentPartner] || {};
+
+		// If not ceazor or no referral data yet, return static config
+		if (currentPartner !== 'ceazor' || !referralConfigResult || isAPIError(referralConfigResult)) {
+			return staticConfig;
+		}
+
+		// Merge dynamic referral config with static config
+		const merged: TChainConfig = {...staticConfig};
+
+		Object.entries(referralConfigResult).forEach(([chainIdStr, vaults]) => {
+			const chainId = Number(chainIdStr);
+			if (!merged[chainId]) {
+				merged[chainId] = {};
+			}
+
+			Object.entries(vaults).forEach(([vault, addresses]) => {
+				const vaultAddr = toAddress(vault);
+				if (!merged[chainId][vaultAddr]) {
+					merged[chainId][vaultAddr] = addresses.map(toAddress);
+				} else {
+					// Merge addresses, removing duplicates
+					const combined = [...merged[chainId][vaultAddr], ...addresses];
+					const uniqueAddresses = Array.from(new Set(combined.map((a) => a.toLowerCase()))).map(toAddress);
+					merged[chainId][vaultAddr] = uniqueAddresses;
+				}
+			});
+		});
+
+		return merged;
+	}, [currentPartner, referralConfigResult]);
+
+	// Extract depositor addresses from merged config
+	const depositorAddresses = useMemo((): TAddress[] => {
+		if (!currentPartner) {
+			return [];
+		}
+
+		// For ceazor, use the merged config; for others, use static PARTNER_ADDRESS_GROUPS
+		if (currentPartner === 'ceazor') {
+			const allAddresses: TAddress[] = [];
+			Object.values(mergedVaultConfig).forEach((vaults) => {
+				Object.values(vaults).forEach((addresses) => {
+					allAddresses.push(...addresses);
+				});
+			});
+			// Remove duplicates
+			const uniqueAddresses = Array.from(new Set(allAddresses.map((a) => a.toLowerCase()))).map(toAddress);
+			return uniqueAddresses;
+		}
+
+		return PARTNER_ADDRESS_GROUPS[currentPartner] || [];
+	}, [currentPartner, mergedVaultConfig]);
 
 	// Extract all chain/vault combinations for this partner
 	const vaultCombos = useMemo((): TVaultCombo[] => {
-		if (!currentPartner || !PARTNER_VAULT_CONFIG[currentPartner]) {
+		if (!currentPartner) {
 			return [];
 		}
 
 		const combos: TVaultCombo[] = [];
-		const chainConfig = PARTNER_VAULT_CONFIG[currentPartner];
 
-		Object.entries(chainConfig).forEach(([chainIdStr, vaultConfig]) => {
+		Object.entries(mergedVaultConfig).forEach(([chainIdStr, vaultConfig]) => {
 			const chainId = Number(chainIdStr);
 			Object.entries(vaultConfig).forEach(([vaultAddress, addresses]) => {
 				combos.push({
@@ -194,7 +264,7 @@ export const PartnerContextApp = ({
 		});
 
 		return combos;
-	}, [currentPartner]);
+	}, [currentPartner, mergedVaultConfig]);
 
 	const [selectedVaultKey, setSelectedVaultKey] = useState('');
 	const firstComboKey = useMemo((): string => {
@@ -303,35 +373,47 @@ export const PartnerContextApp = ({
 	}, [activeCombos, feesCalls]);
 
 	const isLoadingVaults = useMemo((): boolean => {
-		if (depositorAddresses.length === 0) {
-			return false;
-		}
 		if (isSSR) {
 			// During SSR mark as loading so server and client render the same markup.
 			return true;
 		}
+		// For ceazor, also wait for referral data
+		if (currentPartner === 'ceazor' && isLoadingReferrals) {
+			return true;
+		}
+		if (depositorAddresses.length === 0) {
+			return false;
+		}
 		return isLoadingDepositorTVL;
-	}, [depositorAddresses.length, isSSR, isLoadingDepositorTVL]);
+	}, [depositorAddresses.length, isSSR, isLoadingDepositorTVL, currentPartner, isLoadingReferrals]);
 
 	const isLoadingFees = useMemo((): boolean => {
-		if (depositorAddresses.length === 0) {
-			return false;
-		}
 		if (isSSR) {
 			return true;
 		}
+		// For ceazor, also wait for referral data
+		if (currentPartner === 'ceazor' && isLoadingReferrals) {
+			return true;
+		}
+		if (depositorAddresses.length === 0) {
+			return false;
+		}
 		return isLoadingDepositorFees;
-	}, [depositorAddresses.length, isSSR, isLoadingDepositorFees]);
+	}, [depositorAddresses.length, isSSR, isLoadingDepositorFees, currentPartner, isLoadingReferrals]);
 
 	const isLoadingChart = useMemo((): boolean => {
-		if (depositorAddresses.length === 0) {
-			return false;
-		}
 		if (isSSR) {
 			return true;
 		}
+		// For ceazor, also wait for referral data
+		if (currentPartner === 'ceazor' && isLoadingReferrals) {
+			return true;
+		}
+		if (depositorAddresses.length === 0) {
+			return false;
+		}
 		return isLoadingDepositorFees;
-	}, [depositorAddresses.length, isSSR, isLoadingDepositorFees]);
+	}, [depositorAddresses.length, isSSR, isLoadingDepositorFees, currentPartner, isLoadingReferrals]);
 
 	const	vaults = useMemo((): TDict<TPartnerVault> => {
 		// Yearn Vision data usage is disabled; returning empty vault list.
