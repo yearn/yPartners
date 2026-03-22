@@ -3,6 +3,7 @@ import {PARTNER_ADDRESS_GROUPS, PARTNER_VAULT_CONFIG, SHAREABLE_ADDRESSES} from 
 import useSWR from 'swr';
 import {baseFetcher} from 'lib/yearn/utils/fetchers';
 import {toAddress} from 'lib/yearn/utils/address';
+import {checkVaultsEndorsement} from 'lib/yearn/endorsement';
 
 import type {ReactElement} from 'react';
 import type {TPartnerVault} from 'types/types';
@@ -267,6 +268,9 @@ export const PartnerContextApp = ({
 	}, [currentPartner, mergedVaultConfig]);
 
 	const [selectedVaultKey, setSelectedVaultKey] = useState('');
+	const [endorsementMap, setEndorsementMap] = useState<Map<string, boolean>>(new Map());
+	const [isCheckingEndorsement, setIsCheckingEndorsement] = useState(false);
+
 	const firstComboKey = useMemo((): string => {
 		return vaultCombos[0] ? getComboKey(vaultCombos[0]) : '';
 	}, [vaultCombos]);
@@ -283,6 +287,32 @@ export const PartnerContextApp = ({
 			setSelectedVaultKey(firstComboKey);
 		}
 	}, [vaultCombos, selectedVaultKey, firstComboKey]);
+
+	// Lazy load endorsement status after vaults are loaded
+	useEffect((): void => {
+		if (isSSR || vaultCombos.length === 0 || isCheckingEndorsement) {
+			return;
+		}
+
+		const checkEndorsements = async (): Promise<void> => {
+			setIsCheckingEndorsement(true);
+			try {
+				const vaultsToCheck = vaultCombos.map((combo) => ({
+					chainId: combo.chainId,
+					vaultAddress: combo.vaultAddress
+				}));
+
+				const results = await checkVaultsEndorsement(vaultsToCheck);
+				setEndorsementMap(results);
+			} catch (error) {
+				console.error('[usePartner] Failed to check vault endorsements:', error);
+			} finally {
+				setIsCheckingEndorsement(false);
+			}
+		};
+
+		void checkEndorsements();
+	}, [vaultCombos, isSSR, isCheckingEndorsement]);
 
 	const activeCombos = useMemo((): TVaultCombo[] => {
 		if (vaultCombos.length === 0) {
@@ -514,7 +544,7 @@ export const PartnerContextApp = ({
 			return [];
 		}
 
-		return vaultCombos.map((combo): TVaultComboData => {
+		const allComboData = vaultCombos.map((combo): TVaultComboData => {
 			const key = getComboKey(combo);
 			const tvlCall = tvlCallsByKey.get(key);
 			const feesCall = feesCallsByKey.get(key);
@@ -533,7 +563,20 @@ export const PartnerContextApp = ({
 				isLoadingChart: isActive ? Boolean(isLoadingDepositorFees) : false
 			};
 		});
-	}, [activeComboKeys, feesCallsByKey, tvlCallsByKey, vaultCombos, vaultAssetAddressByKey, isLoadingDepositorTVL, isLoadingDepositorFees]);
+
+		// Filter out non-endorsed vaults (lazy loaded)
+		// If endorsement check hasn't completed yet, show all vaults
+		if (endorsementMap.size === 0) {
+			return allComboData;
+		}
+
+		return allComboData.filter((combo): boolean => {
+			const endorsementKey = `${combo.chainId}:${combo.vaultAddress.toLowerCase()}`;
+			const isEndorsed = endorsementMap.get(endorsementKey);
+			// Only include if endorsed (exclude if explicitly false or missing)
+			return isEndorsed === true;
+		});
+	}, [activeComboKeys, feesCallsByKey, tvlCallsByKey, vaultCombos, vaultAssetAddressByKey, isLoadingDepositorTVL, isLoadingDepositorFees, endorsementMap]);
 
 	const apiErrors = useMemo((): string[] => {
 		const errors: string[] = [];
