@@ -212,7 +212,7 @@ function	DashboardTabsWrapper({partnerID: _partnerID, windowValue, onWindowChang
 
 		const symbol = getComboAssetSymbol(combo);
 		const chainLabel = NETWORK_LABELS[combo.chainId] || 'Chain';
-		const addressLabel = truncateHex(combo.vaultAddress, 4);
+		const addressLabel = combo.vaultAddress;
 		return symbol ? `${symbol} • ${chainLabel} • ${addressLabel}` : `${chainLabel} • ${addressLabel}`;
 	};
 
