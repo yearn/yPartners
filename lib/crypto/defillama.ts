@@ -30,6 +30,8 @@ function getDefiLlamaChainName(chainId: number): string | null {
 			return 'arbitrum';
 		case 137:
 			return 'polygon';
+		case 747474:
+			return 'katana';
 		default:
 			return null;
 	}

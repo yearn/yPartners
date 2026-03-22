@@ -10,7 +10,6 @@ import IconCopy from 'lib/yearn/icons/IconCopy';
 import IconLinkOut from 'lib/yearn/icons/IconLinkOut';
 import {copyToClipboard} from 'lib/yearn/utils/helpers';
 import performBatchedUpdates from 'lib/yearn/utils/performBatchedUpdates';
-import {truncateHex} from 'lib/yearn/utils/address';
 import Image from 'next/image';
 import {getChainLogoUrl, getTokenLogoUrl} from 'lib/crypto/tokenLogos';
 
@@ -18,6 +17,7 @@ import {usePartner} from '../../contexts/usePartner';
 import type {TVaultComboData} from '../../contexts/usePartner';
 import VaultChart from '../graphs/VaultChart';
 import SummaryMetrics from './SummaryMetrics';
+import {useYDaemonVault, getCleanVaultName} from 'lib/yearn/useYDaemonVault';
 
 import type {MouseEvent, ReactElement} from 'react';
 import type {TChartBar} from 'types/chart';
@@ -133,8 +133,8 @@ function	Tabs({selectedIndex, set_selectedIndex}: TProps): ReactElement {
 							<Listbox.Button
 								className={`flex h-10 w-50 flex-row items-center border-0 border-b-2 border-neutral-900 bg-neutral-100 p-0 font-bold focus:border-neutral-900 ${vaultCount > 5 ? '' : 'md:hidden'}`}>
 								<div className={'relative flex flex-row items-center'}>
-									{displayVaults[selectedIndex] ? 
-										`${displayVaults[selectedIndex].token} - ${NETWORK_LABELS[displayVaults[selectedIndex]?.chainID]}` 
+									{displayVaults[selectedIndex] ?
+										`${displayVaults[selectedIndex].token} - ${NETWORK_LABELS[displayVaults[selectedIndex]?.chainID]}`
 										: 'Overview'}
 								</div>
 								<div className={'absolute right-0'}>
@@ -212,13 +212,20 @@ function	DashboardTabsWrapper({partnerID: _partnerID, windowValue, onWindowChang
 
 		const symbol = getComboAssetSymbol(combo);
 		const chainLabel = NETWORK_LABELS[combo.chainId] || 'Chain';
-		const addressLabel = truncateHex(combo.vaultAddress, 4);
+		const addressLabel = combo.vaultAddress;
 		return symbol ? `${symbol} • ${chainLabel} • ${addressLabel}` : `${chainLabel} • ${addressLabel}`;
 	};
 
 	const vaultDropdownLabel = getVaultDropdownLabel(selectedCombo);
 	const selectedTokenLogoSrc = getComboTokenLogoSrc(selectedCombo);
 	const selectedChainLogoSrc = getComboChainLogoSrc(selectedCombo);
+
+	// Fetch vault name from yDaemon API
+	const {vault: yDaemonVaultData} = useYDaemonVault(
+		selectedCombo?.chainId,
+		selectedCombo?.vaultAddress
+	);
+	const vaultDisplayName = yDaemonVaultData ? getCleanVaultName(yDaemonVaultData.name) : null;
 
 	function handleWindowChange(e: MouseEvent<HTMLButtonElement>): void {
 		const {name, value} = e.currentTarget;
@@ -239,7 +246,7 @@ function	DashboardTabsWrapper({partnerID: _partnerID, windowValue, onWindowChang
 		//
 		// const balanceEndpoints = [`${baseBalanceURI}?ts=${now}`];
 		// const payoutEndpoints = [`${basePayoutURI}?ts=${now}`];
-		// 	
+		//
 		// for (let i = 1; i < windowValue; i++) {
 		// 	const ts = startOfToday - (86400 * i);
 		// 	balanceEndpoints.push(`${baseBalanceURI}?ts=${ts}`);
@@ -267,7 +274,7 @@ function	DashboardTabsWrapper({partnerID: _partnerID, windowValue, onWindowChang
 		// 					const date = unix(data.ts).format('MMM DD YYYY');
 		// 					const shortDate = unix(data.ts).format('MMM DD');
 		// 					const {token} = currentVault;
-		// 					
+		//
 		// 					if (currentVault.tvl > 0 || vaultBalanceArray?.length > 0) {
 		// 						const dataPoint = {name: date, shortDate, data: {balanceTVL: currentVault.tvl}, token};
 		//
@@ -292,10 +299,10 @@ function	DashboardTabsWrapper({partnerID: _partnerID, windowValue, onWindowChang
 		// 							missingData.push(dataPoint);
 		// 							partnerBalanceTVL[`${toAddress(vaultAddress)}_${chainID}`] = missingData;
 		// 						}
-		// 
+		//
 		// 						// Sum TVLs by day for aggregate wrapper balance chart
 		// 						const dailyTVL = _wrapperTotals[date];
-		// 
+		//
 		// 						if(dailyTVL){
 		// 							_wrapperTotals[date] = {...dailyTVL, data: {totalTVL: dailyTVL.data.totalTVL + currentVault.tvl}};
 		// 						}else{
@@ -321,7 +328,7 @@ function	DashboardTabsWrapper({partnerID: _partnerID, windowValue, onWindowChang
 		// 		});
 		// 	});
 		//
-		// 	
+		//
 		// const partnerPayoutTotals: TDict<TChartBar[]> = {};
 		//
 		// Promise.all(payoutEndpoints.map(async (endpoint): Promise<AxiosResponse> => axios.get(endpoint))).then(
@@ -337,7 +344,7 @@ function	DashboardTabsWrapper({partnerID: _partnerID, windowValue, onWindowChang
 		// 					const date = unix(data.ts).format('MMM DD YYYY');
 		// 					const shortDate = unix(data.ts).format('MMM DD');
 		// 					const {token} = currentVault;
-		// 					
+		//
 		// 					if (currentVault.tvl > 0) {
 		// 						const dataPoint = {name: date, shortDate, data: {feePayout: currentVault.tvl}, token};
 		//
@@ -440,7 +447,7 @@ function	DashboardTabsWrapper({partnerID: _partnerID, windowValue, onWindowChang
 								value={selectedVaultKey}
 								onChange={(value: string): void => setSelectedVaultKey(value)}>
 								{({open}): ReactElement => (
-									<div className={'relative mt-2 w-full max-w-80 md:w-80'}>
+									<div className={'relative mt-2 w-full md:max-w-2xl'}>
 										<Listbox.Button
 											className={'flex h-10 w-full items-center justify-between rounded-md border border-neutral-200 bg-white px-3 text-sm text-neutral-900 shadow-sm hover:border-neutral-300'}>
 									{selectedCombo ? (
@@ -511,6 +518,22 @@ function	DashboardTabsWrapper({partnerID: _partnerID, windowValue, onWindowChang
 				))}
 			</div>
 
+			{selectedCombo && selectedVaultKey !== 'total' ? (
+				<div className={'mt-6 flex items-center gap-3 px-4 md:px-8'}>
+					<h2 className={'text-2xl font-bold text-neutral-900'}>
+						{vaultDisplayName || getComboAssetSymbol(selectedCombo) || 'Vault'}
+					</h2>
+					<a
+						href={`https://yearn.fi/vaults/${selectedCombo.chainId}/${selectedCombo.vaultAddress}`}
+						target={'_blank'}
+						rel={'noopener noreferrer'}
+						className={'inline-flex items-center gap-1 text-sm text-neutral-600 hover:text-neutral-900 hover:underline'}>
+						{'View on Yearn'}
+						<IconLinkOut className={'h-4 w-4'} />
+					</a>
+				</div>
+			) : null}
+
 			<SummaryMetrics
 				vaults={vaults}
 				vault={selectedVault}
@@ -530,7 +553,7 @@ function	DashboardTabsWrapper({partnerID: _partnerID, windowValue, onWindowChang
 
 			{aggregationStep < 2 || !balanceTVLs || !wrapperTotals || !payoutTotals ?
 				null : (
-					<>			
+					<>
 						{Object.values(vaults || []).map((_, idx): ReactElement | null => {
 							return idx === selectedIndex ? <VaultChart
 								key={idx}

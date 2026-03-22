@@ -203,13 +203,14 @@ function parseEventId(eventId: string): {block: number, log: number} | null {
 	return {block, log};
 }
 
-async function getDepositEvents(address: string, vaultAddress: string): Promise<TDepositEvent[]> {
+async function getDepositEvents(address: string, vaultAddress: string, chainId: number): Promise<TDepositEvent[]> {
 	const query = `
-		query GetDepositorDeposits($depositorAddress: String!, $vaultAddress: String!) {
+		query GetDepositorDeposits($depositorAddress: String!, $vaultAddress: String!, $chainId: Int!) {
 			Deposit(
 				where: {
 					owner: { _eq: $depositorAddress }
 					vaultAddress: { _eq: $vaultAddress }
+					chainId: { _eq: $chainId }
 				}
 				order_by: { id: asc }
 			) {
@@ -224,18 +225,20 @@ async function getDepositEvents(address: string, vaultAddress: string): Promise<
 
 	const result = await queryEnvioGraphQL<{Deposit: TDepositEvent[]}>(query, {
 		depositorAddress: address.toLowerCase(),
-		vaultAddress: vaultAddress.toLowerCase()
+		vaultAddress: vaultAddress.toLowerCase(),
+		chainId
 	});
 	return result?.Deposit || [];
 }
 
-async function getWithdrawEvents(address: string, vaultAddress: string): Promise<TWithdrawEvent[]> {
+async function getWithdrawEvents(address: string, vaultAddress: string, chainId: number): Promise<TWithdrawEvent[]> {
 	const query = `
-		query GetDepositorWithdrawals($depositorAddress: String!, $vaultAddress: String!) {
+		query GetDepositorWithdrawals($depositorAddress: String!, $vaultAddress: String!, $chainId: Int!) {
 			Withdraw(
 				where: {
 					owner: { _eq: $depositorAddress }
 					vaultAddress: { _eq: $vaultAddress }
+					chainId: { _eq: $chainId }
 				}
 				order_by: { id: asc }
 			) {
@@ -251,19 +254,21 @@ async function getWithdrawEvents(address: string, vaultAddress: string): Promise
 
 	const result = await queryEnvioGraphQL<{Withdraw: TWithdrawEvent[]}>(query, {
 		depositorAddress: address.toLowerCase(),
-		vaultAddress: vaultAddress.toLowerCase()
+		vaultAddress: vaultAddress.toLowerCase(),
+		chainId
 	});
 	return result?.Withdraw || [];
 }
 
-async function getTransferEvents(address: string, vaultAddress: string): Promise<TTransferEvent[]> {
+async function getTransferEvents(address: string, vaultAddress: string, chainId: number): Promise<TTransferEvent[]> {
 	const query = `
-		query GetDepositorTransfers($depositorAddress: String!, $zeroAddress: String!, $vaultAddress: String!) {
+		query GetDepositorTransfers($depositorAddress: String!, $zeroAddress: String!, $vaultAddress: String!, $chainId: Int!) {
 			transfersFrom: Transfer(
 				where: {
 					sender: { _eq: $depositorAddress }
 					receiver: { _neq: $zeroAddress }
 					vaultAddress: { _eq: $vaultAddress }
+					chainId: { _eq: $chainId }
 				}
 				order_by: { id: asc }
 			) {
@@ -277,6 +282,7 @@ async function getTransferEvents(address: string, vaultAddress: string): Promise
 					receiver: { _eq: $depositorAddress }
 					sender: { _neq: $zeroAddress }
 					vaultAddress: { _eq: $vaultAddress }
+					chainId: { _eq: $chainId }
 				}
 				order_by: { id: asc }
 			) {
@@ -291,7 +297,8 @@ async function getTransferEvents(address: string, vaultAddress: string): Promise
 	const variables = {
 		depositorAddress: address.toLowerCase(),
 		zeroAddress: ZERO_ADDRESS.toLowerCase(),
-		vaultAddress: vaultAddress.toLowerCase()
+		vaultAddress: vaultAddress.toLowerCase(),
+		chainId
 	};
 	const result = await queryEnvioGraphQL<{transfersFrom: TTransferEvent[], transfersTo: TTransferEvent[]}>(query, variables);
 	return [...(result?.transfersFrom || []), ...(result?.transfersTo || [])];
@@ -802,9 +809,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
 
 		for (const address of addresses) {
 			const [deposits, withdrawals, transfers] = await Promise.all([
-				getDepositEvents(address, vaultAddress),
-				getWithdrawEvents(address, vaultAddress),
-				getTransferEvents(address, vaultAddress)
+				getDepositEvents(address, vaultAddress, chainId),
+				getWithdrawEvents(address, vaultAddress, chainId),
+				getTransferEvents(address, vaultAddress, chainId)
 			]);
 
 			const timeline = buildEventTimeline(deposits, withdrawals, transfers, address);

@@ -14,8 +14,8 @@ type TProps = {
 	isLoadingFees?: boolean,
 }
 
-// Always pass metrics vaults as well as selected index? 
-//  Give summary metrics vault and the vaults plus the selected index so it knows what to do 
+// Always pass metrics vaults as well as selected index?
+//  Give summary metrics vault and the vaults plus the selected index so it knows what to do
 
 function SummaryMetrics(props: TProps): ReactElement {
 	const {vault, vaults, tvlOverride, userCount, feesOverride, isLoadingFees} = props;
@@ -27,10 +27,10 @@ function SummaryMetrics(props: TProps): ReactElement {
 	const feeValue = vault ? vault.totalPayout : aggregatedFees;
 	const earningsValue = Math.ceil(feeValue * 50) / 100; // 50% of fees, rounded up to 2 decimals
 	const riskScore = vault ? vault.riskScore : undefined;
-	
+
 	return (
 		<div>
-			<div className={'my-20 hidden w-[80%] justify-between bg-good-ol-grey-100 md:flex'}>
+			<div className={'my-10 hidden w-[80%] justify-between bg-good-ol-grey-100 md:flex'}>
 				<div>
 					<p>{'Contributed TVL'}</p>
 					<b className={'text-2xl tabular-nums'}>
