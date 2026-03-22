@@ -133,8 +133,8 @@ function	Tabs({selectedIndex, set_selectedIndex}: TProps): ReactElement {
 							<Listbox.Button
 								className={`flex h-10 w-50 flex-row items-center border-0 border-b-2 border-neutral-900 bg-neutral-100 p-0 font-bold focus:border-neutral-900 ${vaultCount > 5 ? '' : 'md:hidden'}`}>
 								<div className={'relative flex flex-row items-center'}>
-									{displayVaults[selectedIndex] ? 
-										`${displayVaults[selectedIndex].token} - ${NETWORK_LABELS[displayVaults[selectedIndex]?.chainID]}` 
+									{displayVaults[selectedIndex] ?
+										`${displayVaults[selectedIndex].token} - ${NETWORK_LABELS[displayVaults[selectedIndex]?.chainID]}`
 										: 'Overview'}
 								</div>
 								<div className={'absolute right-0'}>
@@ -246,7 +246,7 @@ function	DashboardTabsWrapper({partnerID: _partnerID, windowValue, onWindowChang
 		//
 		// const balanceEndpoints = [`${baseBalanceURI}?ts=${now}`];
 		// const payoutEndpoints = [`${basePayoutURI}?ts=${now}`];
-		// 	
+		//
 		// for (let i = 1; i < windowValue; i++) {
 		// 	const ts = startOfToday - (86400 * i);
 		// 	balanceEndpoints.push(`${baseBalanceURI}?ts=${ts}`);
@@ -274,7 +274,7 @@ function	DashboardTabsWrapper({partnerID: _partnerID, windowValue, onWindowChang
 		// 					const date = unix(data.ts).format('MMM DD YYYY');
 		// 					const shortDate = unix(data.ts).format('MMM DD');
 		// 					const {token} = currentVault;
-		// 					
+		//
 		// 					if (currentVault.tvl > 0 || vaultBalanceArray?.length > 0) {
 		// 						const dataPoint = {name: date, shortDate, data: {balanceTVL: currentVault.tvl}, token};
 		//
@@ -299,10 +299,10 @@ function	DashboardTabsWrapper({partnerID: _partnerID, windowValue, onWindowChang
 		// 							missingData.push(dataPoint);
 		// 							partnerBalanceTVL[`${toAddress(vaultAddress)}_${chainID}`] = missingData;
 		// 						}
-		// 
+		//
 		// 						// Sum TVLs by day for aggregate wrapper balance chart
 		// 						const dailyTVL = _wrapperTotals[date];
-		// 
+		//
 		// 						if(dailyTVL){
 		// 							_wrapperTotals[date] = {...dailyTVL, data: {totalTVL: dailyTVL.data.totalTVL + currentVault.tvl}};
 		// 						}else{
@@ -328,7 +328,7 @@ function	DashboardTabsWrapper({partnerID: _partnerID, windowValue, onWindowChang
 		// 		});
 		// 	});
 		//
-		// 	
+		//
 		// const partnerPayoutTotals: TDict<TChartBar[]> = {};
 		//
 		// Promise.all(payoutEndpoints.map(async (endpoint): Promise<AxiosResponse> => axios.get(endpoint))).then(
@@ -344,7 +344,7 @@ function	DashboardTabsWrapper({partnerID: _partnerID, windowValue, onWindowChang
 		// 					const date = unix(data.ts).format('MMM DD YYYY');
 		// 					const shortDate = unix(data.ts).format('MMM DD');
 		// 					const {token} = currentVault;
-		// 					
+		//
 		// 					if (currentVault.tvl > 0) {
 		// 						const dataPoint = {name: date, shortDate, data: {feePayout: currentVault.tvl}, token};
 		//
@@ -553,7 +553,7 @@ function	DashboardTabsWrapper({partnerID: _partnerID, windowValue, onWindowChang
 
 			{aggregationStep < 2 || !balanceTVLs || !wrapperTotals || !payoutTotals ?
 				null : (
-					<>			
+					<>
 						{Object.values(vaults || []).map((_, idx): ReactElement | null => {
 							return idx === selectedIndex ? <VaultChart
 								key={idx}
