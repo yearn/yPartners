@@ -44,16 +44,16 @@ const CHAIN_CONFIG: Record<number, TChainConfig> = {
 			'https://1rpc.io/arb'
 		]
 	},
-	137: {
-		name: 'Polygon',
-		rpcEnvVar: 'RPC_URL_POLYGON',
-		publicEnvVar: 'RPC_URL_POLYGON_PUBLIC',
-		privateEnvVar: 'RPC_URL_POLYGON_PRIVATE',
+	747474: {
+		name: 'Katana',
+		rpcEnvVar: 'RPC_URL_KATANA',
+		publicEnvVar: 'RPC_URL_KATANA_PUBLIC',
+		privateEnvVar: 'RPC_URL_KATANA_PRIVATE',
 		fallbackRpcs: [
-			'https://polygon.llamarpc.com',
-			'https://rpc.ankr.com/polygon',
-			'https://polygon-bor.publicnode.com',
-			'https://1rpc.io/matic'
+			'https://katana.gateway.tenderly.co',
+			'https://rpc.katana.network',
+			'https://katana.drpc.org',
+			'https://rpc.katana.network'
 		]
 	}
 };

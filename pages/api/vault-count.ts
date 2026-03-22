@@ -1,4 +1,4 @@
-const VAULTS_ENDPOINT = 'https://ydaemon.yearn.fi/vaults/v3?hideAlways=true&strategiesDetails=withDetails&strategiesCondition=inQueue&chainIDs=1,10,137,250,8453,42161,747474';
+const VAULTS_ENDPOINT = 'https://ydaemon.yearn.fi/vaults/v3?hideAlways=true&strategiesDetails=withDetails&strategiesCondition=inQueue&chainIDs=1,8453,42161,747474';
 
 export const config = {
 	runtime: 'edge'
