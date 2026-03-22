@@ -27,7 +27,7 @@ function	FAQPage(): ReactElement {
 								{'First, get in touch with us by filling the contact form. Then, configure your dApp to deposit to Yearn v3 vaults using our referral contract at 0x3744Df2673097d738aCaa3E463E6D638867757f2 on supported chains (mainnet, Base, Arbitrum, Katana). We will discuss which referral code to use for the deposit call. The code for this referral contract is '}
 								<a
 									className={'text-primary-600 underline'}
-									href={'https://github.com/engn33r/referral-wrapper'}
+									href={'https://github.com/yearn/referral-wrapper'}
 									rel={'noreferrer'}
 									target={'_blank'}>
 									{'here'}
@@ -46,12 +46,10 @@ function	FAQPage(): ReactElement {
 						<div>
 							<p className={'text-lg font-semibold text-neutral-900 sm:text-xl'}>{'What is the wrapper contract?'}</p>
 							<p>
-								{'The wrapper contract address is a way for Yearn v3 vaults to support referral codes. This is not a native feature of the v3 vault code, so a very minimalistic wrapper contract had to be built. It is only used for deposits, so users will withdraw directly from Yearn vaults as they normally would. The contract is located at '}
-								<code>{'0x3744Df2673097d738aCaa3E463E6D638867757f2'}</code>
-								{' on Ethereum mainnet, Base, Arbitrum, and Katana. The code for it is stored '}
+								{'The wrapper contract address is a way for Yearn v3 vaults to support referral codes. This is not a native feature of the v3 vault code, so a very minimalistic wrapper contract had to be built. It is only used for deposits, so users will withdraw directly from Yearn vaults as they normally would. The contract is located at 0x3744Df2673097d738aCaa3E463E6D638867757f2 on Ethereum mainnet, Base, Arbitrum, and Katana. The code for it is stored '}
 								<a
 									className={'text-primary-600 underline'}
-									href={'https://github.com/engn33r/referral-wrapper'}
+									href={'https://github.com/yearn/referral-wrapper'}
 									rel={'noreferrer'}
 									target={'_blank'}>
 									{'here.'}
