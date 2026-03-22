@@ -29,6 +29,7 @@ const CHAIN_CONFIG: Record<number, TChainConfig> = {
 			'https://base.llamarpc.com',
 			'https://rpc.ankr.com/base',
 			'https://base.publicnode.com',
+			'https://base.llamarpc.com',
 			'https://1rpc.io/base'
 		]
 	},
@@ -38,9 +39,9 @@ const CHAIN_CONFIG: Record<number, TChainConfig> = {
 		publicEnvVar: 'RPC_URL_ARBITRUM_PUBLIC',
 		privateEnvVar: 'RPC_URL_ARBITRUM_PRIVATE',
 		fallbackRpcs: [
-			'https://arbitrum.llamarpc.com',
 			'https://rpc.ankr.com/arbitrum',
 			'https://arbitrum-one.publicnode.com',
+			'https://arbitrum.llamarpc.com',
 			'https://1rpc.io/arb'
 		]
 	},

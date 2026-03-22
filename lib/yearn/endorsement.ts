@@ -29,21 +29,39 @@ export async function isVaultEndorsed(chainId: number, vaultAddress: string): Pr
 		const rpcUrl = getRpcUrlLatest(chainId);
 		if (!rpcUrl) {
 			console.warn(`[endorsement] No RPC URL for chain ${chainId}, assuming not endorsed`);
+			endorsementCache.set(cacheKey, false);
 			return false;
 		}
 
-		const provider = new ethers.providers.JsonRpcProvider(rpcUrl, chainId);
+		// Use StaticJsonRpcProvider to skip network detection
+		// This prevents "could not detect network" errors
+		const provider = new ethers.providers.StaticJsonRpcProvider(
+			rpcUrl,
+			{
+				chainId: chainId,
+				name: `chain-${chainId}`
+			}
+		);
+
 		const contract = new ethers.Contract(ENDORSEMENT_CONTRACT, ENDORSEMENT_ABI, provider);
 
-		const isEndorsed = await contract.isEndorsed(vaultAddress);
+		// Add timeout to the contract call
+		const timeoutPromise = new Promise<boolean>((_, reject) => {
+			setTimeout(() => reject(new Error('Endorsement check timeout')), 10000);
+		});
+
+		const endorsementPromise = contract.isEndorsed(vaultAddress);
+		const isEndorsed = await Promise.race([endorsementPromise, timeoutPromise]) as boolean;
 
 		// Cache the result
 		endorsementCache.set(cacheKey, isEndorsed);
 
 		return isEndorsed;
 	} catch (error) {
-		console.error(`[endorsement] Failed to check endorsement for ${vaultAddress} on chain ${chainId}:`, error);
-		// On error, assume not endorsed for safety
+		const errorMsg = error instanceof Error ? error.message : String(error);
+		console.warn(`[endorsement] Failed to check endorsement for ${vaultAddress} on chain ${chainId}: ${errorMsg}`);
+		// On error, cache as false and assume not endorsed for safety
+		endorsementCache.set(cacheKey, false);
 		return false;
 	}
 }

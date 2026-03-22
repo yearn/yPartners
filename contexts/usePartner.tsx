@@ -303,7 +303,14 @@ export const PartnerContextApp = ({
 				}));
 
 				const results = await checkVaultsEndorsement(vaultsToCheck);
-				setEndorsementMap(results);
+
+				// Only set endorsement map if we got at least some results
+				// If all checks failed, we'll show all vaults by keeping the map empty
+				if (results.size > 0) {
+					setEndorsementMap(results);
+				} else {
+					console.warn('[usePartner] All endorsement checks failed, showing all vaults');
+				}
 			} catch (error) {
 				console.error('[usePartner] Failed to check vault endorsements:', error);
 			} finally {

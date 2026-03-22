@@ -10,7 +10,6 @@ import IconCopy from 'lib/yearn/icons/IconCopy';
 import IconLinkOut from 'lib/yearn/icons/IconLinkOut';
 import {copyToClipboard} from 'lib/yearn/utils/helpers';
 import performBatchedUpdates from 'lib/yearn/utils/performBatchedUpdates';
-import {truncateHex} from 'lib/yearn/utils/address';
 import Image from 'next/image';
 import {getChainLogoUrl, getTokenLogoUrl} from 'lib/crypto/tokenLogos';
 
@@ -18,6 +17,7 @@ import {usePartner} from '../../contexts/usePartner';
 import type {TVaultComboData} from '../../contexts/usePartner';
 import VaultChart from '../graphs/VaultChart';
 import SummaryMetrics from './SummaryMetrics';
+import {useYDaemonVault, getCleanVaultName} from 'lib/yearn/useYDaemonVault';
 
 import type {MouseEvent, ReactElement} from 'react';
 import type {TChartBar} from 'types/chart';
@@ -219,6 +219,13 @@ function	DashboardTabsWrapper({partnerID: _partnerID, windowValue, onWindowChang
 	const vaultDropdownLabel = getVaultDropdownLabel(selectedCombo);
 	const selectedTokenLogoSrc = getComboTokenLogoSrc(selectedCombo);
 	const selectedChainLogoSrc = getComboChainLogoSrc(selectedCombo);
+
+	// Fetch vault name from yDaemon API
+	const {vault: yDaemonVaultData} = useYDaemonVault(
+		selectedCombo?.chainId,
+		selectedCombo?.vaultAddress
+	);
+	const vaultDisplayName = yDaemonVaultData ? getCleanVaultName(yDaemonVaultData.name) : null;
 
 	function handleWindowChange(e: MouseEvent<HTMLButtonElement>): void {
 		const {name, value} = e.currentTarget;
@@ -440,7 +447,7 @@ function	DashboardTabsWrapper({partnerID: _partnerID, windowValue, onWindowChang
 								value={selectedVaultKey}
 								onChange={(value: string): void => setSelectedVaultKey(value)}>
 								{({open}): ReactElement => (
-									<div className={'relative mt-2 w-full max-w-80 md:w-80'}>
+									<div className={'relative mt-2 w-full md:max-w-2xl'}>
 										<Listbox.Button
 											className={'flex h-10 w-full items-center justify-between rounded-md border border-neutral-200 bg-white px-3 text-sm text-neutral-900 shadow-sm hover:border-neutral-300'}>
 									{selectedCombo ? (
@@ -510,6 +517,22 @@ function	DashboardTabsWrapper({partnerID: _partnerID, windowValue, onWindowChang
 					</Button>
 				))}
 			</div>
+
+			{selectedCombo && selectedVaultKey !== 'total' ? (
+				<div className={'mt-6 flex items-center gap-3 px-4 md:px-8'}>
+					<h2 className={'text-2xl font-bold text-neutral-900'}>
+						{vaultDisplayName || getComboAssetSymbol(selectedCombo) || 'Vault'}
+					</h2>
+					<a
+						href={`https://yearn.fi/vaults/${selectedCombo.chainId}/${selectedCombo.vaultAddress}`}
+						target={'_blank'}
+						rel={'noopener noreferrer'}
+						className={'inline-flex items-center gap-1 text-sm text-neutral-600 hover:text-neutral-900 hover:underline'}>
+						{'View on Yearn'}
+						<IconLinkOut className={'h-4 w-4'} />
+					</a>
+				</div>
+			) : null}
 
 			<SummaryMetrics
 				vaults={vaults}
