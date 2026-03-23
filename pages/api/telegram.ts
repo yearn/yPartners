@@ -1,4 +1,26 @@
+import Redis from 'ioredis';
+
 import type {NextApiRequest, NextApiResponse} from 'next';
+
+const RATE_LIMIT_WINDOW_S = 60 * 60; // 1 hour
+const RATE_LIMIT_MAX = 2; // max submissions per window
+
+const redis = process.env.REDIS_URL ? new Redis(process.env.REDIS_URL) : null;
+
+const isRateLimited = async (ip: string): Promise<boolean> => {
+	if (!ip || !redis) {
+		return false;
+	}
+
+	const key = `ratelimit:telegram:${ip}`;
+	const count = await redis.incr(key);
+
+	if (count === 1) {
+		await redis.expire(key, RATE_LIMIT_WINDOW_S);
+	}
+
+	return count > RATE_LIMIT_MAX;
+};
 
 const getClientIP = (headerValue?: string | string[]): string => {
 	if (!headerValue) {
@@ -24,6 +46,10 @@ export default async function handler(request: NextApiRequest, response: NextApi
 
 	if (isBlocked(clientIP, ipToBlock)) {
 		return response.status(403).json({success: false});
+	}
+
+	if (await isRateLimited(clientIP)) {
+		return response.status(429).json({success: false, error: 'Too many requests. Please try again later.'});
 	}
 
 	const userAgent = request.headers['user-agent'] || '';
