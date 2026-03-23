@@ -12,14 +12,18 @@ const isRateLimited = async (ip: string): Promise<boolean> => {
 		return false;
 	}
 
-	const key = `ratelimit:telegram:${ip}`;
-	const count = await redis.incr(key);
+	try {
+		const key = `ratelimit:telegram:${ip}`;
+		const count = await redis.incr(key);
 
-	if (count === 1) {
-		await redis.expire(key, RATE_LIMIT_WINDOW_S);
+		if (count === 1) {
+			await redis.expire(key, RATE_LIMIT_WINDOW_S);
+		}
+
+		return count > RATE_LIMIT_MAX;
+	} catch {
+		return false;
 	}
-
-	return count > RATE_LIMIT_MAX;
 };
 
 const getClientIP = (headerValue?: string | string[]): string => {
@@ -60,23 +64,23 @@ export default async function handler(request: NextApiRequest, response: NextApi
 	const {name, tguser, protocol, website, message, turnstileToken} = request.body || {};
 
 	const turnstileSecret = process.env.CLOUDFLARE_TURNSTILE_SECRET;
-	if (turnstileSecret) {
-		if (!turnstileToken) {
-			return response.status(400).json({success: false, error: 'Verification required'});
-		}
+	if (turnstileSecret && turnstileToken) {
+		try {
+			const verifyResponse = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
+				method: 'POST',
+				headers: {'Content-Type': 'application/json'},
+				body: JSON.stringify({
+					secret: turnstileSecret,
+					response: turnstileToken
+				})
+			});
 
-		const verifyResponse = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
-			method: 'POST',
-			headers: {'Content-Type': 'application/json'},
-			body: JSON.stringify({
-				secret: turnstileSecret,
-				response: turnstileToken
-			})
-		});
-
-		const verifyResult = await verifyResponse.json() as {success: boolean};
-		if (!verifyResult.success) {
-			return response.status(403).json({success: false, error: 'Verification failed'});
+			const verifyResult = await verifyResponse.json() as {success: boolean};
+			if (!verifyResult.success) {
+				return response.status(403).json({success: false, error: 'Verification failed'});
+			}
+		} catch {
+			// Turnstile unavailable — fail open
 		}
 	}
 

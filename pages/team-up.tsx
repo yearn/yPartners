@@ -34,7 +34,8 @@ function	TeamUpPage(): ReactElement {
 		setIsDisabled(true);
 		setResponse(null);
 
-		if (!turnstileToken) {
+		const hasTurnstile = Boolean(process.env.CLOUDFLARE_TURNSTILE_SITE_KEY);
+		if (hasTurnstile && !turnstileToken) {
 			setResponse({isError: true, message: 'Please complete the verification challenge.'});
 			setIsBusy(false);
 			setIsDisabled(false);
@@ -47,7 +48,7 @@ function	TeamUpPage(): ReactElement {
 			protocol: (event.currentTarget.elements.namedItem('protocol') as HTMLInputElement)?.value,
 			website: (event.currentTarget.elements.namedItem('website') as HTMLInputElement)?.value,
 			message: (event.currentTarget.elements.namedItem('message') as HTMLTextAreaElement)?.value,
-			turnstileToken
+			turnstileToken: turnstileToken || undefined
 		};
 
 		try {
@@ -152,14 +153,16 @@ function	TeamUpPage(): ReactElement {
 								name={'message'}
 								rows={4} />
 						</div>
-						<div className={'md:col-span-2'}>
-							<div
-								ref={turnstileRef}
-								className={'cf-turnstile'}
-								data-callback={'onTurnstileCallback'}
-								data-sitekey={process.env.CLOUDFLARE_TURNSTILE_SITE_KEY}
-								data-theme={'light'} />
-						</div>
+						{process.env.CLOUDFLARE_TURNSTILE_SITE_KEY ? (
+							<div className={'md:col-span-2'}>
+								<div
+									ref={turnstileRef}
+									className={'cf-turnstile'}
+									data-callback={'onTurnstileCallback'}
+									data-sitekey={process.env.CLOUDFLARE_TURNSTILE_SITE_KEY}
+									data-theme={'light'} />
+							</div>
+						) : null}
 						<div className={'md:col-span-2'}>
 							<button
 								className={`flex w-full items-center justify-center rounded-lg border border-neutral-900 px-4 py-3 text-base font-medium transition ${
@@ -176,14 +179,16 @@ function	TeamUpPage(): ReactElement {
 				</div>
 			</div>
 
-			<Script
-				src={'https://challenges.cloudflare.com/turnstile/v0/api.js'}
-				strategy={'afterInteractive'}
-				onReady={(): void => {
-					(window as Window).onTurnstileCallback = (token: string): void => {
-						setTurnstileToken(token);
-					};
-				}} />
+			{process.env.CLOUDFLARE_TURNSTILE_SITE_KEY ? (
+				<Script
+					src={'https://challenges.cloudflare.com/turnstile/v0/api.js'}
+					strategy={'afterInteractive'}
+					onReady={(): void => {
+						(window as Window).onTurnstileCallback = (token: string): void => {
+							setTurnstileToken(token);
+						};
+					}} />
+			) : null}
 		</div>
 	);
 }
