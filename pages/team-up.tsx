@@ -29,7 +29,8 @@ function	TeamUpPage(): ReactElement {
 			tguser: (event.currentTarget.elements.namedItem('tguser') as HTMLInputElement)?.value,
 			protocol: (event.currentTarget.elements.namedItem('protocol') as HTMLInputElement)?.value,
 			website: (event.currentTarget.elements.namedItem('website') as HTMLInputElement)?.value,
-			message: (event.currentTarget.elements.namedItem('message') as HTMLTextAreaElement)?.value
+			message: (event.currentTarget.elements.namedItem('message') as HTMLTextAreaElement)?.value,
+			company_url: (event.currentTarget.elements.namedItem('company_url') as HTMLInputElement)?.value
 		};
 
 		try {
@@ -124,6 +125,15 @@ function	TeamUpPage(): ReactElement {
 								id={'website'}
 								name={'website'}
 								type={'url'} />
+						</div>
+						<div className={'absolute left-[-9999px]'} aria-hidden={'true'}>
+							<label htmlFor={'company_url'}>{'Company URL'}</label>
+							<input
+								autoComplete={'off'}
+								id={'company_url'}
+								name={'company_url'}
+								tabIndex={-1}
+								type={'text'} />
 						</div>
 						<div className={'md:col-span-2'}>
 							<label className={'block text-sm font-medium text-neutral-700'} htmlFor={'message'}>{'Short explanation of what you are looking for'}</label>

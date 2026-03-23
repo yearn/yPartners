@@ -31,7 +31,12 @@ export default async function handler(request: NextApiRequest, response: NextApi
 		return response.status(403).json({success: false});
 	}
 
-	const {name, tguser, protocol, website, message} = request.body || {};
+	const {name, tguser, protocol, website, message, company_url} = request.body || {};
+
+	if (company_url) {
+		return response.status(200).json({success: true});
+	}
+
 	if (!name || !tguser || !protocol) {
 		return response.status(400).json({success: false, error: 'Missing required fields'});
 	}
