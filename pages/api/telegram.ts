@@ -57,10 +57,31 @@ export default async function handler(request: NextApiRequest, response: NextApi
 		return response.status(403).json({success: false});
 	}
 
-	const {name, tguser, protocol, website, message, company_url} = request.body || {};
+	const {name, tguser, protocol, website, message, company_url, turnstileToken} = request.body || {};
 
 	if (company_url) {
 		return response.status(200).json({success: true});
+	}
+
+	const turnstileSecret = process.env.CLOUDFLARE_TURNSTILE_SECRET;
+	if (turnstileSecret) {
+		if (!turnstileToken) {
+			return response.status(400).json({success: false, error: 'Verification required'});
+		}
+
+		const verifyResponse = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
+			method: 'POST',
+			headers: {'Content-Type': 'application/json'},
+			body: JSON.stringify({
+				secret: turnstileSecret,
+				response: turnstileToken
+			})
+		});
+
+		const verifyResult = await verifyResponse.json() as {success: boolean};
+		if (!verifyResult.success) {
+			return response.status(403).json({success: false, error: 'Verification failed'});
+		}
 	}
 
 	if (!name || !tguser || !protocol) {
