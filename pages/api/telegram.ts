@@ -2,7 +2,7 @@ import Redis from 'ioredis';
 
 import type {NextApiRequest, NextApiResponse} from 'next';
 
-const RATE_LIMIT_WINDOW_S = 60 * 60; // 1 hour
+const RATE_LIMIT_WINDOW_S = 30 * 60; // 30 minutes
 const RATE_LIMIT_MAX = 2; // max submissions per window
 
 const redis = process.env.REDIS_URL ? new Redis(process.env.REDIS_URL) : null;
@@ -57,11 +57,7 @@ export default async function handler(request: NextApiRequest, response: NextApi
 		return response.status(403).json({success: false});
 	}
 
-	const {name, tguser, protocol, website, message, company_url, turnstileToken} = request.body || {};
-
-	if (company_url) {
-		return response.status(200).json({success: true});
-	}
+	const {name, tguser, protocol, website, message, turnstileToken} = request.body || {};
 
 	const turnstileSecret = process.env.CLOUDFLARE_TURNSTILE_SECRET;
 	if (turnstileSecret) {
