@@ -1,9 +1,10 @@
 import {createContext, useContext, useEffect, useMemo, useState}	from 'react';
-import {PARTNER_ADDRESS_GROUPS, PARTNER_VAULT_CONFIG, SHAREABLE_ADDRESSES} from 'utils/Partners';
+import {PARTNER_ADDRESS_GROUPS, PARTNER_VAULT_CONFIG, SHAREABLE_ADDRESSES, VAULT_WHITELIST} from 'utils/Partners';
 import useSWR from 'swr';
 import {baseFetcher} from 'lib/yearn/utils/fetchers';
 import {toAddress} from 'lib/yearn/utils/address';
 import {checkVaultsEndorsement} from 'lib/yearn/endorsement';
+import {isVault, TVaultType} from 'lib/yearn/vaultDetection';
 
 import type {ReactElement} from 'react';
 import type {TPartnerVault} from 'types/types';
@@ -270,6 +271,8 @@ export const PartnerContextApp = ({
 	const [selectedVaultKey, setSelectedVaultKey] = useState('');
 	const [endorsementMap, setEndorsementMap] = useState<Map<string, boolean>>(new Map());
 	const [isCheckingEndorsement, setIsCheckingEndorsement] = useState(false);
+	const [vaultTypeMap, setVaultTypeMap] = useState<Map<string, TVaultType>>(new Map());
+	const [isCheckingVaultTypes, setIsCheckingVaultTypes] = useState(false);
 
 	const firstComboKey = useMemo((): string => {
 		return vaultCombos[0] ? getComboKey(vaultCombos[0]) : '';
@@ -320,6 +323,46 @@ export const PartnerContextApp = ({
 
 		void checkEndorsements();
 	}, [vaultCombos, isSSR, isCheckingEndorsement]);
+
+	// Check vault types to filter out strategies (only show vaults in dropdown)
+	useEffect((): void => {
+		if (isSSR || vaultCombos.length === 0 || isCheckingVaultTypes) {
+			return;
+		}
+
+		const checkVaultTypes = async (): Promise<void> => {
+			setIsCheckingVaultTypes(true);
+			try {
+				const results = new Map<string, TVaultType>();
+
+				// Check each vault combo to determine if it's a vault or strategy
+				await Promise.all(
+					vaultCombos.map(async (combo) => {
+						const key = `${combo.chainId}:${combo.vaultAddress.toLowerCase()}`;
+						const vaultType = await isVault(combo.chainId, combo.vaultAddress) ? 'vault' : 'strategy';
+						results.set(key, vaultType);
+					})
+				);
+
+				if (results.size > 0) {
+					setVaultTypeMap(results);
+					// Log strategies that will be filtered out
+					const strategies = Array.from(results.entries())
+						.filter(([, type]) => type === 'strategy')
+						.map(([key]) => key);
+					if (strategies.length > 0) {
+						console.log('[usePartner] Filtering out strategies:', strategies);
+					}
+				}
+			} catch (error) {
+				console.error('[usePartner] Failed to check vault types:', error);
+			} finally {
+				setIsCheckingVaultTypes(false);
+			}
+		};
+
+		void checkVaultTypes();
+	}, [vaultCombos, isSSR, isCheckingVaultTypes]);
 
 	const activeCombos = useMemo((): TVaultCombo[] => {
 		if (vaultCombos.length === 0) {
@@ -571,19 +614,35 @@ export const PartnerContextApp = ({
 			};
 		});
 
-		// Filter out non-endorsed vaults (lazy loaded)
-		// If endorsement check hasn't completed yet, show all vaults
-		if (endorsementMap.size === 0) {
-			return allComboData;
+		// Filter out non-endorsed vaults and strategies (lazy loaded)
+		// If endorsement/vault type checks haven't completed yet, show all vaults
+		let filteredData = allComboData;
+
+		// Filter by endorsement if we have endorsement data
+		if (endorsementMap.size > 0) {
+			filteredData = filteredData.filter((combo): boolean => {
+				const endorsementKey = `${combo.chainId}:${combo.vaultAddress.toLowerCase()}`;
+				const isEndorsed = endorsementMap.get(endorsementKey);
+				// Only include if endorsed (exclude if explicitly false or missing)
+				return isEndorsed === true;
+			});
 		}
 
-		return allComboData.filter((combo): boolean => {
-			const endorsementKey = `${combo.chainId}:${combo.vaultAddress.toLowerCase()}`;
-			const isEndorsed = endorsementMap.get(endorsementKey);
-			// Only include if endorsed (exclude if explicitly false or missing)
-			return isEndorsed === true;
-		});
-	}, [activeComboKeys, feesCallsByKey, tvlCallsByKey, vaultCombos, vaultAssetAddressByKey, isLoadingDepositorTVL, isLoadingDepositorFees, endorsementMap]);
+		// Filter out strategies if we have vault type data
+		if (vaultTypeMap.size > 0) {
+			filteredData = filteredData.filter((combo): boolean => {
+				const vaultTypeKey = `${combo.chainId}:${combo.vaultAddress.toLowerCase()}`;
+				const vaultType = vaultTypeMap.get(vaultTypeKey);
+				// Check if this address is whitelisted (should not be filtered)
+				const whitelistedAddresses = VAULT_WHITELIST[combo.chainId] || [];
+				const isWhitelisted = whitelistedAddresses.includes(combo.vaultAddress.toLowerCase());
+				// Include if it's a vault OR if it's whitelisted
+				return vaultType === 'vault' || isWhitelisted;
+			});
+		}
+
+		return filteredData;
+	}, [activeComboKeys, feesCallsByKey, tvlCallsByKey, vaultCombos, vaultAssetAddressByKey, isLoadingDepositorTVL, isLoadingDepositorFees, endorsementMap, vaultTypeMap]);
 
 	const apiErrors = useMemo((): string[] => {
 		const errors: string[] = [];

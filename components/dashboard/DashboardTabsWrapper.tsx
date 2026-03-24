@@ -473,11 +473,13 @@ function	DashboardTabsWrapper({partnerID: _partnerID, windowValue, onWindowChang
 									leaveTo={'transform scale-95 opacity-0'}>
 									<Listbox.Options
 										className={'absolute z-50 mt-2 max-h-72 w-full overflow-auto rounded-md border border-neutral-200 bg-white shadow-lg'}>
+										{/* Total option temporarily hidden due to bugs
 										<Listbox.Option
 											className={'cursor-pointer px-3 py-2 text-sm text-neutral-900 hover:bg-neutral-100'}
 											value={'total'}>
 											{'Total'}
 										</Listbox.Option>
+										*/}
 										{vaultComboData.map((combo) => {
 											const comboLabel = getVaultDropdownLabel(combo);
 											const comboTokenLogoSrc = getComboTokenLogoSrc(combo);
