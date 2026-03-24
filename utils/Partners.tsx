@@ -57,6 +57,12 @@ type TPartnerVaultConfig = {
 	[partnerKey: string]: TChainConfig;
 };
 
+// Vault whitelist: addresses that should NOT be filtered out as strategies
+// Format: {chainId: [address1, address2, ...]} - addresses in lowercase
+const VAULT_WHITELIST: Record<number, string[]> = {
+	1: [toAddress('0x23346B04a7f55b8760E5860AA5A77383D63491cD')].map((a) => a.toLowerCase())
+};
+
 const PARTNER_VAULT_CONFIG: TPartnerVaultConfig = {
 	yearn: {
 		1: {
@@ -143,6 +149,7 @@ export {
 	SHAREABLE_ADDRESSES,
 	PARTNER_ADDRESS_GROUPS,
 	PARTNER_VAULT_CONFIG,
-	DEFAULT_PROFIT_SHARE
+	DEFAULT_PROFIT_SHARE,
+	VAULT_WHITELIST
 };
 export type {TVaultConfig, TChainConfig, TPartnerVaultConfig};
