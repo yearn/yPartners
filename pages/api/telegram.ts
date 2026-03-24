@@ -1,4 +1,30 @@
+import Redis from 'ioredis';
+
 import type {NextApiRequest, NextApiResponse} from 'next';
+
+const RATE_LIMIT_WINDOW_S = 30 * 60; // 30 minutes
+const RATE_LIMIT_MAX = 2; // max submissions per window
+
+const redis = process.env.REDIS_URL ? new Redis(process.env.REDIS_URL) : null;
+
+const isRateLimited = async (ip: string): Promise<boolean> => {
+	if (!ip || !redis) {
+		return false;
+	}
+
+	try {
+		const key = `ratelimit:telegram:${ip}`;
+		const count = await redis.incr(key);
+
+		if (count === 1) {
+			await redis.expire(key, RATE_LIMIT_WINDOW_S);
+		}
+
+		return count > RATE_LIMIT_MAX;
+	} catch {
+		return false;
+	}
+};
 
 const getClientIP = (headerValue?: string | string[]): string => {
 	if (!headerValue) {
@@ -26,12 +52,38 @@ export default async function handler(request: NextApiRequest, response: NextApi
 		return response.status(403).json({success: false});
 	}
 
+	if (await isRateLimited(clientIP)) {
+		return response.status(429).json({success: false, error: 'Too many requests. Please try again later.'});
+	}
+
 	const userAgent = request.headers['user-agent'] || '';
 	if (typeof userAgent === 'string' && userAgent.includes('python-requests')) {
 		return response.status(403).json({success: false});
 	}
 
-	const {name, tguser, protocol, website, message} = request.body || {};
+	const {name, tguser, protocol, website, message, turnstileToken} = request.body || {};
+
+	const turnstileSecret = process.env.CLOUDFLARE_TURNSTILE_SECRET;
+	if (turnstileSecret && turnstileToken) {
+		try {
+			const verifyResponse = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
+				method: 'POST',
+				headers: {'Content-Type': 'application/json'},
+				body: JSON.stringify({
+					secret: turnstileSecret,
+					response: turnstileToken
+				})
+			});
+
+			const verifyResult = await verifyResponse.json() as {success: boolean};
+			if (!verifyResult.success) {
+				return response.status(403).json({success: false, error: 'Verification failed'});
+			}
+		} catch {
+			// Turnstile unavailable — fail open
+		}
+	}
+
 	if (!name || !tguser || !protocol) {
 		return response.status(400).json({success: false, error: 'Missing required fields'});
 	}

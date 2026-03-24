@@ -1,5 +1,6 @@
 import axios from 'axios';
-import {useRef, useState} from 'react';
+import Script from 'next/script';
+import {useCallback, useRef, useState} from 'react';
 
 import type {FormEvent, ReactElement} from 'react';
 
@@ -12,7 +13,16 @@ function	TeamUpPage(): ReactElement {
 	const [isBusy, setIsBusy] = useState(false);
 	const [isDisabled, setIsDisabled] = useState(false);
 	const [response, setResponse] = useState<TFormResponse | null>(null);
+	const [turnstileToken, setTurnstileToken] = useState('');
 	const formRef = useRef<HTMLFormElement>(null);
+	const turnstileRef = useRef<HTMLDivElement>(null);
+
+	const resetTurnstile = useCallback((): void => {
+		setTurnstileToken('');
+		if (window.turnstile && turnstileRef.current) {
+			window.turnstile.reset(turnstileRef.current);
+		}
+	}, []);
 
 	const handleSubmit = async (event: FormEvent<HTMLFormElement>): Promise<void> => {
 		event.preventDefault();
@@ -24,12 +34,21 @@ function	TeamUpPage(): ReactElement {
 		setIsDisabled(true);
 		setResponse(null);
 
+		const hasTurnstile = Boolean(process.env.CLOUDFLARE_TURNSTILE_SITE_KEY);
+		if (hasTurnstile && !turnstileToken) {
+			setResponse({isError: true, message: 'Please complete the verification challenge.'});
+			setIsBusy(false);
+			setIsDisabled(false);
+			return;
+		}
+
 		const formData = {
 			name: (event.currentTarget.elements.namedItem('name') as HTMLInputElement)?.value,
 			tguser: (event.currentTarget.elements.namedItem('tguser') as HTMLInputElement)?.value,
 			protocol: (event.currentTarget.elements.namedItem('protocol') as HTMLInputElement)?.value,
 			website: (event.currentTarget.elements.namedItem('website') as HTMLInputElement)?.value,
-			message: (event.currentTarget.elements.namedItem('message') as HTMLTextAreaElement)?.value
+			message: (event.currentTarget.elements.namedItem('message') as HTMLTextAreaElement)?.value,
+			turnstileToken: turnstileToken || undefined
 		};
 
 		try {
@@ -47,6 +66,7 @@ function	TeamUpPage(): ReactElement {
 			});
 		} finally {
 			setIsBusy(false);
+			resetTurnstile();
 			setTimeout((): void => setIsDisabled(false), 10000);
 		}
 	};
@@ -133,6 +153,16 @@ function	TeamUpPage(): ReactElement {
 								name={'message'}
 								rows={4} />
 						</div>
+						{process.env.CLOUDFLARE_TURNSTILE_SITE_KEY ? (
+							<div className={'md:col-span-2'}>
+								<div
+									ref={turnstileRef}
+									className={'cf-turnstile'}
+									data-callback={'onTurnstileCallback'}
+									data-sitekey={process.env.CLOUDFLARE_TURNSTILE_SITE_KEY}
+									data-theme={'light'} />
+							</div>
+						) : null}
 						<div className={'md:col-span-2'}>
 							<button
 								className={`flex w-full items-center justify-center rounded-lg border border-neutral-900 px-4 py-3 text-base font-medium transition ${
@@ -148,8 +178,26 @@ function	TeamUpPage(): ReactElement {
 					</form>
 				</div>
 			</div>
+
+			{process.env.CLOUDFLARE_TURNSTILE_SITE_KEY ? (
+				<Script
+					src={'https://challenges.cloudflare.com/turnstile/v0/api.js'}
+					strategy={'afterInteractive'}
+					onReady={(): void => {
+						(window as Window).onTurnstileCallback = (token: string): void => {
+							setTurnstileToken(token);
+						};
+					}} />
+			) : null}
 		</div>
 	);
+}
+
+declare global {
+	interface Window {
+		turnstile?: {reset: (element: HTMLElement) => void};
+		onTurnstileCallback?: (token: string) => void;
+	}
 }
 
 export default TeamUpPage;

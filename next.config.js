@@ -41,6 +41,7 @@ module.exports = ({
 			1: process.env.RPC_URL_MAINNET
 		}),
 		NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET,
-		YVISION_BASE_URI: 'https://api.yearn.vision'
+		YVISION_BASE_URI: 'https://api.yearn.vision',
+		CLOUDFLARE_TURNSTILE_SITE_KEY: process.env.CLOUDFLARE_TURNSTILE_SITE_KEY
 	}
 });
