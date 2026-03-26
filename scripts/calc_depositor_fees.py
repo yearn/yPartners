@@ -2,7 +2,6 @@
 """Python port of the Yearn V3 depositor fee calculator."""
 
 import argparse
-import base64
 import bisect
 import datetime
 import json
@@ -63,7 +62,7 @@ DOTENV_FILE = os.path.join(os.getcwd(), '.env')
 load_local_env(DOTENV_FILE)
 
 ENVIO_GRAPHQL_URL = os.environ.get('ENVIO_GRAPHQL_URL')
-ENVIO_PASSWORD = os.environ.get('ENVIO_PASSWORD', 'testing')
+ENVIO_TOKEN = os.environ.get('ENVIO_PASSWORD', '')
 DEFAULT_VAULT_ADDRESS = '0xBe53A109B494E5c9f97b9Cd39Fe969BE68BF6204'
 DEFAULT_CHAIN_ID = 1
 CHAIN_CONFIG = {
@@ -450,10 +449,9 @@ def format_units_display(value: int, decimals: int) -> str:
 
 def query_envio_graphql(query: str, variables: Dict[str, Any]) -> Dict[str, Any]:
     payload = json.dumps({'query': query, 'variables': variables}).encode('utf-8')
-    auth = base64.b64encode(f":{ENVIO_PASSWORD}".encode('utf-8')).decode('utf-8')
     headers = {
         'Content-Type': 'application/json',
-        'Authorization': f'Basic {auth}',
+        'Authorization': f'Bearer {ENVIO_TOKEN}',
     }
     request = urllib.request.Request(ENVIO_GRAPHQL_URL, data=payload, headers=headers)
     try:
