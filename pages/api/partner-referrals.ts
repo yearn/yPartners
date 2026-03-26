@@ -41,11 +41,16 @@ async function queryEnvioGraphQL<T>(query: string, variables: Record<string, unk
 
 	const payload = JSON.stringify({query, variables});
 
+	const headers: Record<string, string> = {
+		'Content-Type': 'application/json'
+	};
+	if (process.env.ENVIO_PASSWORD) {
+		headers['Authorization'] = `Bearer ${process.env.ENVIO_PASSWORD}`;
+	}
+
 	const response = await fetch(envioUrl, {
 		method: 'POST',
-		headers: {
-			'Content-Type': 'application/json'
-		},
+		headers,
 		body: payload
 	});
 
