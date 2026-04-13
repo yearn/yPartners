@@ -471,8 +471,8 @@ def get_deposit_events(depositor_address: str, vault_address: Optional[str] = No
             query GetDepositorDeposits($depositorAddress: String!, $vaultAddress: String!) {
               Deposit(
                 where: {
-                  owner: { _eq: $depositorAddress }
-                  vaultAddress: { _eq: $vaultAddress }
+                  owner: { _ilike: $depositorAddress }
+                  vaultAddress: { _ilike: $vaultAddress }
                 }
                 order_by: { id: asc }
               ) {
@@ -492,7 +492,7 @@ def get_deposit_events(depositor_address: str, vault_address: Optional[str] = No
         query = textwrap.dedent('''
             query GetDepositorDeposits($depositorAddress: String!) {
               Deposit(
-                where: { owner: { _eq: $depositorAddress } }
+                where: { owner: { _ilike: $depositorAddress } }
                 order_by: { id: asc }
               ) {
                 id
@@ -513,8 +513,8 @@ def get_withdraw_events(depositor_address: str, vault_address: Optional[str] = N
             query GetDepositorWithdrawals($depositorAddress: String!, $vaultAddress: String!) {
               Withdraw(
                 where: {
-                  owner: { _eq: $depositorAddress }
-                  vaultAddress: { _eq: $vaultAddress }
+                  owner: { _ilike: $depositorAddress }
+                  vaultAddress: { _ilike: $vaultAddress }
                 }
                 order_by: { id: asc }
               ) {
@@ -535,7 +535,7 @@ def get_withdraw_events(depositor_address: str, vault_address: Optional[str] = N
         query = textwrap.dedent('''
             query GetDepositorWithdrawals($depositorAddress: String!) {
               Withdraw(
-                where: { owner: { _eq: $depositorAddress } }
+                where: { owner: { _ilike: $depositorAddress } }
                 order_by: { id: asc }
               ) {
                 id
@@ -558,9 +558,9 @@ def get_transfer_events(depositor_address: str, vault_address: Optional[str] = N
             query GetDepositorTransfers($depositorAddress: String!, $zeroAddress: String!, $vaultAddress: String!) {
               transfersFrom: Transfer(
                 where: {
-                  sender: { _eq: $depositorAddress }
+                  sender: { _ilike: $depositorAddress }
                   receiver: { _neq: $zeroAddress }
-                  vaultAddress: { _eq: $vaultAddress }
+                  vaultAddress: { _ilike: $vaultAddress }
                 }
                 order_by: { id: asc }
               ) {
@@ -571,9 +571,9 @@ def get_transfer_events(depositor_address: str, vault_address: Optional[str] = N
               }
               transfersTo: Transfer(
                 where: {
-                  receiver: { _eq: $depositorAddress }
+                  receiver: { _ilike: $depositorAddress }
                   sender: { _neq: $zeroAddress }
-                  vaultAddress: { _eq: $vaultAddress }
+                  vaultAddress: { _ilike: $vaultAddress }
                 }
                 order_by: { id: asc }
               ) {
@@ -594,7 +594,7 @@ def get_transfer_events(depositor_address: str, vault_address: Optional[str] = N
             query GetDepositorTransfers($depositorAddress: String!, $zeroAddress: String!) {
               transfersFrom: Transfer(
                 where: {
-                  sender: { _eq: $depositorAddress }
+                  sender: { _ilike: $depositorAddress }
                   receiver: { _neq: $zeroAddress }
                 }
                 order_by: { id: asc }
@@ -606,7 +606,7 @@ def get_transfer_events(depositor_address: str, vault_address: Optional[str] = N
               }
               transfersTo: Transfer(
                 where: {
-                  receiver: { _eq: $depositorAddress }
+                  receiver: { _ilike: $depositorAddress }
                   sender: { _neq: $zeroAddress }
                 }
                 order_by: { id: asc }
