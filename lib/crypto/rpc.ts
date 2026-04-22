@@ -14,7 +14,7 @@ const CHAIN_CONFIG: Record<number, TChainConfig> = {
 		privateEnvVar: 'RPC_URL_MAINNET_PRIVATE',
 		fallbackRpcs: [
 			'https://mainnet.gateway.tenderly.co/3V34wr9LQ5X3HupEWCw8kg',
-			'https://eth.llamarpc.com',
+			'https://gateway.tenderly.co/public/mainnet',
 			'https://rpc.ankr.com/eth',
 			'https://ethereum.publicnode.com',
 			'https://1rpc.io/eth'
@@ -26,10 +26,9 @@ const CHAIN_CONFIG: Record<number, TChainConfig> = {
 		publicEnvVar: 'RPC_URL_BASE_PUBLIC',
 		privateEnvVar: 'RPC_URL_BASE_PRIVATE',
 		fallbackRpcs: [
-			'https://base.llamarpc.com',
+			'https://gateway.tenderly.co/public/base',
 			'https://rpc.ankr.com/base',
 			'https://base.publicnode.com',
-			'https://base.llamarpc.com',
 			'https://1rpc.io/base'
 		]
 	},
@@ -40,7 +39,7 @@ const CHAIN_CONFIG: Record<number, TChainConfig> = {
 		privateEnvVar: 'RPC_URL_ARBITRUM_PRIVATE',
 		fallbackRpcs: [
 			'https://arbitrum-one.publicnode.com',
-			'https://arbitrum.llamarpc.com',
+			'https://arbitrum.gateway.tenderly.co',
 			'https://1rpc.io/arb'
 		]
 	},
