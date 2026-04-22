@@ -18,7 +18,7 @@ function isRateLimitError(error: unknown): boolean {
 	const msg = error.message || '';
 	if (msg.includes('429')) return true;
 	if (msg.includes('rate-limit') || msg.includes('rate limited') || msg.includes('rate_limited')) return true;
-	const anyError = error as Record<string, unknown>;
+	const anyError = error as unknown as Record<string, unknown>;
 	if (anyError.code === 'SERVER_ERROR') {
 		const body = anyError.body as string | undefined;
 		if (body && (body.includes('"code":429') || body.includes('rate-limit'))) return true;
