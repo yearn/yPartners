@@ -264,7 +264,7 @@ async function getDepositEvents(
 				where: {
 					owner: { _ilike: $depositorAddress }
 					vaultAddress: { _ilike: $vaultAddress }
-					chainId: { _ilike: $chainId }
+					chainId: { _eq: $chainId }
 				}
 				order_by: { id: asc }
 			) {
@@ -299,7 +299,7 @@ async function getWithdrawEvents(
 				where: {
 					owner: { _ilike: $depositorAddress }
 					vaultAddress: { _ilike: $vaultAddress }
-					chainId: { _ilike: $chainId }
+					chainId: { _eq: $chainId }
 				}
 				order_by: { id: asc }
 			) {
@@ -336,7 +336,7 @@ async function getTransferEvents(
 					sender: { _ilike: $depositorAddress }
 					receiver: { _neq: $zeroAddress }
 					vaultAddress: { _ilike: $vaultAddress }
-					chainId: { _ilike: $chainId }
+					chainId: { _eq: $chainId }
 				}
 				order_by: { id: asc }
 			) {
@@ -350,7 +350,7 @@ async function getTransferEvents(
 					receiver: { _ilike: $depositorAddress }
 					sender: { _neq: $zeroAddress }
 					vaultAddress: { _ilike: $vaultAddress }
-					chainId: { _ilike: $chainId }
+					chainId: { _eq: $chainId }
 				}
 				order_by: { id: asc }
 			) {

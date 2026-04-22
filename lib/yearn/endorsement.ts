@@ -3,67 +3,89 @@ import {getRpcUrlLatest} from 'lib/crypto/rpc';
 
 const ENDORSEMENT_CONTRACT = '0xd40ecF29e001c76Dcc4cC0D9cd50520CE845B038';
 
-// ABI for isEndorsed function
 const ENDORSEMENT_ABI = [
 	'function isEndorsed(address vault) view returns (bool)'
 ];
 
+const MAX_RETRIES = 3;
+const RETRY_DELAYS = [1000, 3000, 6000];
+
 type EndorsementCache = Map<string, boolean>;
 const endorsementCache: EndorsementCache = new Map();
 
-/**
- * Check if a vault is endorsed by calling isEndorsed() on the endorsement contract
- * @param chainId - The chain ID
- * @param vaultAddress - The vault address to check
- * @returns Promise<boolean> - true if endorsed, false otherwise
- */
+function isRateLimitError(error: unknown): boolean {
+	if (!(error instanceof Error)) return false;
+	const msg = error.message || '';
+	if (msg.includes('429')) return true;
+	if (msg.includes('rate-limit') || msg.includes('rate limited') || msg.includes('rate_limited')) return true;
+	const anyError = error as Record<string, unknown>;
+	if (anyError.code === 'SERVER_ERROR') {
+		const body = anyError.body as string | undefined;
+		if (body && (body.includes('"code":429') || body.includes('rate-limit'))) return true;
+	}
+	return false;
+}
+
+async function sleep(ms: number): Promise<void> {
+	return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 export async function isVaultEndorsed(chainId: number, vaultAddress: string): Promise<boolean> {
 	const cacheKey = `${chainId}:${vaultAddress.toLowerCase()}`;
 
-	// Check cache first
 	if (endorsementCache.has(cacheKey)) {
 		return endorsementCache.get(cacheKey)!;
 	}
 
-	try {
-		const rpcUrl = getRpcUrlLatest(chainId);
-		if (!rpcUrl) {
-			console.warn(`[endorsement] No RPC URL for chain ${chainId}, assuming not endorsed`);
-			endorsementCache.set(cacheKey, false);
-			return false;
-		}
-
-		// Use StaticJsonRpcProvider to skip network detection
-		// This prevents "could not detect network" errors
-		const provider = new ethers.providers.StaticJsonRpcProvider(
-			rpcUrl,
-			{
-				chainId: chainId,
-				name: `chain-${chainId}`
-			}
-		);
-
-		const contract = new ethers.Contract(ENDORSEMENT_CONTRACT, ENDORSEMENT_ABI, provider);
-
-		// Add timeout to the contract call
-		const timeoutPromise = new Promise<boolean>((_, reject) => {
-			setTimeout(() => reject(new Error('Endorsement check timeout')), 10000);
-		});
-
-		const endorsementPromise = contract.isEndorsed(vaultAddress);
-		const isEndorsed = await Promise.race([endorsementPromise, timeoutPromise]) as boolean;
-
-		// Cache the result
-		endorsementCache.set(cacheKey, isEndorsed);
-
-		return isEndorsed;
-	} catch (error) {
-		const errorMsg = error instanceof Error ? error.message : String(error);
-		console.warn(`[endorsement] Failed to check endorsement for ${vaultAddress} on chain ${chainId}: ${errorMsg}`);
-		// On error, cache as false and assume not endorsed for safety
+	const rpcUrl = getRpcUrlLatest(chainId);
+	if (!rpcUrl) {
+		console.warn(`[endorsement] No RPC URL for chain ${chainId}, assuming not endorsed`);
 		endorsementCache.set(cacheKey, false);
 		return false;
 	}
+
+	for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+		try {
+			const provider = new ethers.providers.StaticJsonRpcProvider(
+				rpcUrl,
+				{
+					chainId: chainId,
+					name: `chain-${chainId}`
+				}
+			);
+
+			const contract = new ethers.Contract(ENDORSEMENT_CONTRACT, ENDORSEMENT_ABI, provider);
+
+			const timeoutPromise = new Promise<boolean>((_, reject) => {
+				setTimeout(() => reject(new Error('Endorsement check timeout')), 10000);
+			});
+
+			const endorsementPromise = contract.isEndorsed(vaultAddress);
+			const isEndorsed = await Promise.race([endorsementPromise, timeoutPromise]) as boolean;
+
+			endorsementCache.set(cacheKey, isEndorsed);
+
+			return isEndorsed;
+		} catch (error) {
+			const errorMsg = error instanceof Error ? error.message : String(error);
+
+			if (isRateLimitError(error)) {
+				if (attempt < MAX_RETRIES) {
+					console.warn(`[endorsement] Rate-limited checking ${vaultAddress} on chain ${chainId}, retrying in ${RETRY_DELAYS[attempt]}ms (attempt ${attempt + 1}/${MAX_RETRIES})`);
+					await sleep(RETRY_DELAYS[attempt]);
+					continue;
+				}
+				console.warn(`[endorsement] Rate-limited checking ${vaultAddress} on chain ${chainId} after ${MAX_RETRIES} retries, will retry on next call`);
+				return false;
+			}
+
+			console.warn(`[endorsement] Failed to check endorsement for ${vaultAddress} on chain ${chainId}: ${errorMsg}`);
+			endorsementCache.set(cacheKey, false);
+			return false;
+		}
+	}
+
+	return false;
 }
 
 /**
