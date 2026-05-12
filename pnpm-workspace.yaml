@@ -1,0 +1,6 @@
+minimumReleaseAge: 7
+blockExoticSubdeps: true
+allowBuilds:
+  '@parcel/watcher': true
+  sharp: true
+  unrs-resolver: true
