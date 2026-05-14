@@ -1,7 +1,12 @@
-minimumReleaseAge: 10080
-blockExoticSubdeps: true
+packages:
+  - .
+
 allowBuilds:
   '@parcel/watcher': true
   sharp: true
   unrs-resolver: true
+
+minimumReleaseAge: 10080
 ignoreScripts: true
+blockExoticSubdeps: true
+trustPolicy: no-downgrade
