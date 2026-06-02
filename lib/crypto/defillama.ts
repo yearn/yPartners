@@ -1,3 +1,5 @@
+import {utils} from 'ethers';
+
 const DEFILLAMA_API_BASE = 'https://coins.llama.fi/prices/current';
 const CACHE_TTL_MS = 5 * 60 * 1000;
 
@@ -6,9 +8,9 @@ const inFlightPriceLookups = new Map<string, Promise<TTokenPriceUsdLookup>>();
 
 type TTokenPriceLookupReason =
 	| 'unsupported_chain'
+	| 'invalid_address'
 	| 'rate_limited'
 	| 'http_error'
-	| 'missing_usd'
 	| 'invalid_json'
 	| 'network_error';
 
@@ -48,8 +50,19 @@ export async function getTokenPriceUsdWithDebug(chainId: number, contractAddress
 		};
 	}
 
-	const address = contractAddress.toLowerCase();
-	const cacheKey = `${chainName}:${address}`;
+	let address: string;
+	try {
+		address = utils.getAddress(contractAddress);
+	} catch {
+		return {
+			price: null,
+			source: 'network',
+			reason: 'invalid_address',
+			message: `Invalid address or failed EIP-55 checksum for ${contractAddress}`
+		};
+	}
+
+	const cacheKey = `${chainName}:${address.toLowerCase()}`;
 	const cached = priceCache.get(cacheKey);
 	if (cached && Date.now() - cached.fetchedAt < CACHE_TTL_MS) {
 		return {
