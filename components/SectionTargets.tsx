@@ -62,9 +62,9 @@ const vaultLogos = [
 		href: 'https://robin.markets/'
 	},
 	{
-		name: 'TrueMarkets',
-		src: '/vaults/truemarkets.png',
-		href: 'https://truemarkets.org/'
+		name: 'Trueo',
+		src: '/vaults/trueo.png',
+		href: 'https://trueo.com/'
 	}
 ];
 

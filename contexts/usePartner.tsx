@@ -180,9 +180,10 @@ export const PartnerContextApp = ({
 }: {partnerID: string, children: ReactElement, windowDays?: number}): ReactElement => {
 	const currentPartner = SHAREABLE_ADDRESSES[partnerID] ? SHAREABLE_ADDRESSES[partnerID].shortName : '';
 	const isSSR = typeof window === 'undefined';
+	const isDynamicPartner = currentPartner === 'ceazor' || currentPartner === 'jumper';
 
-	// Fetch dynamic referral data for ceazor partner
-	const shouldFetchReferrals = !isSSR && currentPartner === 'ceazor' && partnerID;
+	// Fetch dynamic referral data for partners with dynamic vault config
+	const shouldFetchReferrals = !isSSR && isDynamicPartner && partnerID;
 	const {data: referralConfigResult, isLoading: isLoadingReferrals} = useSWR<TPartnerReferralConfig | TAPIError>(
 		shouldFetchReferrals ? ['partner-referrals', partnerID] : null,
 		async (): Promise<TPartnerReferralConfig | TAPIError> =>
@@ -194,8 +195,8 @@ export const PartnerContextApp = ({
 	const mergedVaultConfig = useMemo((): TChainConfig => {
 		const staticConfig = PARTNER_VAULT_CONFIG[currentPartner] || {};
 
-		// If not ceazor or no referral data yet, return static config
-		if (currentPartner !== 'ceazor' || !referralConfigResult || isAPIError(referralConfigResult)) {
+		// If not a dynamic partner or no referral data yet, return static config
+		if (!isDynamicPartner || !referralConfigResult || isAPIError(referralConfigResult)) {
 			return staticConfig;
 		}
 
@@ -222,7 +223,7 @@ export const PartnerContextApp = ({
 		});
 
 		return merged;
-	}, [currentPartner, referralConfigResult]);
+	}, [currentPartner, referralConfigResult, isDynamicPartner]);
 
 	// Extract depositor addresses from merged config
 	const depositorAddresses = useMemo((): TAddress[] => {
@@ -230,8 +231,8 @@ export const PartnerContextApp = ({
 			return [];
 		}
 
-		// For ceazor, use the merged config; for others, use static PARTNER_ADDRESS_GROUPS
-		if (currentPartner === 'ceazor') {
+		// For dynamic partners, use the merged config; for others, use static PARTNER_ADDRESS_GROUPS
+		if (isDynamicPartner) {
 			const allAddresses: TAddress[] = [];
 			Object.values(mergedVaultConfig).forEach((vaults) => {
 				Object.values(vaults).forEach((addresses) => {
@@ -244,7 +245,7 @@ export const PartnerContextApp = ({
 		}
 
 		return PARTNER_ADDRESS_GROUPS[currentPartner] || [];
-	}, [currentPartner, mergedVaultConfig]);
+	}, [currentPartner, mergedVaultConfig, isDynamicPartner]);
 
 	// Extract all chain/vault combinations for this partner
 	const vaultCombos = useMemo((): TVaultCombo[] => {
@@ -457,43 +458,43 @@ export const PartnerContextApp = ({
 			// During SSR mark as loading so server and client render the same markup.
 			return true;
 		}
-		// For ceazor, also wait for referral data
-		if (currentPartner === 'ceazor' && isLoadingReferrals) {
+		// For dynamic partners, also wait for referral data
+		if (isDynamicPartner && isLoadingReferrals) {
 			return true;
 		}
 		if (depositorAddresses.length === 0) {
 			return false;
 		}
 		return isLoadingDepositorTVL;
-	}, [depositorAddresses.length, isSSR, isLoadingDepositorTVL, currentPartner, isLoadingReferrals]);
+	}, [depositorAddresses.length, isSSR, isLoadingDepositorTVL, currentPartner, isLoadingReferrals, isDynamicPartner]);
 
 	const isLoadingFees = useMemo((): boolean => {
 		if (isSSR) {
 			return true;
 		}
-		// For ceazor, also wait for referral data
-		if (currentPartner === 'ceazor' && isLoadingReferrals) {
+		// For dynamic partners, also wait for referral data
+		if (isDynamicPartner && isLoadingReferrals) {
 			return true;
 		}
 		if (depositorAddresses.length === 0) {
 			return false;
 		}
 		return isLoadingDepositorFees;
-	}, [depositorAddresses.length, isSSR, isLoadingDepositorFees, currentPartner, isLoadingReferrals]);
+	}, [depositorAddresses.length, isSSR, isLoadingDepositorFees, currentPartner, isLoadingReferrals, isDynamicPartner]);
 
 	const isLoadingChart = useMemo((): boolean => {
 		if (isSSR) {
 			return true;
 		}
-		// For ceazor, also wait for referral data
-		if (currentPartner === 'ceazor' && isLoadingReferrals) {
+		// For dynamic partners, also wait for referral data
+		if (isDynamicPartner && isLoadingReferrals) {
 			return true;
 		}
 		if (depositorAddresses.length === 0) {
 			return false;
 		}
 		return isLoadingDepositorFees;
-	}, [depositorAddresses.length, isSSR, isLoadingDepositorFees, currentPartner, isLoadingReferrals]);
+	}, [depositorAddresses.length, isSSR, isLoadingDepositorFees, currentPartner, isLoadingReferrals, isDynamicPartner]);
 
 	const	vaults = useMemo((): TDict<TPartnerVault> => {
 		// Yearn Vision data usage is disabled; returning empty vault list.
