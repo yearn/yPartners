@@ -12,7 +12,8 @@ type TTokenPriceLookupReason =
 	| 'rate_limited'
 	| 'http_error'
 	| 'invalid_json'
-	| 'network_error';
+	| 'network_error'
+	| 'missing_usd';
 
 export type TTokenPriceUsdLookup = {
 	price: number | null;
