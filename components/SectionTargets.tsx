@@ -37,6 +37,11 @@ const productLogos = [
 		name: 'Superform',
 		src: '/products/superform.png',
 		href: 'https://www.superform.xyz/'
+	},
+	{
+		name: 'Teller',
+		src: '/products/Teller.jpg',
+		href: 'https://www.teller.org/'
 	}
 ];
 
