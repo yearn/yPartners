@@ -31,6 +31,12 @@ const PARTNERS: TDict<TPartner> = {
 		shortName: 'jumper',
 		treasury: [toAddress('0x3610486BD4975F5C3dC838A36E897bF97fAE15DD')],
 		logo: <img src="/partners/jumper.jpg" alt="Jumper" className="text-900" />
+	},
+	aihedge: {
+		name: 'AIHedge',
+		shortName: 'aihedge',
+		treasury: [toAddress('0x241ac8b7584dfe2f23b626c939fd88b9151d7684')],
+		logo: <img src="/partners/aihedge.jpg" alt="AIHedge" className="text-900" />
 	}
 };
 
@@ -96,7 +102,7 @@ const PARTNER_VAULT_CONFIG: TPartnerVaultConfig = {
 			],
 			[toAddress('0x182863131F9a4630fF9E27830d945B1413e347E8')]: [
 				toAddress('0x93A62dA5a14C80f265DAbC077fCEE437B1a0Efde')
-			],
+			]
 		}
 	},
 	ceazor: {
@@ -124,7 +130,15 @@ const PARTNER_VAULT_CONFIG: TPartnerVaultConfig = {
 			],
 			[toAddress('0x93Fec6639717b6215A48E5a72a162C50DCC40d68')]: [
 				toAddress('0x3610486BD4975F5C3dC838A36E897bF97fAE15DD')
-			],
+			]
+		}
+	},
+	aihedge: {
+		1: {
+			// Example: [toAddress('0xVaultAddress')]: [toAddress('0xDepositorAddress1'), ...]
+			[toAddress('0xBe53A109B494E5c9f97b9Cd39Fe969BE68BF6204')]: [
+				toAddress('0x241ac8b7584dfe2f23b626c939fd88b9151d7684')
+			]
 		}
 	}
 };
@@ -152,7 +166,8 @@ const LOGOS: TPartnerLogo = {
 	yearn: <LogoYearn className={'text-900 h-3/4 w-3/4'} />,
 	defisaver: <LogoDeFiSaver isColored={true} className={'text-900 h-3/4 w-3/4'} />,
 	ceazor: <img src="/partners/ceazor.jpg" alt="Ceazor" className="h-3/4 w-3/4 object-contain" />,
-	jumper: <img src="/partners/jumper.jpg" alt="Jumper" className="h-3/4 w-3/4 object-contain" />
+	jumper: <img src="/partners/jumper.jpg" alt="Jumper" className="h-3/4 w-3/4 object-contain" />,
+	aihedge: <img src="/partners/aihedge.jpg" alt="AIHedge" className="h-3/4 w-3/4 object-contain" />
 };
 
 const DEFAULT_PROFIT_SHARE = 0.5;
