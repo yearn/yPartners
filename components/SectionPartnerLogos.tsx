@@ -44,11 +44,6 @@ const	partnerLogos = [
 		href: 'https://alchemix.fi/'
 	},
 	{
-		name: 'Bankr',
-		src: '/partner-logos-dark/bankr-symbol-full-color-rgb.svg',
-		href: 'https://bankr.bot/'
-	},
-	{
 		name: 'Inverse',
 		src: '/partner-logos-dark/Inverse_Finance_Logo_05.svg',
 		href: 'https://www.inverse.finance/'
@@ -57,11 +52,6 @@ const	partnerLogos = [
 		name: 'Robin',
 		src: '/partner-logos-dark/robin.svg',
 		href: 'https://robin.markets/'
-	},
-	{
-		name: 'Trueo',
-		src: '/partner-logos-dark/trueo-logo.svg',
-		href: 'https://trueo.com/'
 	},
 	{
 		name: 'Octant',
