@@ -41,7 +41,7 @@ function	SectionStats(): ReactElement {
 
 
 	return (
-		<section aria-label={'stats'} className={'mb-28 flex flex-row flex-wrap items-center md:mb-50'}>
+		<section aria-label={'stats'} className={'mb-[2.8rem] flex flex-row flex-wrap items-center md:mb-20'}>
 			<div className={'mr-4 mt-4 flex flex-col space-y-2 pr-5 md:mr-8 md:mt-0'}>
 				<p>{'Fees earned this month'}</p>
 				<b className={'text-3xl tabular-nums'}>
