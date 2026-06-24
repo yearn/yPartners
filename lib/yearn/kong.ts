@@ -59,7 +59,7 @@ export async function getKongVaultMetadata(chainId: number, vaultAddress: string
 
 	const queryByChain = `
 		query VaultByAddress($address: String!, $chainId: Int!) {
-			vaults(where: {address: $address, chainId: $chainId, v3: true}) {
+			vaults(chainId: $chainId, addresses: [$address], v3: true) {
 				address
 				chainId
 				v3
@@ -74,7 +74,7 @@ export async function getKongVaultMetadata(chainId: number, vaultAddress: string
 
 	const queryByAddress = `
 		query VaultByAddress($address: String!) {
-			vaults(where: {address: $address, v3: true}) {
+			vaults(addresses: [$address], v3: true) {
 				address
 				chainId
 				v3

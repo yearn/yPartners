@@ -1,5 +1,13 @@
 module.exports = ({
 	images: {
+		/* 🔵 - Yearn Finance **************************************************
+		** The partner logos on the homepage are first-party SVGs (generated
+		** from scripts/make-logos-dark.py), so we allow next/image to serve
+		** them. The CSP disables scripts/sandbox to keep things safe.
+		**********************************************************************/
+		dangerouslyAllowSVG: true,
+		contentDispositionType: 'attachment',
+		contentSecurityPolicy: 'default-src \'self\'; script-src \'none\'; sandbox;',
 		remotePatterns: [{
 			protocol: 'https',
 			hostname: 'rawcdn.githack.com'
