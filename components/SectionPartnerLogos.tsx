@@ -82,7 +82,7 @@ const	partnerLogos = [
 
 function	PartnerLogos(): ReactElement {
 	return (
-		<section aria-label={'partner-logos'} className={'mb-28 md:mb-50'}>
+		<section aria-label={'partner-logos'} className={'mb-14 md:mb-[100px]'}>
 			<h3 className={'mb-3 text-xl font-semibold text-neutral-800'}>{'Trusted by teams building on Yearn'}</h3>
 			<div className={'partner-marquee__viewport relative w-full overflow-hidden'}>
 				<div className={'partner-marquee__track'}>

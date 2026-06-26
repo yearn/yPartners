@@ -36,7 +36,7 @@ function	Index(): ReactElement {
 
 			<SectionPartnerLogos />
 
-			<section aria-label={'partner-steps'} className={'mb-28'}>
+			<section aria-label={'partner-steps'} className={'mb-20'}>
 				<div className={'rounded-2xl border-2 border-neutral-300 bg-white p-6 md:p-8'}>
 					<h2 className={'mb-4 text-3xl font-bold text-neutral-900'}>
 						{'Become a partner in 5 minutes'}
