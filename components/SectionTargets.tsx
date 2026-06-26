@@ -1,10 +1,8 @@
-import Link from 'next/link';
 import IconCoin from 'components/icons/IconCoin';
 import IconEarnYield from 'components/icons/IconEarnYield';
 import IconFundCause from 'components/icons/IconFundCause';
 import IconManagedVaults from 'components/icons/IconManagedVaults';
 import IconMarketplace from 'components/icons/IconMarketplace';
-import {Button} from 'lib/yearn/components/Button';
 
 import type {ReactElement} from 'react';
 import type {TPartner} from 'types/types';
@@ -65,18 +63,6 @@ function	Targets(): ReactElement {
 							</div>
 						</div>
 					))}
-					<div className={'flex h-66 flex-col justify-between border-2 border-neutral-900 bg-neutral-900 p-6 text-neutral-0'}>
-						<div className={'h-14'}>
-							<b className={'text-xl'}>{'→'}</b>
-						</div>
-						<div className={'space-y-2'}>
-							<b className={'text-xl'}>{'Have another idea?'}</b>
-							<p>{'Tell us what you are building and we will find a way to make it happen.'}</p>
-							<Link href={'/team-up'} className={'inline-block pt-2'}>
-								<Button>{'Apply'}</Button>
-							</Link>
-						</div>
-					</div>
 				</div>
 			</div>
 		</section>

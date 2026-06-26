@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import B2BMeme from 'components/B2BMeme';
+import HeroStats from 'components/HeroStats';
 import SectionPartnerLogos from 'components/SectionPartnerLogos';
-import SectionStats from 'components/SectionStats';
 import SectionTargets from 'components/SectionTargets';
 import {Button} from 'lib/yearn/components/Button';
 
@@ -10,10 +10,10 @@ import type {ReactElement} from 'react';
 function	Index(): ReactElement {
 	return (
 		<main>
-			<section aria-label={'hero'} className={'mb-[2.8rem] mt-[42.5px] grid grid-cols-12 items-center'}>
+			<section aria-label={'hero'} className={'mb-[2.8rem] mt-[42.5px] grid grid-cols-12 items-start'}>
 				<div className={'col-span-12 md:col-span-8'}>
 					<h1 className={'mb-6 text-6xl font-black text-neutral-900 md:text-8xl'}>{'Yearn Partners'}</h1>
-					<p className={'text-lg'}>{'Integrate Yearn vaults to earn 50% profit share'}</p>
+					<HeroStats />
 					<div className={'mt-4 flex flex-col gap-3 sm:flex-row sm:space-x-4 sm:gap-0'}>
 						<Link href={'/team-up'}>
 							<Button className={'w-full text-xl sm:w-[150px] md:w-[200px]'}>
@@ -32,9 +32,9 @@ function	Index(): ReactElement {
 				</div>
 			</section>
 
-			<SectionStats />
-
 			<SectionPartnerLogos />
+
+			<SectionTargets />
 
 			<section aria-label={'partner-steps'} className={'mb-20'}>
 				<div className={'rounded-2xl border-2 border-neutral-300 bg-white p-6 md:p-8'}>
@@ -50,8 +50,6 @@ function	Index(): ReactElement {
 					</p>
 				</div>
 			</section>
-
-			<SectionTargets />
 
 		</main>
 	);
