@@ -95,7 +95,6 @@ function	PartnerLogos({activeName, onToggle}: TPartnerLogosProps): ReactElement 
 			<div className={'grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5'}>
 				{partnerLogos.map((logo): ReactElement => {
 					const	isActive = logo.name === activeName;
-					const	src = isActive ? logo.src.replace('/partner-logos-dark/', '/partner-logos/') : logo.src;
 					return (
 						<button
 							key={logo.name}
@@ -107,7 +106,7 @@ function	PartnerLogos({activeName, onToggle}: TPartnerLogosProps): ReactElement 
 							<div className={'relative h-10 w-32 md:h-12 md:w-48'}>
 								<Image
 									alt={`${logo.name} logo`}
-									src={src}
+									src={logo.src}
 									fill
 									className={'object-contain'}
 								/>
