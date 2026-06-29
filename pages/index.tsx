@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import {useState} from 'react';
 import B2BMeme from 'components/B2BMeme';
 import HeroStats from 'components/HeroStats';
 import SectionPartnerLogos from 'components/SectionPartnerLogos';
@@ -8,6 +9,19 @@ import {Button} from 'lib/yearn/components/Button';
 import type {ReactElement} from 'react';
 
 function	Index(): ReactElement {
+	const	[activePartner, setActivePartner] = useState<string | null>(null);
+
+	const	togglePartner = (name: string): void => {
+		setActivePartner((prev): string | null => prev === name ? null : name);
+	};
+
+	const	selectPartnerFromTargets = (name: string): void => {
+		setActivePartner(name);
+		if (typeof document !== 'undefined') {
+			document.getElementById('partner-logos')?.scrollIntoView({behavior: 'smooth', block: 'start'});
+		}
+	};
+
 	return (
 		<main>
 			<section aria-label={'hero'} className={'mb-[2.8rem] mt-[42.5px] grid grid-cols-12 items-start'}>
@@ -32,9 +46,9 @@ function	Index(): ReactElement {
 				</div>
 			</section>
 
-			<SectionPartnerLogos />
+			<SectionPartnerLogos activeName={activePartner} onToggle={togglePartner} />
 
-			<SectionTargets />
+			<SectionTargets onSelectPartner={selectPartnerFromTargets} />
 
 			<section aria-label={'partner-steps'} className={'mb-20'}>
 				<div className={'rounded-2xl border-2 border-neutral-300 bg-white p-6 md:p-8'}>
