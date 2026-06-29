@@ -17,7 +17,7 @@ const	partnerLogos = [
 	{
 		name: 'Cap',
 		src: '/partner-logos-dark/cap.svg',
-		description: 'Cap’s capUSDC is a Yearn V3 vault — its "USDC Fractional Reserve Vault" — backing the cUSD stablecoin and the stcUSD yield-bearing savings token with battle-tested Yearn infrastructure.'
+		description: 'Cap’s capUSDC is a Yearn V3 vault (its "USDC Fractional Reserve Vault") backing the cUSD stablecoin and the stcUSD yield-bearing savings token with battle-tested Yearn infrastructure.'
 	},
 	{
 		name: 'Curve Finance',
@@ -52,17 +52,17 @@ const	partnerLogos = [
 	{
 		name: 'Inverse',
 		src: '/partner-logos-dark/Inverse_Finance_Logo_05.svg',
-		description: 'Inverse’s FiRM fixed-rate lending market accepts Yearn V2 yVault tokens as collateral — Curve DOLA-paired LPs and staked yCRV — so borrowers keep the Yearn autocompounded yield while drawing fixed-rate DOLA.'
+		description: 'Inverse’s FiRM fixed-rate lending market accepts Yearn V2 yVault tokens such as Curve DOLA-paired LPs and staked yCRV as collateral, letting borrowers keep the Yearn autocompounded yield while drawing fixed-rate DOLA.'
 	},
 	{
 		name: 'Birch Hill',
 		src: '/partner-logos-dark/birch-hill-logo.svg',
-		description: 'Birch Hill’s RWA USDC Vault is built on the Yearn v3 framework, supplying USDC into curated, permissioned Morpho lending markets on Base — starting with lending against Groma’s tokenized real-estate collateral.'
+		description: 'Birch Hill’s RWA USDC Vault is built on the Yearn v3 framework, supplying USDC into curated, permissioned Morpho lending markets on Base, starting with lending against Groma’s tokenized real-estate collateral.'
 	},
 	{
 		name: 'Octant',
 		src: '/partner-logos-dark/Octant-logo.svg',
-		description: 'Octant builds yield-donating vaults on Yearn V3 patterns, forking the TokenizedStrategy to redirect profits to public goods — including wrapper strategies that wrap existing Yearn vaults.'
+		description: 'Octant builds yield-donating vaults on Yearn V3 patterns, forking the TokenizedStrategy to redirect profits to public goods, including wrapper strategies that wrap existing Yearn vaults.'
 	},
 	{
 		name: 'Term',
@@ -72,7 +72,7 @@ const	partnerLogos = [
 	{
 		name: 'Trueo',
 		src: '/partner-logos-dark/trueo-logo.svg',
-		description: 'Trueo is a prediction-market protocol whose dollar unit, TYD (True Yield Dollar), is a Yearn V3 vault — so market collateral sits in TYD and inherits its Yearn strategy exposure (~$0.8M).'
+		description: 'Trueo is a prediction-market protocol whose dollar unit, TYD (True Yield Dollar), is a Yearn V3 vault, so market collateral sits in TYD and inherits its Yearn strategy exposure (~$0.8M).'
 	},
 	{
 		name: 'Swell',
