@@ -63,13 +63,18 @@ function	Index(): ReactElement {
 					<h2 className={'mb-4 text-3xl font-bold text-neutral-900'}>
 						{'Become a partner in 5 minutes'}
 					</h2>
-					<p className={'text-lg text-neutral-900'}>
-						{'Fill out the '}
-						<Link href={'/team-up'} className={'underline'}>
-							{'contact form'}
+					<div className={'flex flex-col gap-3 sm:flex-row sm:space-x-4 sm:gap-0'}>
+						<Link href={'/team-up'}>
+							<Button className={'w-full text-xl sm:w-[150px] md:w-[200px]'}>
+								{'Apply'}
+							</Button>
 						</Link>
-						{' and we will soon be in touch'}
-					</p>
+						<Link href={'/faq'}>
+							<Button className={'w-full text-xl sm:w-[150px] md:w-[200px]'} variant={'outlined'}>
+								{'FAQ'}
+							</Button>
+						</Link>
+					</div>
 				</div>
 			</section>
 
