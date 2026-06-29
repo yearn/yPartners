@@ -21,6 +21,8 @@ export default function useWindowDimensions(): TWindowDimensions {
 	const [windowDimensions, set_windowDimensions] = useState({width: 0, height: 0});
 
 	useEffect((): TVoidCleanupFunction => {
+		// Read window size after mount to stay SSR-safe (window is undefined on the server).
+		// eslint-disable-next-line react-hooks/set-state-in-effect
 		set_windowDimensions(getWindowDimensions());
 
 		function handleResize(): void {

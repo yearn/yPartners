@@ -279,6 +279,8 @@ export const PartnerContextApp = ({
 		return vaultCombos[0] ? getComboKey(vaultCombos[0]) : '';
 	}, [vaultCombos]);
 
+	// Keep the selected vault in sync as the available vault combos change.
+	/* eslint-disable react-hooks/set-state-in-effect */
 	useEffect((): void => {
 		if (vaultCombos.length === 0) {
 			if (selectedVaultKey !== '') {
@@ -291,6 +293,7 @@ export const PartnerContextApp = ({
 			setSelectedVaultKey(firstComboKey);
 		}
 	}, [vaultCombos, selectedVaultKey, firstComboKey]);
+	/* eslint-enable react-hooks/set-state-in-effect */
 
 	// Lazy load endorsement status after vaults are loaded
 	useEffect((): void => {

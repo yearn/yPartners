@@ -23,6 +23,27 @@ type TProps = {
 type TSortColumn = 'address' | 'currentSharesNormalized' | 'totalFeesNormalized';
 type TSortDirection = 'asc' | 'desc';
 
+type TSortIconProps = {
+	column: TSortColumn;
+	sortColumn: TSortColumn;
+	sortDirection: TSortDirection;
+};
+
+function SortIcon({column, sortColumn, sortDirection}: TSortIconProps): ReactElement {
+	if (sortColumn !== column) {
+		return (
+			<span className={'ml-1 text-neutral-400'}>
+				{'↕'}
+			</span>
+		);
+	}
+	return (
+		<span className={'ml-1'}>
+			{sortDirection === 'asc' ? '↑' : '↓'}
+		</span>
+	);
+}
+
 function AccountFeesTable({accountFees}: TProps): ReactElement {
 	const [sortColumn, setSortColumn] = useState<TSortColumn>('currentSharesNormalized');
 	const [sortDirection, setSortDirection] = useState<TSortDirection>('desc');
@@ -63,21 +84,6 @@ function AccountFeesTable({accountFees}: TProps): ReactElement {
 		}
 	};
 
-	const SortIcon = ({column}: {column: TSortColumn}): ReactElement => {
-		if (sortColumn !== column) {
-			return (
-				<span className={'ml-1 text-neutral-400'}>
-					{'↕'}
-				</span>
-			);
-		}
-		return (
-			<span className={'ml-1'}>
-				{sortDirection === 'asc' ? '↑' : '↓'}
-			</span>
-		);
-	};
-
 	if (accountFees.length === 0) {
 		return (
 			<div className={'flex h-48 items-center justify-center rounded-lg border border-neutral-200 bg-neutral-50'}>
@@ -101,7 +107,7 @@ function AccountFeesTable({accountFees}: TProps): ReactElement {
 								className={'sticky left-0 z-20 cursor-pointer bg-neutral-50 px-3 py-2 text-left text-[11px] font-medium uppercase tracking-wider text-neutral-700 hover:bg-neutral-100 sm:px-6 sm:py-3 sm:text-xs md:static md:z-auto'}>
 								<div className={'flex items-center'}>
 									{'Address'}
-									<SortIcon column={'address'} />
+									<SortIcon column={'address'} sortColumn={sortColumn} sortDirection={sortDirection} />
 								</div>
 							</th>
 							<th
@@ -110,7 +116,7 @@ function AccountFeesTable({accountFees}: TProps): ReactElement {
 								className={'cursor-pointer px-3 py-2 text-right text-[11px] font-medium uppercase tracking-wider text-neutral-700 hover:bg-neutral-100 sm:px-6 sm:py-3 sm:text-xs'}>
 								<div className={'flex items-center justify-end'}>
 									{'Current Shares'}
-									<SortIcon column={'currentSharesNormalized'} />
+									<SortIcon column={'currentSharesNormalized'} sortColumn={sortColumn} sortDirection={sortDirection} />
 								</div>
 							</th>
 							<th
@@ -119,7 +125,7 @@ function AccountFeesTable({accountFees}: TProps): ReactElement {
 								className={'cursor-pointer px-3 py-2 text-right text-[11px] font-medium uppercase tracking-wider text-neutral-700 hover:bg-neutral-100 sm:px-6 sm:py-3 sm:text-xs'}>
 								<div className={'flex items-center justify-end'}>
 									{'Total Fees (USD)'}
-									<SortIcon column={'totalFeesNormalized'} />
+									<SortIcon column={'totalFeesNormalized'} sortColumn={sortColumn} sortDirection={sortDirection} />
 								</div>
 							</th>
 						</tr>

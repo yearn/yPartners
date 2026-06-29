@@ -19,6 +19,8 @@ function Index({partnerID, windowValue, onWindowChange}: {partnerID: string, win
 		const latestSync = new Date().toLocaleString('default',
 			{month: 'long', day: '2-digit', year: 'numeric', hour: 'numeric', minute:'numeric', timeZone: 'UTC'});
 
+		// Set after mount to avoid a server/client hydration mismatch on the timestamp.
+		// eslint-disable-next-line react-hooks/set-state-in-effect
 		set_lastSync(`${latestSync} UTC`);
 	}, [set_lastSync]);
 

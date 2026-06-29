@@ -36,19 +36,19 @@ type TEvent =
 			blockNumber: number;
 			logIndex: number;
 			data: TDepositEvent;
-	  }
+	}
 	| {
 			type: "withdraw";
 			blockNumber: number;
 			logIndex: number;
 			data: TWithdrawEvent;
-	  }
+	}
 	| {
 			type: "transfer_in" | "transfer_out";
 			blockNumber: number;
 			logIndex: number;
 			data: TTransferEvent;
-	  };
+	};
 
 type TSnapshot = {
 	blockNumber: number;
@@ -92,7 +92,7 @@ type TResponse =
 			grossProfitNormalized: number;
 			accounts: TAccountFees[];
 			snapshots: TChartSnapshot[];
-	  }
+	}
 	| { error: string };
 
 const DEFAULT_VAULT_ADDRESS = "0xBe53A109B494E5c9f97b9Cd39Fe969BE68BF6204";

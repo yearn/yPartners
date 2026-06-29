@@ -1,32 +1,38 @@
 const js = require('@eslint/js');
-const {FlatCompat} = require('@eslint/eslintrc');
-
-const compat = new FlatCompat({
-	baseDirectory: __dirname,
-	recommendedConfig: js.configs.recommended,
-	allConfig: js.configs.all
-});
+const tseslint = require('typescript-eslint');
+const nextCoreWebVitals = require('eslint-config-next/core-web-vitals');
 
 module.exports = [
 	{
-		ignores: ['yearn.fi/**', '.next/**', 'node_modules/**']
+		ignores: ['yearn.fi/**', '.next/**', 'node_modules/**', 'internal-docs/**']
 	},
-	...compat.config({
-		extends: ['next/core-web-vitals', 'eslint:recommended', 'plugin:@typescript-eslint/recommended'],
-		parser: '@typescript-eslint/parser',
-		parserOptions: {
-			ecmaFeatures: {
-				jsx: true
-			},
-			tsconfigRootDir: __dirname,
-			ecmaVersion: 2022,
-			sourceType: 'module',
-			project: ['./tsconfig.json']
+	...nextCoreWebVitals,
+	js.configs.recommended,
+	...tseslint.configs.recommended,
+	{
+		files: ['**/*.{ts,tsx}'],
+		languageOptions: {
+			parser: tseslint.parser,
+			parserOptions: {
+				projectService: true,
+				tsconfigRootDir: __dirname
+			}
 		},
 		rules: {
-			'@typescript-eslint/prefer-optional-chain': 'error',
+			'@typescript-eslint/prefer-optional-chain': 'error'
+		}
+	},
+	{
+		rules: {
 			'no-multi-spaces': ['error', {ignoreEOLComments: false}],
 			'no-mixed-spaces-and-tabs': 'error'
 		}
-	})
+	},
+	{
+		// Config files legitimately use CommonJS require()
+		files: ['*.config.js', '*.config.mjs', '*.config.cjs', '*.config.ts'],
+		rules: {
+			'@typescript-eslint/no-require-imports': 'off'
+		}
+	}
 ];

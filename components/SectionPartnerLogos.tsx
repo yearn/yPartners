@@ -1,98 +1,108 @@
+import {AnimatePresence, motion} from 'framer-motion';
 import Image from 'next/image';
 
 import type {ReactElement} from 'react';
+
+type TPartnerLogosProps = {
+	activeName: string | null;
+	onToggle: (name: string) => void;
+};
 
 const	partnerLogos = [
 	{
 		name: 'Asymmetry',
 		src: '/partner-logos-dark/Asymmetry_Finance_Logo_Light.svg',
-		href: 'https://www.asymmetry.finance/'
+		description: 'sUSDaf is a Yearn V3 vault that auto-rebalances USDaf across Stability Pools, offering one-click access to optimized USDaf yields using Yearn’s oracle-free, battle-tested patterns.'
 	},
 	{
 		name: 'Cap',
 		src: '/partner-logos-dark/cap.svg',
-		href: 'https://cap.app/'
+		description: 'Cap’s capUSDC is a Yearn V3 vault (its "USDC Fractional Reserve Vault") backing the cUSD stablecoin and the stcUSD yield-bearing savings token with battle-tested Yearn infrastructure.'
 	},
 	{
 		name: 'Curve Finance',
 		src: '/partner-logos-dark/Curve.svg',
-		href: 'https://www.curve.finance/'
+		description: 'Curve’s scrvUSD is a Yearn V3 savings vault for crvUSD: using Yearn’s "report on self" pattern it holds no strategies, and the share price rises as Curve injects a share of crvUSD interest fees (~$20M).'
 	},
 	{
 		name: 'Katana',
 		src: '/partner-logos-dark/katana_logo_primary_lockup_spark.svg',
-		href: 'https://katana.network/'
+		description: 'Katana is a DeFi-focused L2 underpinned by Yearn, using Yearn V3 vaults and a VaultBridge that routes bridged assets into Yearn and Morpho vaults to earn yield from day one ($233M+ TVS).'
 	},
 	{
 		name: 'Origin Protocol',
 		src: '/partner-logos-dark/Origin.svg',
-		href: 'https://www.originprotocol.com/'
+		description: 'Origin routes OUSD collateral to a Morpho vault curated jointly with Yearn, and uses Yearn vaults as yield boosters that compound rewards for passive OETH holders.'
 	},
 	{
 		name: 'Superform',
 		src: '/partner-logos-dark/Superform.svg',
-		href: 'https://www.superform.xyz/'
+		description: 'Superform is a universal yield marketplace that lists Yearn V3 vaults among 800+ earning opportunities across 50+ protocols, enabling cross-chain deposits into Yearn from any chain using any asset.'
 	},
 	{
 		name: 'Teller',
 		src: '/partner-logos-dark/teller-logo.svg',
-		href: 'https://www.teller.org/'
+		description: 'Teller’s lender-facing "Yearn Vaults" are Yearn V3 vaults whose strategy routes deposits across Teller’s active lending pools, parking idle capital in Morpho and Aave for an aggregated yield (~$700k across tUSDC, tUSDS, tWETH and more).'
 	},
 	{
 		name: 'Alchemix',
 		src: '/partner-logos-dark/Alchemix_Black.svg',
-		href: 'https://alchemix.fi/'
+		description: 'Alchemix V3’s "Risk Adjusted Mix USDC" vault integrates a yvUSD strategy that deposits into Yearn, extending a long-running relationship that previously ran Yearn vaults on Optimism.'
 	},
 	{
 		name: 'Inverse',
 		src: '/partner-logos-dark/Inverse_Finance_Logo_05.svg',
-		href: 'https://www.inverse.finance/'
-	},
-	{
-		name: 'Robin',
-		src: '/partner-logos-dark/robin.svg',
-		href: 'https://robin.markets/'
-	},
-	{
-		name: 'Octant',
-		src: '/partner-logos-dark/Octant-logo.svg',
-		href: 'https://octant.build/'
-	},
-	{
-		name: 'Term',
-		src: '/partner-logos-dark/Term.svg',
-		href: 'https://www.term.finance/'
-	},
-	{
-		name: 'Sturdy',
-		src: '/partner-logos-dark/sturdy.svg',
-		href: 'https://sturdy.finance/'
-	},
-	{
-		name: 'Swell',
-		src: '/partner-logos-dark/swell-light.svg',
-		href: 'https://www.swellnetwork.io/'
+		description: 'Inverse’s FiRM fixed-rate lending market accepts Yearn V2 yVault tokens such as Curve DOLA-paired LPs and staked yCRV as collateral, letting borrowers keep the Yearn autocompounded yield while drawing fixed-rate DOLA.'
 	},
 	{
 		name: 'Birch Hill',
 		src: '/partner-logos-dark/birch-hill-logo.svg',
-		href: 'https://www.birchhill.io/'
+		description: 'Birch Hill’s RWA USDC Vault is built on the Yearn v3 framework, supplying USDC into curated, permissioned Morpho lending markets on Base, starting with lending against Groma’s tokenized real-estate collateral.'
+	},
+	{
+		name: 'Octant',
+		src: '/partner-logos-dark/Octant-logo.svg',
+		description: 'Octant builds yield-donating vaults on Yearn V3 patterns, forking the TokenizedStrategy to redirect profits to public goods, including wrapper strategies that wrap existing Yearn vaults.'
+	},
+	{
+		name: 'Term',
+		src: '/partner-logos-dark/Term.svg',
+		description: 'Term Finance builds its fixed-rate lending vaults on Yearn’s V3 TokenizedStrategy framework, blending fixed-rate lending (~7.5% APY) with Yearn baseline yields (~$21M TVL).'
+	},
+	{
+		name: 'Trueo',
+		src: '/partner-logos-dark/trueo-logo.svg',
+		description: 'Trueo is a prediction-market protocol whose dollar unit, TYD (True Yield Dollar), is a Yearn V3 vault, so market collateral sits in TYD and inherits its Yearn strategy exposure (~$0.8M).'
+	},
+	{
+		name: 'Swell',
+		src: '/partner-logos-dark/swell-light.svg',
+		description: 'Swell’s swBTC is a Yearn V3 vault integrating with Aera, bringing battle-tested Yearn infrastructure to its Bitcoin liquid restaking token.'
+	},
+	{
+		name: 'Robin',
+		src: '/partner-logos-dark/robin.svg',
+		description: 'Robin is a capital-efficiency layer for Polymarket: it stakes opposing YES/NO outcome tokens, merges them into delta-neutral USDC.e via Polymarket’s Conditional Token Framework, and deposits that USDC.e into a curated Yearn V3 vault on Polygon (~$72k).'
 	}
 ];
 
-function	PartnerLogos(): ReactElement {
+function	PartnerLogos({activeName, onToggle}: TPartnerLogosProps): ReactElement {
+	const	activeLogo = partnerLogos.find((logo): boolean => logo.name === activeName) ?? null;
+
 	return (
-		<section aria-label={'partner-logos'} className={'mb-14 md:mb-[100px]'}>
-			<h3 className={'mb-3 text-xl font-semibold text-neutral-800'}>{'Trusted by teams building on Yearn'}</h3>
-			<div className={'partner-marquee__viewport relative w-full overflow-hidden'}>
-				<div className={'partner-marquee__track'}>
-					{[...partnerLogos, ...partnerLogos].map((logo, index): ReactElement => (
-						<a
-							key={`${logo.name}-${index}`}
-							className={'flex flex-none items-center justify-center px-[1.125rem] opacity-70 transition-opacity duration-300 hover:opacity-100 md:px-7'}
-							href={logo.href}
-							target={'_blank'}
-							rel={'noreferrer noopener'}>
+		<section id={'partner-logos'} aria-label={'partner-logos'} className={'mb-14 md:mb-[100px]'}>
+			<h2 className={'mb-3 text-xl font-semibold text-neutral-800'}>{'Teams building on Yearn'}</h2>
+			<div className={'grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5'}>
+				{partnerLogos.map((logo): ReactElement => {
+					const	isActive = logo.name === activeName;
+					return (
+						<button
+							key={logo.name}
+							type={'button'}
+							aria-expanded={isActive}
+							aria-controls={'partner-logos-detail'}
+							onClick={(): void => onToggle(logo.name)}
+							className={`flex cursor-pointer items-center justify-center rounded-xl p-2 transition-all duration-300 ${isActive ? 'opacity-100 ring-2 ring-neutral-400' : 'opacity-70 hover:opacity-100'}`}>
 							<div className={'relative h-10 w-32 md:h-12 md:w-48'}>
 								<Image
 									alt={`${logo.name} logo`}
@@ -101,10 +111,39 @@ function	PartnerLogos(): ReactElement {
 									className={'object-contain'}
 								/>
 							</div>
-						</a>
-					))}
-				</div>
+						</button>
+					);
+				})}
 			</div>
+
+			<AnimatePresence initial={false}>
+				{activeLogo ? (
+					<motion.div
+						key={'partner-logos-detail'}
+						id={'partner-logos-detail'}
+						initial={{opacity: 0, height: 0}}
+						animate={{opacity: 1, height: 'auto'}}
+						exit={{opacity: 0, height: 0}}
+						transition={{duration: 0.3, ease: [0.4, 0, 0.2, 1]}}
+						className={'overflow-hidden'}>
+						<div className={'pt-6'}>
+							<div className={'rounded-2xl border-2 border-neutral-300 bg-white p-6 md:p-8'}>
+								<AnimatePresence initial={false} mode={'wait'}>
+									<motion.div
+										key={activeLogo.name}
+										initial={{opacity: 0, y: 6}}
+										animate={{opacity: 1, y: 0}}
+										exit={{opacity: 0, y: -6}}
+										transition={{duration: 0.18}}>
+										<b className={'text-xl font-semibold text-neutral-900'}>{activeLogo.name}</b>
+										<p className={'mt-2 text-neutral-700'}>{activeLogo.description}</p>
+									</motion.div>
+								</AnimatePresence>
+							</div>
+						</div>
+					</motion.div>
+				) : null}
+			</AnimatePresence>
 		</section>
 	);
 }

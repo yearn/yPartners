@@ -1,4 +1,4 @@
-import {useMemo, useState}	from	'react';
+import {useMemo}	from	'react';
 import Chart from 'components/charts/Chart';
 import {NETWORK_LABELS} from 'utils';
 import {formatAmount} from 'lib/yearn/utils/format.number';
@@ -24,11 +24,9 @@ const chartColors = [
 
 function	OverviewChart(props: TOverviewChartProps): ReactElement {
 	const {wrapperTotals, balanceTVLs, windowValue, payoutTotals} = props;
-	const [assetsList, set_assetsList] = useState<string[]>([]);
-
-	const harvestEvents = useMemo((): TChartBar[] => {
+	const {harvestEvents, assetsList} = useMemo((): {harvestEvents: TChartBar[]; assetsList: string[]} => {
 		if(Object.values(payoutTotals).length === 0 ){
-			return [{name: 'no data', shortDate: 'n/a', data: {}}];
+			return {harvestEvents: [{name: 'no data', shortDate: 'n/a', data: {}}], assetsList: []};
 		}
 
 		const _data: TChartBar[] = Object.values(payoutTotals)[0].map((item): TChartBar => {
@@ -71,12 +69,10 @@ function	OverviewChart(props: TOverviewChartProps): ReactElement {
 			});
 		});
 
-		set_assetsList(Array.from(_assets));
-
 		// Remove first element as it will contain no data and cause errors
 		_data.shift();
 		
-		return _data;
+		return {harvestEvents: _data, assetsList: Array.from(_assets)};
 		
 	}, [payoutTotals]);
 
