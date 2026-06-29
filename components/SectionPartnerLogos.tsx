@@ -22,7 +22,7 @@ const	partnerLogos = [
 	{
 		name: 'Curve Finance',
 		src: '/partner-logos-dark/Curve.svg',
-		description: 'Curve’s scrvUSD is a Yearn V3 vault that turns crvUSD into a savings token, routing crvUSD fee donations to depositors through a custom Yearn "report on self" mechanism.'
+		description: 'Curve’s scrvUSD is a Yearn V3 savings vault for crvUSD: using Yearn’s "report on self" pattern it holds no strategies, and the share price rises as Curve injects a share of crvUSD interest fees (~$20M).'
 	},
 	{
 		name: 'Katana',
@@ -42,7 +42,7 @@ const	partnerLogos = [
 	{
 		name: 'Teller',
 		src: '/partner-logos-dark/teller-logo.svg',
-		description: 'Teller uses Yearn vaults as built-in strategies across its lending pools, with Yearn-powered vaults for USDS, USDC, and more live on Ethereum, Arbitrum, and Base.'
+		description: 'Teller’s lender-facing "Yearn Vaults" are Yearn V3 vaults whose strategy routes deposits across Teller’s active lending pools, parking idle capital in Morpho and Aave for an aggregated yield (~$700k across tUSDC, tUSDS, tWETH and more).'
 	},
 	{
 		name: 'Alchemix',
@@ -52,12 +52,12 @@ const	partnerLogos = [
 	{
 		name: 'Inverse',
 		src: '/partner-logos-dark/Inverse_Finance_Logo_05.svg',
-		description: 'Inverse integrates Yearn-curated vaults and uses yCRV as collateral within Firm, its lending product.'
+		description: 'Inverse’s FiRM fixed-rate lending market accepts Yearn V2 yVault tokens as collateral — Curve DOLA-paired LPs and staked yCRV — so borrowers keep the Yearn autocompounded yield while drawing fixed-rate DOLA.'
 	},
 	{
-		name: 'Robin',
-		src: '/partner-logos-dark/robin.svg',
-		description: 'Robin embeds Yearn-curated vaults as part of its offering at robin.markets.'
+		name: 'Birch Hill',
+		src: '/partner-logos-dark/birch-hill-logo.svg',
+		description: 'Birch Hill’s RWA USDC Vault is built on the Yearn v3 framework, supplying USDC into curated, permissioned Morpho lending markets on Base — starting with lending against Groma’s tokenized real-estate collateral.'
 	},
 	{
 		name: 'Octant',
@@ -70,9 +70,9 @@ const	partnerLogos = [
 		description: 'Term Finance builds its fixed-rate lending vaults on Yearn’s V3 TokenizedStrategy framework, blending fixed-rate lending (~7.5% APY) with Yearn baseline yields (~$21M TVL).'
 	},
 	{
-		name: 'Sturdy',
-		src: '/partner-logos-dark/sturdy.svg',
-		description: 'Sturdy’s aggregator layer is built on the Yearn V3 framework — its yield optimizers distribute lender deposits across whitelisted isolated silos, with allocations fed by a Bittensor AI subnet.'
+		name: 'Trueo',
+		src: '/partner-logos-dark/trueo-logo.svg',
+		description: 'Trueo is a prediction-market protocol whose dollar unit, TYD (True Yield Dollar), is a Yearn V3 vault — so market collateral sits in TYD and inherits its Yearn strategy exposure (~$0.8M).'
 	},
 	{
 		name: 'Swell',
@@ -80,9 +80,9 @@ const	partnerLogos = [
 		description: 'Swell’s swBTC is a Yearn V3 vault integrating with Aera, bringing battle-tested Yearn infrastructure to its Bitcoin liquid restaking token.'
 	},
 	{
-		name: 'Birch Hill',
-		src: '/partner-logos-dark/birch-hill-logo.svg',
-		description: 'Birch Hill’s RWA USDC Vault is built on the Yearn v3 framework, supplying USDC into curated, permissioned Morpho lending markets on Base — starting with lending against Groma’s tokenized real-estate collateral.'
+		name: 'Robin',
+		src: '/partner-logos-dark/robin.svg',
+		description: 'Robin is a capital-efficiency layer for Polymarket: it stakes opposing YES/NO outcome tokens, merges them into delta-neutral USDC.e via Polymarket’s Conditional Token Framework, and deposits that USDC.e into a curated Yearn V3 vault on Polygon (~$72k).'
 	}
 ];
 
@@ -91,7 +91,7 @@ function	PartnerLogos({activeName, onToggle}: TPartnerLogosProps): ReactElement 
 
 	return (
 		<section id={'partner-logos'} aria-label={'partner-logos'} className={'mb-14 md:mb-[100px]'}>
-			<h3 className={'mb-3 text-xl font-semibold text-neutral-800'}>{'Teams building on Yearn'}</h3>
+			<h2 className={'mb-3 text-xl font-semibold text-neutral-800'}>{'Teams building on Yearn'}</h2>
 			<div className={'grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5'}>
 				{partnerLogos.map((logo): ReactElement => {
 					const	isActive = logo.name === activeName;
