@@ -93,7 +93,7 @@ body {
 		@apply text-neutral-900;
 	}
 
-	.project--nav[aria-selected='true'] {
+	.project--nav[aria-current='page'] {
 		@apply border-neutral-900 text-neutral-900;
 	}
 

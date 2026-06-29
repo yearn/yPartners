@@ -97,6 +97,7 @@ function	TeamUpPage(): ReactElement {
 						</div>
 						{response ? (
 							<div
+								role={response.isError ? 'alert' : 'status'}
 								className={`${response.isError ? 'bg-red-200 text-red-900' : 'bg-primary-100 text-neutral-900'} rounded-md px-4 py-3 text-sm font-medium`}>
 								{response.message}
 							</div>

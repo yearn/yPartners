@@ -125,7 +125,7 @@ function	AppHeader(): ReactElement {
 							<div>
 								<Link href={'/'}>
 									<p
-										aria-selected={router.pathname === '/'}
+										aria-current={router.pathname === '/' ? 'page' : undefined}
 										className={'project--nav'}>
 										{'Main'}
 									</p>
@@ -134,7 +134,7 @@ function	AppHeader(): ReactElement {
 							<div>
 								<Link href={'/team-up'}>
 									<p
-										aria-selected={router.pathname === '/team-up'}
+										aria-current={router.pathname === '/team-up' ? 'page' : undefined}
 										className={'project--nav'}>
 										{'Team up'}
 									</p>
@@ -143,7 +143,7 @@ function	AppHeader(): ReactElement {
 							<div>
 								<Link href={'/faq'}>
 									<p
-										aria-selected={router.pathname === '/faq'}
+										aria-current={router.pathname === '/faq' ? 'page' : undefined}
 										className={'project--nav'}>
 										{'FAQ'}
 									</p>
@@ -291,7 +291,7 @@ function	WrappedInput({title, initialValue, onSave}: TWrappedInput): ReactElemen
 					<input
 						onFocus={(): void => set_isFocused(true)}
 						onBlur={(): void => set_isFocused(false)}
-						className={'h-10 w-full overflow-x-scroll border-2 border-neutral-700 bg-neutral-0 p-2 outline-none scrollbar-none'}
+						className={'h-10 w-full overflow-x-scroll border-2 border-neutral-700 bg-neutral-0 p-2 scrollbar-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-400'}
 						placeholder={'0x...'}
 						value={value}
 						type={'text'}

@@ -4,7 +4,7 @@ const nextCoreWebVitals = require('eslint-config-next/core-web-vitals');
 
 module.exports = [
 	{
-		ignores: ['yearn.fi/**', '.next/**', 'node_modules/**']
+		ignores: ['yearn.fi/**', '.next/**', 'node_modules/**', 'internal-docs/**']
 	},
 	...nextCoreWebVitals,
 	js.configs.recommended,
@@ -26,6 +26,13 @@ module.exports = [
 		rules: {
 			'no-multi-spaces': ['error', {ignoreEOLComments: false}],
 			'no-mixed-spaces-and-tabs': 'error'
+		}
+	},
+	{
+		// Config files legitimately use CommonJS require()
+		files: ['*.config.js', '*.config.mjs', '*.config.cjs', '*.config.ts'],
+		rules: {
+			'@typescript-eslint/no-require-imports': 'off'
 		}
 	}
 ];

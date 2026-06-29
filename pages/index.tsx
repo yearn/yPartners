@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import {useState} from 'react';
+import {useEffect, useRef, useState} from 'react';
 import B2BMeme from 'components/B2BMeme';
 import HeroStats from 'components/HeroStats';
 import SectionPartnerLogos from 'components/SectionPartnerLogos';
@@ -10,6 +10,7 @@ import type {ReactElement} from 'react';
 
 function	Index(): ReactElement {
 	const	[activePartner, setActivePartner] = useState<string | null>(null);
+	const	shouldScrollToDetail = useRef(false);
 
 	const	togglePartner = (name: string): void => {
 		setActivePartner((prev): string | null => prev === name ? null : name);
@@ -17,10 +18,17 @@ function	Index(): ReactElement {
 
 	const	selectPartnerFromTargets = (name: string): void => {
 		setActivePartner(name);
-		if (typeof document !== 'undefined') {
-			document.getElementById('partner-logos')?.scrollIntoView({behavior: 'smooth', block: 'start'});
-		}
+		shouldScrollToDetail.current = true;
 	};
+
+	// After selecting a partner from the Targets cards, scroll the expanded
+	// detail panel into view (it renders below the logo grid).
+	useEffect((): void => {
+		if (shouldScrollToDetail.current && activePartner) {
+			document.getElementById('partner-logos-detail')?.scrollIntoView({behavior: 'smooth', block: 'start'});
+			shouldScrollToDetail.current = false;
+		}
+	}, [activePartner]);
 
 	return (
 		<main>
