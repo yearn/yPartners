@@ -5,12 +5,23 @@ import {formatAmount} from 'lib/yearn/utils/format.number';
 import type {ReactElement} from 'react';
 import type {SWRResponse} from 'swr';
 
+const tvlFormatter = new Intl.NumberFormat('en-US', {
+	style: 'currency',
+	currency: 'USD',
+	notation: 'compact',
+	maximumFractionDigits: 1
+});
+
 async function vaultCountFetcher(url: string): Promise<{vaults_count: number}> {
 	return baseFetcher(url) as Promise<{vaults_count: number}>;
 }
 
 async function feesFetcher(url: string): Promise<{total30d: number}> {
 	return baseFetcher(url) as Promise<{total30d: number}>;
+}
+
+async function tvlFetcher(url: string): Promise<{tvl: number}> {
+	return baseFetcher(url) as Promise<{tvl: number}>;
 }
 
 function	HeroStats(): ReactElement {
@@ -32,17 +43,35 @@ function	HeroStats(): ReactElement {
 		}
 	) as SWRResponse;
 
+	const	{data: tvl, error: tvlError} = useSWR(
+		'/api/tvl',
+		tvlFetcher,
+		{
+			revalidateOnFocus: false,
+			onError: (err: Error) => console.error('[SWR] TVL fetch error:', err)
+		}
+	) as SWRResponse;
+
 	if (countError) {
 		console.error('[HeroStats] Vaults count error:', countError);
 	}
 	if (feesError) {
 		console.error('[HeroStats] Fees error:', feesError);
 	}
+	if (tvlError) {
+		console.error('[HeroStats] TVL error:', tvlError);
+	}
 
 
 	return (
 		<div className={'mb-4 flex flex-row flex-wrap items-center'}>
 			<div className={'mr-4 flex flex-col space-y-2 pr-5 md:mr-8'}>
+				<p>{'Total TVL'}</p>
+				<b className={'text-3xl tabular-nums'}>
+					{tvl ? tvlFormatter.format(tvl.tvl) : '-'}
+				</b>
+			</div>
+			<div className={'flex flex-col space-y-2 pr-5'}>
 				<p>{'Fees earned this month'}</p>
 				<b className={'text-3xl tabular-nums'}>
 					{fees ? `$ ${formatAmount(fees.total30d, 0, 2)}` : '-'}
