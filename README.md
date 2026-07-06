@@ -180,17 +180,11 @@ const LOGOS: TPartnerLogo = {
 };
 ```
 
-#### 4. (Optional) Enable dynamic referral tracking
+#### 4. Dynamic referral tracking (enabled for all partners)
 
-If the partner uses the Yearn referral wrapper contract (deployed at `0x3744Df2673097d738aCaa3E463E6D638867757f2` on all supported chains), you can enable dynamic referral tracking. This automatically discovers depositors who deposited through the partner's referral code via Envio's `ReferralDeposit` events.
+All partners use dynamic referral tracking. The dashboard automatically discovers depositors who deposited through the partner's referral code via Envio's `ReferralDeposit` events emitted by the Yearn referral wrapper contract (`0x3744Df2673097d738aCaa3E463E6D638867757f2` on all supported chains).
 
-To enable it, add the partner's `shortName` to the `isDynamicPartner` check in `contexts/usePartner.tsx`:
-
-```typescript
-const isDynamicPartner = currentPartner === 'ceazor' || currentPartner === 'jumper' || currentPartner === 'yourpartner';
-```
-
-Dynamic partners merge their static `PARTNER_VAULT_CONFIG` with data from `/api/partner-referrals` at runtime.
+Each partner's static `PARTNER_VAULT_CONFIG` (if any) is merged at runtime with data from `/api/partner-referrals`, so no per-partner opt-in is required — just add the partner to `PARTNERS` and `SHAREABLE_ADDRESSES` resolves automatically.
 
 After adding your partner, rebuild the app with `pnpm build` and the new dashboard will be available at:
 - `/dashboard/0xYourPartnerTreasuryAddress` (using treasury address)

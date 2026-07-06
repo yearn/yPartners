@@ -180,7 +180,7 @@ export const PartnerContextApp = ({
 }: {partnerID: string, children: ReactElement, windowDays?: number}): ReactElement => {
 	const currentPartner = SHAREABLE_ADDRESSES[partnerID] ? SHAREABLE_ADDRESSES[partnerID].shortName : '';
 	const isSSR = typeof window === 'undefined';
-	const isDynamicPartner = currentPartner === 'ceazor' || currentPartner === 'jumper';
+	const isDynamicPartner = Boolean(currentPartner);
 
 	// Fetch dynamic referral data for partners with dynamic vault config
 	const shouldFetchReferrals = !isSSR && isDynamicPartner && partnerID;
