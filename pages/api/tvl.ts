@@ -1,4 +1,4 @@
-const TVL_ENDPOINT = 'https://api.llama.fi/protocol/yearn-finance';
+const TVL_ENDPOINT = 'https://api.llama.fi/protocol/yearn';
 
 export const config = {
 	runtime: 'edge'
