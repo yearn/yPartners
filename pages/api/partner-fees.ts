@@ -253,16 +253,53 @@ function parseEventId(eventId: string): { block: number; log: number } | null {
 	return { block, log };
 }
 
-async function getDepositEvents(
-	address: string,
+/**
+ * Build the list of address strings to match against for a set of depositors.
+ * `_in` performs an exact, case-sensitive match, whereas the previous
+ * per-address queries used case-insensitive `_ilike`. Envio may store addresses
+ * lowercased or EIP-55 checksummed, so we include both forms to preserve the
+ * case-insensitive behaviour. Duplicate strings (e.g. all-lowercase addresses
+ * whose checksummed form is identical) collapse via the Set.
+ */
+function buildOwnersList(addresses: string[]): string[] {
+	const owners = new Set<string>();
+	for (const addr of addresses) {
+		owners.add(addr.toLowerCase());
+		try {
+			owners.add(ethers.utils.getAddress(addr));
+		} catch {
+			// Ignore malformed addresses; they are filtered out elsewhere.
+		}
+	}
+	return Array.from(owners);
+}
+
+function groupEventsByOwner<TEvent extends {owner: string}>(
+	events: TEvent[],
+): Map<string, TEvent[]> {
+	const byOwner = new Map<string, TEvent[]>();
+	for (const event of events) {
+		const key = event.owner.toLowerCase();
+		let bucket = byOwner.get(key);
+		if (!bucket) {
+			bucket = [];
+			byOwner.set(key, bucket);
+		}
+		bucket.push(event);
+	}
+	return byOwner;
+}
+
+async function getDepositEventsForAddresses(
+	addresses: string[],
 	vaultAddress: string,
 	chainId: number,
-): Promise<TDepositEvent[]> {
+): Promise<Map<string, TDepositEvent[]>> {
 	const query = `
-		query GetDepositorDeposits($depositorAddress: String!, $vaultAddress: String!, $chainId: Int!) {
+		query GetDepositorDeposits($owners: [String!]!, $vaultAddress: String!, $chainId: Int!) {
 			Deposit(
 				where: {
-					owner: { _ilike: $depositorAddress }
+					owner: { _in: $owners }
 					vaultAddress: { _ilike: $vaultAddress }
 					chainId: { _eq: $chainId }
 				}
@@ -280,24 +317,24 @@ async function getDepositEvents(
 	const result = await queryEnvioGraphQL<{ Deposit: TDepositEvent[] }>(
 		query,
 		{
-			depositorAddress: address.toLowerCase(),
+			owners: buildOwnersList(addresses),
 			vaultAddress: vaultAddress.toLowerCase(),
 			chainId,
 		},
 	);
-	return result?.Deposit || [];
+	return groupEventsByOwner(result?.Deposit || []);
 }
 
-async function getWithdrawEvents(
-	address: string,
+async function getWithdrawEventsForAddresses(
+	addresses: string[],
 	vaultAddress: string,
 	chainId: number,
-): Promise<TWithdrawEvent[]> {
+): Promise<Map<string, TWithdrawEvent[]>> {
 	const query = `
-		query GetDepositorWithdrawals($depositorAddress: String!, $vaultAddress: String!, $chainId: Int!) {
+		query GetDepositorWithdrawals($owners: [String!]!, $vaultAddress: String!, $chainId: Int!) {
 			Withdraw(
 				where: {
-					owner: { _ilike: $depositorAddress }
+					owner: { _in: $owners }
 					vaultAddress: { _ilike: $vaultAddress }
 					chainId: { _eq: $chainId }
 				}
@@ -316,24 +353,24 @@ async function getWithdrawEvents(
 	const result = await queryEnvioGraphQL<{ Withdraw: TWithdrawEvent[] }>(
 		query,
 		{
-			depositorAddress: address.toLowerCase(),
+			owners: buildOwnersList(addresses),
 			vaultAddress: vaultAddress.toLowerCase(),
 			chainId,
 		},
 	);
-	return result?.Withdraw || [];
+	return groupEventsByOwner(result?.Withdraw || []);
 }
 
-async function getTransferEvents(
-	address: string,
+async function getTransferEventsForAddresses(
+	addresses: string[],
 	vaultAddress: string,
 	chainId: number,
-): Promise<TTransferEvent[]> {
+): Promise<Map<string, TTransferEvent[]>> {
 	const query = `
-		query GetDepositorTransfers($depositorAddress: String!, $zeroAddress: String!, $vaultAddress: String!, $chainId: Int!) {
+		query GetDepositorTransfers($owners: [String!]!, $zeroAddress: String!, $vaultAddress: String!, $chainId: Int!) {
 			transfersFrom: Transfer(
 				where: {
-					sender: { _ilike: $depositorAddress }
+					sender: { _in: $owners }
 					receiver: { _neq: $zeroAddress }
 					vaultAddress: { _ilike: $vaultAddress }
 					chainId: { _eq: $chainId }
@@ -347,7 +384,7 @@ async function getTransferEvents(
 			}
 			transfersTo: Transfer(
 				where: {
-					receiver: { _ilike: $depositorAddress }
+					receiver: { _in: $owners }
 					sender: { _neq: $zeroAddress }
 					vaultAddress: { _ilike: $vaultAddress }
 					chainId: { _eq: $chainId }
@@ -362,17 +399,36 @@ async function getTransferEvents(
 		}
 	`;
 
-	const variables = {
-		depositorAddress: address.toLowerCase(),
-		zeroAddress: ZERO_ADDRESS.toLowerCase(),
-		vaultAddress: vaultAddress.toLowerCase(),
-		chainId,
-	};
 	const result = await queryEnvioGraphQL<{
 		transfersFrom: TTransferEvent[];
 		transfersTo: TTransferEvent[];
-	}>(query, variables);
-	return [...(result?.transfersFrom || []), ...(result?.transfersTo || [])];
+	}>(query, {
+		owners: buildOwnersList(addresses),
+		zeroAddress: ZERO_ADDRESS.toLowerCase(),
+		vaultAddress: vaultAddress.toLowerCase(),
+		chainId,
+	});
+
+	// Attribute each transfer to its relevant owner(s). A transfer between two
+	// tracked depositors appears once for the sender (outgoing, from the From
+	// set) and once for the receiver (incoming, from the To set);
+	// buildEventTimeline derives direction by comparing the sender.
+	const byOwner = new Map<string, TTransferEvent[]>();
+	const ensure = (key: string): TTransferEvent[] => {
+		let bucket = byOwner.get(key);
+		if (!bucket) {
+			bucket = [];
+			byOwner.set(key, bucket);
+		}
+		return bucket;
+	};
+	for (const transfer of result?.transfersFrom || []) {
+		ensure(transfer.sender.toLowerCase()).push(transfer);
+	}
+	for (const transfer of result?.transfersTo || []) {
+		ensure(transfer.receiver.toLowerCase()).push(transfer);
+	}
+	return byOwner;
 }
 
 function buildEventTimeline(
@@ -474,6 +530,35 @@ async function getPricePerShareAtBlock(
 	const value = BigNumber.from(data);
 	pricePerShareCache.set(cacheKey, value);
 	return value;
+}
+
+/**
+ * Pre-fetch price-per-share for a set of historical blocks in a
+ * concurrency-limited batch. Every value is written through the shared
+ * `pricePerShareCache`, so callers that subsequently `await
+ * getPricePerShareAtBlock(...)` for these blocks resolve from cache instead of
+ * issuing one serial archive eth_call per block. Fetch errors are swallowed
+ * here so a single failing block doesn't abort the batch; the consuming code
+ * retries and surfaces the error if a value is genuinely unavailable.
+ */
+async function prefetchPricePerShare(
+	provider: ethers.providers.JsonRpcProvider,
+	vault: string,
+	blocks: number[],
+	concurrency = 8,
+): Promise<void> {
+	for (let i = 0; i < blocks.length; i += concurrency) {
+		const chunk = blocks.slice(i, i + concurrency);
+		await Promise.all(
+			chunk.map(async (block): Promise<void> => {
+				try {
+					await getPricePerShareAtBlock(provider, vault, block);
+				} catch {
+					// Swallowed intentionally; consumers retry on cache miss.
+				}
+			}),
+		);
+	}
 }
 
 async function getVaultAssetAddress(
@@ -1052,6 +1137,52 @@ export default async function handler(
 		}
 		const priceUsd = assetPriceUsd;
 
+		// Fetch every depositor's events in three batched GraphQL queries (one per
+		// event type) instead of one round-trip per depositor per type.
+		const [depositsByOwner, withdrawByOwner, transfersByOwner] =
+			await Promise.all([
+				getDepositEventsForAddresses(addresses, vaultAddress, chainId),
+				getWithdrawEventsForAddresses(addresses, vaultAddress, chainId),
+				getTransferEventsForAddresses(addresses, vaultAddress, chainId),
+			]);
+
+		// Build per-address timelines and share balances (pure computation).
+		const positions = addresses.map((address) => {
+			const key = address.toLowerCase();
+			const timeline = buildEventTimeline(
+				depositsByOwner.get(key) || [],
+				withdrawByOwner.get(key) || [],
+				transfersByOwner.get(key) || [],
+				address,
+			);
+			const { snapshots, currentShares } = calculatePosition(timeline);
+			return { address, timeline, snapshots, currentShares };
+		});
+
+		// Pre-warm the price-per-share cache for every historical block the profit
+		// math and chart snapshots will read, fetched as one concurrency-limited
+		// batch. The calculations below (and prepareChartSnapshots) then resolve
+		// PPS from cache instead of issuing a serial archive eth_call per block.
+		const ppsBlocks = new Set<number>();
+		if (cutoffBlock !== null) {
+			ppsBlocks.add(cutoffBlock);
+		}
+		for (const { timeline, snapshots } of positions) {
+			for (const event of timeline) {
+				if (event.type === "transfer_in") {
+					ppsBlocks.add(event.blockNumber);
+				}
+			}
+			for (const snapshot of snapshots) {
+				ppsBlocks.add(snapshot.blockNumber);
+			}
+		}
+		await prefetchPricePerShare(
+			archiveProvider,
+			vaultAddress,
+			Array.from(ppsBlocks),
+		);
+
 		const accountFees: TAccountFees[] = [];
 		let totalFees = BigNumber.from(0);
 		let totalNetProfit = BigNumber.from(0);
@@ -1059,20 +1190,7 @@ export default async function handler(
 		let allSnapshots: TSnapshot[] = [];
 		let totalCurrentShares = BigNumber.from(0);
 
-		for (const address of addresses) {
-			const [deposits, withdrawals, transfers] = await Promise.all([
-				getDepositEvents(address, vaultAddress, chainId),
-				getWithdrawEvents(address, vaultAddress, chainId),
-				getTransferEvents(address, vaultAddress, chainId),
-			]);
-
-			const timeline = buildEventTimeline(
-				deposits,
-				withdrawals,
-				transfers,
-				address,
-			);
-			const { snapshots, currentShares } = calculatePosition(timeline);
+		for (const { address, timeline, snapshots, currentShares } of positions) {
 			const weightedAvgEntryPps = await calculateWeightedAverageEntryPps(
 				archiveProvider,
 				timeline,
