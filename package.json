@@ -9,7 +9,9 @@
 		"build": "tsc && next build",
 		"export": "tsc && next build && next export",
 		"lint": "eslint . --ext .js,.jsx,.ts,.tsx",
-		"lintfix": "eslint . --ext .js,.jsx,.ts,.tsx --fix"
+		"lintfix": "eslint . --ext .js,.jsx,.ts,.tsx --fix",
+		"test": "vitest run",
+		"test:watch": "vitest"
 	},
 	"dependencies": {
 		"@headlessui/react": "2.2.10",
@@ -52,6 +54,7 @@
 		"sass": "1.99.0",
 		"sharp": "0.34.5",
 		"ts-loader": "9.5.7",
-		"typescript": "5.9.3"
+		"typescript": "5.9.3",
+		"vitest": "^4.1.9"
 	}
 }
