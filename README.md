@@ -90,6 +90,8 @@ These endpoints aggregate over the vault + depositor configuration in `PARTNER_V
 | `defisaver` | DeFi Saver | — (no vault config) |
 | `ceazor` | Ceazor | Katana (dynamic referrals) |
 | `jumper` | Jumper | Katana (dynamic referrals) |
+| `aihedge` | AIHedge | Ethereum |
+| `frankencoin` | Frankencoin | Ethereum (dynamic ysyBOLD collateral) |
 
 ### Adding a new partner
 
@@ -185,6 +187,10 @@ const LOGOS: TPartnerLogo = {
 All partners use dynamic referral tracking. The dashboard automatically discovers depositors who deposited through the partner's referral code via Envio's `ReferralDeposit` events emitted by the Yearn referral wrapper contract (`0x3744Df2673097d738aCaa3E463E6D638867757f2` on all supported chains).
 
 Each partner's static `PARTNER_VAULT_CONFIG` (if any) is merged at runtime with data from `/api/partner-referrals`, so no per-partner opt-in is required — just add the partner to `PARTNERS` and `SHAREABLE_ADDRESSES` resolves automatically.
+
+#### 5. Frankencoin (ysyBOLD-as-ZCHF-collateral) tracking
+
+The Frankencoin partner is a special case: instead of a static depositor list or referral events, its tracked "depositors" are the Frankencoin V2 **collateral positions** that hold ysyBOLD (`0x23346B04a7f55b8760E5860AA5A77383D63491cD`, Staked yBOLD) as ZCHF collateral. `/api/partner-referrals` detects the Frankencoin partner (via `SHAREABLE_ADDRESSES`) and queries the Envio indexer's `FrankencoinYsyBoldAccount` ledger (`isPosition = true`) to resolve those position addresses dynamically, returning them against the ysyBOLD vault. The standard `/api/partner-tvl` and `/api/partner-fees` endpoints then compute the balance, profit, and fees on that ysyBOLD collateral using the same Envio endpoint. No `PARTNER_VAULT_CONFIG` entry is required for Frankencoin — positions are discovered automatically as they are opened.
 
 After adding your partner, rebuild the app with `pnpm build` and the new dashboard will be available at:
 - `/dashboard/0xYourPartnerTreasuryAddress` (using treasury address)
