@@ -1,5 +1,6 @@
 import LogoDeFiSaver from 'components/icons/partners/LogoDeFiSaver';
 import LogoYearn from 'components/icons/LogoYearn';
+import LogoFrankencoin from 'components/icons/partners/LogoFrankencoin';
 import {toAddress} from 'lib/yearn/utils/address';
 
 import type {ReactElement} from 'react';
@@ -37,6 +38,16 @@ const PARTNERS: TDict<TPartner> = {
 		shortName: 'aihedge',
 		treasury: [toAddress('0x241ac8b7584dfe2f23b626c939fd88b9151d7684')],
 		logo: <img src="/partners/aihedge.jpg" alt="AIHedge" className="text-900" />
+	},
+	frankencoin: {
+		name: 'Frankencoin',
+		shortName: 'frankencoin',
+		// Frankencoin V2 MintingHub (0xDe12B…3557): the contract that opens positions
+		// using ysyBOLD as ZCHF collateral. Used as the routing/login identifier only;
+		// the tracked depositors (the ysyBOLD collateral positions) are resolved
+		// dynamically from the Envio indexer by /api/partner-referrals.
+		treasury: [toAddress('0xDe12B620A8a714476A97EfD14E6F7180Ca653557')],
+		logo: <LogoFrankencoin className={'text-900'} />
 	}
 };
 
@@ -167,7 +178,8 @@ const LOGOS: TPartnerLogo = {
 	defisaver: <LogoDeFiSaver isColored={true} className={'text-900 h-3/4 w-3/4'} />,
 	ceazor: <img src="/partners/ceazor.jpg" alt="Ceazor" className="h-3/4 w-3/4 object-contain" />,
 	jumper: <img src="/partners/jumper.jpg" alt="Jumper" className="h-3/4 w-3/4 object-contain" />,
-	aihedge: <img src="/partners/aihedge.jpg" alt="AIHedge" className="h-3/4 w-3/4 object-contain" />
+	aihedge: <img src="/partners/aihedge.jpg" alt="AIHedge" className="h-3/4 w-3/4 object-contain" />,
+	frankencoin: <LogoFrankencoin isColored={true} className={'text-900 h-3/4 w-3/4'} />
 };
 
 const DEFAULT_PROFIT_SHARE = 0.5;

@@ -1,8 +1,14 @@
 import { toAddress } from "lib/yearn/utils/address";
+import {SHAREABLE_ADDRESSES} from 'utils/Partners';
 import type { NextApiRequest, NextApiResponse } from "next";
 
 // Chains where YearnReferralWrapper (0x3744Df2673097d738aCaa3E463E6D638867757f2) is deployed
 const SUPPORTED_CHAIN_IDS = new Set([1, 8453, 42161, 747474]);
+// ysyBOLD (Staked yBOLD, 0x23346B04…) is the Yearn V3 vault used as Frankencoin (ZCHF)
+// collateral. The Frankencoin partner has no static depositor list: the tracked
+// depositors are the Frankencoin V2 collateral positions, resolved dynamically below.
+const YSYBOLD_VAULT = "0x23346B04a7f55b8760E5860AA5A77383D63491cD";
+const FRANKENCOIN_PARTNER = "frankencoin";
 
 type TReferralDeposit = {
 	id: string;
@@ -97,6 +103,54 @@ async function getReferralDeposits(
 
 	return result?.ReferralDeposit || [];
 }
+type TFrankencoinPositionAccount = {
+	address: string;
+	chainId: number;
+};
+
+// Resolve the Frankencoin V2 positions that hold ysyBOLD as ZCHF collateral.
+//
+// The Envio indexer (yearn-indexing-test, PRs #36/#37) flags every such position via
+// FrankencoinMintingHubV2.PositionOpened and maintains a per-account ysyBOLD ledger
+// (FrankencoinYsyBoldAccount, isPosition=true). Each flagged account's `address` is a
+// collateral position contract; its ysyBOLD balance (driven by Transfer events) is what
+// /api/partner-tvl and /api/partner-fees track. We return the same {chain → vault →
+// depositors} shape as the referral resolver so the dashboard's merge machinery in
+// usePartner consumes it unchanged. This is ground truth and needs no RPC.
+async function getFrankencoinCollateralConfig(): Promise<TPartnerVaultConfig> {
+	const query = `
+		query GetFrankencoinYsyBoldPositions {
+			FrankencoinYsyBoldAccount(
+				where: { isPosition: { _eq: true } }
+				limit: 1000
+			) {
+				address
+				chainId
+			}
+		}
+	`;
+
+	const result = await queryEnvioGraphQL<{
+		FrankencoinYsyBoldAccount: TFrankencoinPositionAccount[];
+	}>(query, {});
+
+	const config: TPartnerVaultConfig = {};
+	const vault = toAddress(YSYBOLD_VAULT);
+	for (const account of result?.FrankencoinYsyBoldAccount || []) {
+		if (!config[account.chainId]) {
+			config[account.chainId] = {};
+		}
+		if (!config[account.chainId][vault]) {
+			config[account.chainId][vault] = [];
+		}
+		const position = toAddress(account.address);
+		if (!config[account.chainId][vault].includes(position)) {
+			config[account.chainId][vault].push(position);
+		}
+	}
+
+	return config;
+}
 
 export default async function handler(
 	req: NextApiRequest,
@@ -131,6 +185,12 @@ export default async function handler(
 	}
 
 	try {
+		const partnerShortName = SHAREABLE_ADDRESSES[referrerAddress]?.shortName;
+		if (partnerShortName === FRANKENCOIN_PARTNER) {
+			const collateralConfig = await getFrankencoinCollateralConfig();
+			res.status(200).json(collateralConfig);
+			return;
+		}
 		const deposits = await getReferralDeposits(referrerAddress);
 
 		// Build the vault config structure grouped by chain.
