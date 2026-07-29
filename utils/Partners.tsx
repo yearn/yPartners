@@ -48,6 +48,12 @@ const PARTNERS: TDict<TPartner> = {
 		// dynamically from the Envio indexer by /api/partner-referrals.
 		treasury: [toAddress('0xDe12B620A8a714476A97EfD14E6F7180Ca653557')],
 		logo: <LogoFrankencoin className={'text-900'} />
+	},
+	alchemix: {
+		name: 'Alchemix',
+		shortName: 'alchemix',
+		treasury: [toAddress('0x29bcfeD246ce37319d94eBa107db90C453D4c43D')],
+		logo: <img src="/partner-logos/AlchemixMark_01.svg" alt="Alchemix" className="text-900" />
 	}
 };
 
@@ -179,7 +185,8 @@ const LOGOS: TPartnerLogo = {
 	ceazor: <img src="/partners/ceazor.jpg" alt="Ceazor" className="h-3/4 w-3/4 object-contain" />,
 	jumper: <img src="/partners/jumper.jpg" alt="Jumper" className="h-3/4 w-3/4 object-contain" />,
 	aihedge: <img src="/partners/aihedge.jpg" alt="AIHedge" className="h-3/4 w-3/4 object-contain" />,
-	frankencoin: <LogoFrankencoin isColored={true} className={'text-900 h-3/4 w-3/4'} />
+	frankencoin: <LogoFrankencoin isColored={true} className={'text-900 h-3/4 w-3/4'} />,
+	alchemix: <img src="/partner-logos/AlchemixMark_01.svg" alt="Alchemix" className="h-3/4 w-3/4 object-contain" />
 };
 
 const DEFAULT_PROFIT_SHARE = 0.5;
