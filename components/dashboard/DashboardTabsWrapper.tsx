@@ -42,7 +42,7 @@ function getComboAssetAddress(combo?: TVaultComboData): string | undefined {
 }
 
 function getComboAssetSymbol(combo?: TVaultComboData): string | undefined {
-	return combo?.fees?.assetSymbol ?? combo?.tvl?.assetSymbol;
+	return combo?.fees?.assetSymbol ?? combo?.tvl?.assetSymbol ?? combo?.assetSymbol;
 }
 
 function getComboTokenLogoSrc(combo?: TVaultComboData): string | null {
@@ -473,11 +473,11 @@ function	DashboardTabsWrapper({partnerID: _partnerID, windowValue, onWindowChang
 									leaveTo={'transform scale-95 opacity-0'}>
 									<Listbox.Options
 										className={'absolute z-50 mt-2 max-h-72 w-full overflow-auto rounded-md border border-neutral-200 bg-white shadow-lg'}>
-									<Listbox.Option
-										className={'cursor-pointer px-3 py-2 text-sm text-neutral-900 hover:bg-neutral-100'}
-										value={'total'}>
-										{'Total (all vaults)'}
-									</Listbox.Option>
+										<Listbox.Option
+											className={'cursor-pointer px-3 py-2 text-sm text-neutral-900 hover:bg-neutral-100'}
+											value={'total'}>
+											{'Total (all vaults)'}
+										</Listbox.Option>
 										{vaultComboData.map((combo) => {
 											const comboLabel = getVaultDropdownLabel(combo);
 											const comboTokenLogoSrc = getComboTokenLogoSrc(combo);
@@ -548,7 +548,7 @@ function	DashboardTabsWrapper({partnerID: _partnerID, windowValue, onWindowChang
 			</div>
 
 			<div className={'mt-8 px-4 md:px-8'}>
-				<AccountFeesTable accountFees={selectedCombo ? selectedAccountFees : accountFees} />
+			<AccountFeesTable accountFees={selectedCombo ? selectedAccountFees : accountFees} />
 			</div>
 
 			{aggregationStep < 2 || !balanceTVLs || !wrapperTotals || !payoutTotals ?

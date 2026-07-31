@@ -1072,24 +1072,19 @@ export default async function handler(
 				? kongMetadataResult.value
 				: null;
 
-		let currentPpsRaw: BigNumber | null = null;
+		// The current price-per-share MUST come from the same RPC source as the
+		// historical snapshots read below. Kong's `pricePerShare` is unreliable
+		// for vaults with custom accountants (e.g. yvUSDC 0x696d…), where it lags
+		// the on-chain value by months. A stale current PPS makes the final
+		// unrealized-profit term `shares * (currentPps - lastPps)` wildly wrong —
+		// it turned yvUSDC's true ~+$3.7k/week into a spurious −$71k. Kong is
+		// still trusted for asset address / decimals, which it reports correctly.
+		const currentPpsRaw = await withTimeout(
+			getPricePerShareAtBlock(latestProvider, vaultAddress),
+			"getPricePerShareAtBlock",
+		);
 		let decimals: number | null = kongMetadata?.decimals ?? null;
 		let assetAddress: string | null = kongMetadata?.assetAddress ?? null;
-
-		if (kongMetadata?.pricePerShare) {
-			try {
-				currentPpsRaw = BigNumber.from(kongMetadata.pricePerShare);
-			} catch {
-				currentPpsRaw = null;
-			}
-		}
-
-		if (!currentPpsRaw) {
-			currentPpsRaw = await withTimeout(
-				getPricePerShareAtBlock(latestProvider, vaultAddress),
-				"getPricePerShareAtBlock",
-			);
-		}
 
 		if (decimals === null) {
 			const decimalsRaw = await withTimeout(

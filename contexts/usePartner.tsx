@@ -113,7 +113,8 @@ type TPartnerFeesResponse = {
 type TVaultAssetMetadataResponse = {
 	chainId: number,
 	vaultAddress: string,
-	assetAddress: string | null
+	assetAddress: string | null,
+	assetSymbol: string | null
 };
 
 type TVaultCombo = {
@@ -134,6 +135,7 @@ type TVaultComboData = {
 	vaultAddress: TAddress;
 	addresses: TAddress[];
 	assetAddress?: string;
+	assetSymbol?: string;
 	tvl?: TPartnerTVLResponse;
 	fees?: TPartnerFeesResponse;
 	chart?: TPartnerFeesResponse;
@@ -435,6 +437,17 @@ export const PartnerContextApp = ({
 		});
 		return map;
 	}, [vaultCombos, vaultAssetMetadataCalls]);
+	const vaultAssetSymbolByKey = useMemo((): Map<string, string> => {
+		const map = new Map<string, string>();
+		vaultCombos.forEach((combo, idx): void => {
+			const metadataCall = vaultAssetMetadataCalls[idx];
+			if (!metadataCall || isAPIError(metadataCall) || !metadataCall.assetSymbol) {
+				return;
+			}
+			map.set(getComboKey(combo), metadataCall.assetSymbol);
+		});
+		return map;
+	}, [vaultCombos, vaultAssetMetadataCalls]);
 	const tvlCallsByKey = useMemo((): Map<string, TPartnerTVLResponse | TAPIError> => {
 		const map = new Map<string, TPartnerTVLResponse | TAPIError>();
 		activeCombos.forEach((combo, idx): void => {
@@ -609,6 +622,7 @@ export const PartnerContextApp = ({
 				vaultAddress: combo.vaultAddress,
 				addresses: combo.addresses,
 				assetAddress: vaultAssetAddressByKey.get(key),
+				assetSymbol: vaultAssetSymbolByKey.get(key),
 				tvl: tvlCall && !isAPIError(tvlCall) ? tvlCall : undefined,
 				fees: feesCall && !isAPIError(feesCall) ? feesCall : undefined,
 				chart: feesCall && !isAPIError(feesCall) ? feesCall : undefined,
@@ -646,7 +660,7 @@ export const PartnerContextApp = ({
 		}
 
 		return filteredData;
-	}, [activeComboKeys, feesCallsByKey, tvlCallsByKey, vaultCombos, vaultAssetAddressByKey, isLoadingDepositorTVL, isLoadingDepositorFees, endorsementMap, vaultTypeMap]);
+	}, [activeComboKeys, feesCallsByKey, tvlCallsByKey, vaultCombos, vaultAssetAddressByKey, vaultAssetSymbolByKey, isLoadingDepositorTVL, isLoadingDepositorFees, endorsementMap, vaultTypeMap]);
 
 	const apiErrors = useMemo((): string[] => {
 		const errors: string[] = [];
