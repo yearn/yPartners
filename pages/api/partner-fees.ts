@@ -101,7 +101,9 @@ const PRICE_PER_SHARE_SELECTOR = "0x99530b06";
 const DECIMALS_SELECTOR = "0x313ce567";
 const ASSET_SELECTOR = "0x38d52e0f";
 const ACCOUNTANT_SELECTOR = "0x4fb3ccc5";
-const VAULT_CONFIG_SELECTOR = "0xde1eb9a3";
+const VAULT_CONFIG_SELECTOR = "0xde1eb9a3"; // getVaultConfig(address)
+// Global performanceFee() — exposed by custom accountants without getVaultConfig.
+const PERFORMANCE_FEE_SELECTOR = "0x87788782";
 const DEFAULT_DECIMALS = 18;
 const DEFAULT_PERFORMANCE_FEE_BPS = 0;
 const REQUEST_TIMEOUT_MS = 12_000;
@@ -597,10 +599,33 @@ async function readAccountantFeeConfig(
 	return [words[0], words[1], words[2], words[3]];
 }
 
+// Some Yearn v3 accountants (e.g. the custom accountant behind the yvUSDC vault
+// 0x696d…) do not expose per-vault `getVaultConfig`. They expose a single global
+// `performanceFee()` (bps out of 10_000, same convention as the standard Fee
+// struct) instead, so the real fee — 0% until it is activated — is read directly
+// rather than masked by the 10% default below.
+async function readGlobalPerformanceFeeBps(
+	provider: ethers.providers.JsonRpcProvider,
+	vault: string,
+	block?: number,
+): Promise<number> {
+	const accountantHex = await provider.call(
+		{to: vault, data: ACCOUNTANT_SELECTOR},
+		block,
+	);
+	const accountantAddress = `0x${accountantHex.slice(-40)}`;
+	const data = await provider.call(
+		{to: accountantAddress, data: PERFORMANCE_FEE_SELECTOR},
+		block,
+	);
+	return BigNumber.from(data).toNumber();
+}
+
 async function getPerformanceFeeBps(
 	provider: ethers.providers.JsonRpcProvider,
 	vault: string,
 ): Promise<number> {
+	// Standard / older Yearn v3 accountants expose a per-vault `getVaultConfig`.
 	try {
 		const [managementFee, performanceFee, , maxFee] =
 			await readAccountantFeeConfig(provider, vault);
@@ -609,8 +634,14 @@ async function getPerformanceFeeBps(
 		}
 		return performanceFee.mul(10000).div(maxFee).toNumber();
 	} catch {
-		// Default fallback to 10% if accountant lookup fails
-		return 1000;
+		// Custom accountants without `getVaultConfig` expose a global
+		// `performanceFee()`. Fall back to it so the vault's real fee is used.
+		try {
+			return await readGlobalPerformanceFeeBps(provider, vault);
+		} catch {
+			// Fee unreadable: do not fabricate one.
+			return 0;
+		}
 	}
 }
 
@@ -711,21 +742,32 @@ async function calculateWeightedAverageEntryPps(
 	return totalAssets.mul(scale).div(totalShares);
 }
 
+// Target block time (seconds) per chain, used to convert a time window (days)
+// into an approximate block cutoff. These are consensus-governed and stable, so
+// the resulting window is approximate but correct per chain. Chains not listed
+// fall back to Ethereum mainnet's ~12s block time.
+const SECONDS_PER_BLOCK_BY_CHAIN: Record<number, number> = {
+	1: 12, // Ethereum mainnet
+	42161: 0.25, // Arbitrum One
+	8453: 2, // Base
+	137: 2, // Polygon PoS
+	747474: 1, // Katana
+};
+
 async function getCutoffBlock(
 	provider: ethers.providers.JsonRpcProvider,
 	days?: number,
+	chainId: number = 1,
 ): Promise<number | null> {
 	if (!days || days <= 0) {
 		return null; // No filter, return all history
 	}
 
 	const currentBlock = await provider.getBlockNumber();
+	const secondsPerBlock = SECONDS_PER_BLOCK_BY_CHAIN[chainId] ?? 12;
+	const blocksPerDay = 86400 / secondsPerBlock;
 
-	// Approximate blocks per day (~7200 for 12s block time)
-	const estimatedBlocksPerDay = 7200;
-	const estimatedCutoffBlock = currentBlock - days * estimatedBlocksPerDay;
-
-	return Math.max(0, estimatedCutoffBlock);
+	return Math.max(0, Math.floor(currentBlock - days * blocksPerDay));
 }
 
 async function calculateIncrementalProfitAndFees(
@@ -856,24 +898,53 @@ async function prepareChartSnapshots(
 	vault: string,
 	priceUsd: number,
 	latestProvider?: ethers.providers.JsonRpcProvider,
+	cutoffBlock: number | null = null,
 ): Promise<TChartSnapshot[]> {
 	if (snapshots.length === 0) {
 		return [];
 	}
 
-	// OPTIMIZATION: Batch all RPC calls in parallel instead of sequential
-	// Collect all unique block numbers
-	const blockNumbers = snapshots.map((s) => s.blockNumber);
+	const orderedSnapshots = [...snapshots].sort(
+		(a, b): number => a.blockNumber - b.blockNumber,
+	);
+
+	// When a time window is active, restrict the chart to that window. Seed the
+	// starting share balance with the position held at the cutoff (the last event
+	// before it) so unrealized profit accrues correctly from the window origin,
+	// and begin plotting at the cutoff block so the chart's x-axis reflects the
+	// selected window instead of all history.
+	let plotSnapshots = orderedSnapshots;
+	let seedShares = BigNumber.from(0);
+	let startBlock = orderedSnapshots[0].blockNumber;
+	if (cutoffBlock !== null) {
+		const lastBeforeCutoff = [...orderedSnapshots]
+			.reverse()
+			.find((snapshot): boolean => snapshot.blockNumber < cutoffBlock);
+		seedShares = lastBeforeCutoff
+			? lastBeforeCutoff.sharesBalance
+			: BigNumber.from(0);
+		plotSnapshots = orderedSnapshots.filter(
+			(snapshot): boolean => snapshot.blockNumber >= cutoffBlock,
+		);
+		startBlock = cutoffBlock;
+	}
+
+	// OPTIMIZATION: Batch all RPC calls in parallel instead of sequential.
+	// Always include the start block (cutoff, or first snapshot) so the window
+	// origin has a price-per-share to diff against.
+	const blockNumbers = [startBlock, ...plotSnapshots.map((s) => s.blockNumber)];
+	const uniqueBlockNumbers = [...new Set(blockNumbers)];
 
 	// Fetch all price-per-share values in parallel
-	const ppsPromises = blockNumbers.map((block) =>
-		getPricePerShareAtBlock(provider, vault, block),
+	const ppsValues = await Promise.all(
+		uniqueBlockNumbers.map((block) =>
+			getPricePerShareAtBlock(provider, vault, block),
+		),
 	);
-	const ppsValues = await Promise.all(ppsPromises);
 
 	// Create a map for quick lookup
 	const ppsMap = new Map<number, BigNumber>();
-	blockNumbers.forEach((block, idx) => {
+	uniqueBlockNumbers.forEach((block, idx) => {
 		ppsMap.set(block, ppsValues[idx]);
 	});
 
@@ -881,10 +952,20 @@ async function prepareChartSnapshots(
 	const scale = BigNumber.from(10).pow(decimals);
 	const chartData: TChartSnapshot[] = [];
 	let profit = BigNumber.from(0);
-	let previousShares = BigNumber.from(0);
-	let previousPps = ppsMap.get(snapshots[0].blockNumber)!;
+	let previousShares = seedShares;
+	let previousPps = ppsMap.get(startBlock)!;
 
-	for (const snapshot of snapshots) {
+	// Emit a zero-profit origin point at the cutoff so the chart visibly starts
+	// at the selected window rather than at the first in-window event.
+	if (cutoffBlock !== null) {
+		chartData.push({
+			block: cutoffBlock,
+			shares: Number(ethers.utils.formatUnits(seedShares, decimals)),
+			profit: 0,
+		});
+	}
+
+	for (const snapshot of plotSnapshots) {
 		const snapshotPps = ppsMap.get(snapshot.blockNumber)!;
 		const deltaPps = snapshotPps.sub(previousPps);
 		profit = profit.add(previousShares.mul(deltaPps).div(scale));
@@ -917,8 +998,10 @@ async function prepareChartSnapshots(
 				Number(ethers.utils.formatUnits(profit, decimals)) * priceUsd,
 		});
 	} catch {
-		// If we can't get current block, use last snapshot block + offset
-		const lastBlock = snapshots[snapshots.length - 1].blockNumber + 1000;
+		// If we can't get current block, use last plotted block + offset
+		const lastBlock =
+			(plotSnapshots[plotSnapshots.length - 1]?.blockNumber ??
+				startBlock) + 1000;
 		chartData.push({
 			block: lastBlock,
 			shares: Number(ethers.utils.formatUnits(currentShares, decimals)),
@@ -1020,7 +1103,7 @@ export default async function handler(
 					"getPerformanceFeeBps",
 				),
 				withTimeout(
-					getCutoffBlock(latestProvider, days),
+					getCutoffBlock(latestProvider, days, chainId),
 					"getCutoffBlock",
 				),
 				withTimeout(
@@ -1041,24 +1124,19 @@ export default async function handler(
 				? kongMetadataResult.value
 				: null;
 
-		let currentPpsRaw: BigNumber | null = null;
+		// The current price-per-share MUST come from the same RPC source as the
+		// historical snapshots read below. Kong's `pricePerShare` is unreliable
+		// for vaults with custom accountants (e.g. yvUSDC 0x696d…), where it lags
+		// the on-chain value by months. A stale current PPS makes the final
+		// unrealized-profit term `shares * (currentPps - lastPps)` wildly wrong —
+		// it turned yvUSDC's true ~+$3.7k/week into a spurious −$71k. Kong is
+		// still trusted for asset address / decimals, which it reports correctly.
+		const currentPpsRaw = await withTimeout(
+			getPricePerShareAtBlock(latestProvider, vaultAddress),
+			"getPricePerShareAtBlock",
+		);
 		let decimals: number | null = kongMetadata?.decimals ?? null;
 		let assetAddress: string | null = kongMetadata?.assetAddress ?? null;
-
-		if (kongMetadata?.pricePerShare) {
-			try {
-				currentPpsRaw = BigNumber.from(kongMetadata.pricePerShare);
-			} catch {
-				currentPpsRaw = null;
-			}
-		}
-
-		if (!currentPpsRaw) {
-			currentPpsRaw = await withTimeout(
-				getPricePerShareAtBlock(latestProvider, vaultAddress),
-				"getPricePerShareAtBlock",
-			);
-		}
 
 		if (decimals === null) {
 			const decimalsRaw = await withTimeout(
@@ -1265,6 +1343,7 @@ export default async function handler(
 				vaultAddress,
 				priceUsd,
 				latestProvider,
+				cutoffBlock,
 			);
 		}
 

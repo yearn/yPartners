@@ -2,13 +2,15 @@ import type {NextApiRequest, NextApiResponse} from 'next';
 import {ethers} from 'ethers';
 import {getKongVaultMetadata} from 'lib/yearn/kong';
 import {getRpcUrlLatest} from 'lib/crypto/rpc';
+import {getTokenSymbol} from 'lib/crypto/tokenMetadata';
 import {toAddress} from 'lib/yearn/utils/address';
 
 type TResponse =
 	| {
 		chainId: number,
 		vaultAddress: string,
-		assetAddress: string | null
+		assetAddress: string | null,
+		assetSymbol: string | null
 	}
 	| {error: string};
 
@@ -47,30 +49,38 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
 	}
 
 	try {
+		const rpcUrl = getRpcUrlLatest(chainId);
+		const provider = rpcUrl ? new ethers.providers.JsonRpcProvider(rpcUrl, chainId) : null;
+
 		// Try to get asset address from Kong first
 		const metadata = await getKongVaultMetadata(chainId, vaultAddress);
 		let assetAddress: string | null = metadata?.assetAddress ?? null;
 
 		// If Kong doesn't have the asset address, fetch it directly from the vault contract
-		if (!assetAddress) {
-			const rpcUrl = getRpcUrlLatest(chainId);
-			if (rpcUrl) {
-				try {
-					const provider = new ethers.providers.JsonRpcProvider(rpcUrl, chainId);
-					const vaultContract = new ethers.Contract(vaultAddress, VAULT_ABI, provider);
-					const rpcAssetAddress = await vaultContract.asset() as string;
-					assetAddress = toAddress(rpcAssetAddress);
-				} catch (rpcError) {
-					console.warn(`[vault-asset] Failed to fetch asset from RPC for vault ${vaultAddress} on chain ${chainId}:`, rpcError);
-				}
+		if (!assetAddress && provider) {
+			try {
+				const vaultContract = new ethers.Contract(vaultAddress, VAULT_ABI, provider);
+				const rpcAssetAddress = await vaultContract.asset() as string;
+				assetAddress = toAddress(rpcAssetAddress);
+			} catch (rpcError) {
+				console.warn(`[vault-asset] Failed to fetch asset from RPC for vault ${vaultAddress} on chain ${chainId}:`, rpcError);
 			}
+		}
+
+		// Resolve the asset symbol so the partner dashboard can label every vault
+		// consistently — not only the currently-selected one (which otherwise is the
+		// only combo whose fees/tvl response carries assetSymbol).
+		let assetSymbol: string | null = null;
+		if (assetAddress && provider) {
+			assetSymbol = await getTokenSymbol(provider, assetAddress);
 		}
 
 		res.setHeader('Cache-Control', 's-maxage=300, stale-while-revalidate=900');
 		res.status(200).json({
 			chainId,
 			vaultAddress,
-			assetAddress
+			assetAddress,
+			assetSymbol
 		});
 	} catch (error) {
 		const message = error instanceof Error ? error.message : 'Failed to fetch vault metadata';

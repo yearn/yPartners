@@ -157,6 +157,23 @@ const PARTNER_VAULT_CONFIG: TPartnerVaultConfig = {
 				toAddress('0x241ac8b7584dfe2f23b626c939fd88b9151d7684')
 			]
 		}
+	},
+	alchemix: {
+		// Alchemix deposits directly into endorsed Yearn v3 vaults and receives the
+		// yv-shares itself (owner == sender in every Deposit event), so these are
+		// plain ERC4626 deposits fully indexed by `owner` in Envio. The standard
+		// partner-tvl / partner-fees pipeline tracks them with no referral wrapper
+		// or custom indexing required.
+		1: {
+			// yvWETH — depositor 0x8AAC…
+			[toAddress('0xc56413869c6CDf96496f2b1eF801fEDBdFA7dDB0')]: [
+				toAddress('0x8AACC947c2f4E24D2Be4CBa4498f004079F35D87')
+			],
+			// yvUSDC — depositor 0xdFDC… (performance fee not yet active on this vault)
+			[toAddress('0x696d02Db93291651ED510704c9b286841d506987')]: [
+				toAddress('0xdFDC17F784e16D7634AC270911D98755C68Ae220')
+			]
+		}
 	}
 };
 
