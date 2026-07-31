@@ -742,21 +742,32 @@ async function calculateWeightedAverageEntryPps(
 	return totalAssets.mul(scale).div(totalShares);
 }
 
+// Target block time (seconds) per chain, used to convert a time window (days)
+// into an approximate block cutoff. These are consensus-governed and stable, so
+// the resulting window is approximate but correct per chain. Chains not listed
+// fall back to Ethereum mainnet's ~12s block time.
+const SECONDS_PER_BLOCK_BY_CHAIN: Record<number, number> = {
+	1: 12, // Ethereum mainnet
+	42161: 0.25, // Arbitrum One
+	8453: 2, // Base
+	137: 2, // Polygon PoS
+	747474: 1, // Katana
+};
+
 async function getCutoffBlock(
 	provider: ethers.providers.JsonRpcProvider,
 	days?: number,
+	chainId: number = 1,
 ): Promise<number | null> {
 	if (!days || days <= 0) {
 		return null; // No filter, return all history
 	}
 
 	const currentBlock = await provider.getBlockNumber();
+	const secondsPerBlock = SECONDS_PER_BLOCK_BY_CHAIN[chainId] ?? 12;
+	const blocksPerDay = 86400 / secondsPerBlock;
 
-	// Approximate blocks per day (~7200 for 12s block time)
-	const estimatedBlocksPerDay = 7200;
-	const estimatedCutoffBlock = currentBlock - days * estimatedBlocksPerDay;
-
-	return Math.max(0, estimatedCutoffBlock);
+	return Math.max(0, Math.floor(currentBlock - days * blocksPerDay));
 }
 
 async function calculateIncrementalProfitAndFees(
@@ -887,24 +898,53 @@ async function prepareChartSnapshots(
 	vault: string,
 	priceUsd: number,
 	latestProvider?: ethers.providers.JsonRpcProvider,
+	cutoffBlock: number | null = null,
 ): Promise<TChartSnapshot[]> {
 	if (snapshots.length === 0) {
 		return [];
 	}
 
-	// OPTIMIZATION: Batch all RPC calls in parallel instead of sequential
-	// Collect all unique block numbers
-	const blockNumbers = snapshots.map((s) => s.blockNumber);
+	const orderedSnapshots = [...snapshots].sort(
+		(a, b): number => a.blockNumber - b.blockNumber,
+	);
+
+	// When a time window is active, restrict the chart to that window. Seed the
+	// starting share balance with the position held at the cutoff (the last event
+	// before it) so unrealized profit accrues correctly from the window origin,
+	// and begin plotting at the cutoff block so the chart's x-axis reflects the
+	// selected window instead of all history.
+	let plotSnapshots = orderedSnapshots;
+	let seedShares = BigNumber.from(0);
+	let startBlock = orderedSnapshots[0].blockNumber;
+	if (cutoffBlock !== null) {
+		const lastBeforeCutoff = [...orderedSnapshots]
+			.reverse()
+			.find((snapshot): boolean => snapshot.blockNumber < cutoffBlock);
+		seedShares = lastBeforeCutoff
+			? lastBeforeCutoff.sharesBalance
+			: BigNumber.from(0);
+		plotSnapshots = orderedSnapshots.filter(
+			(snapshot): boolean => snapshot.blockNumber >= cutoffBlock,
+		);
+		startBlock = cutoffBlock;
+	}
+
+	// OPTIMIZATION: Batch all RPC calls in parallel instead of sequential.
+	// Always include the start block (cutoff, or first snapshot) so the window
+	// origin has a price-per-share to diff against.
+	const blockNumbers = [startBlock, ...plotSnapshots.map((s) => s.blockNumber)];
+	const uniqueBlockNumbers = [...new Set(blockNumbers)];
 
 	// Fetch all price-per-share values in parallel
-	const ppsPromises = blockNumbers.map((block) =>
-		getPricePerShareAtBlock(provider, vault, block),
+	const ppsValues = await Promise.all(
+		uniqueBlockNumbers.map((block) =>
+			getPricePerShareAtBlock(provider, vault, block),
+		),
 	);
-	const ppsValues = await Promise.all(ppsPromises);
 
 	// Create a map for quick lookup
 	const ppsMap = new Map<number, BigNumber>();
-	blockNumbers.forEach((block, idx) => {
+	uniqueBlockNumbers.forEach((block, idx) => {
 		ppsMap.set(block, ppsValues[idx]);
 	});
 
@@ -912,10 +952,20 @@ async function prepareChartSnapshots(
 	const scale = BigNumber.from(10).pow(decimals);
 	const chartData: TChartSnapshot[] = [];
 	let profit = BigNumber.from(0);
-	let previousShares = BigNumber.from(0);
-	let previousPps = ppsMap.get(snapshots[0].blockNumber)!;
+	let previousShares = seedShares;
+	let previousPps = ppsMap.get(startBlock)!;
 
-	for (const snapshot of snapshots) {
+	// Emit a zero-profit origin point at the cutoff so the chart visibly starts
+	// at the selected window rather than at the first in-window event.
+	if (cutoffBlock !== null) {
+		chartData.push({
+			block: cutoffBlock,
+			shares: Number(ethers.utils.formatUnits(seedShares, decimals)),
+			profit: 0,
+		});
+	}
+
+	for (const snapshot of plotSnapshots) {
 		const snapshotPps = ppsMap.get(snapshot.blockNumber)!;
 		const deltaPps = snapshotPps.sub(previousPps);
 		profit = profit.add(previousShares.mul(deltaPps).div(scale));
@@ -948,8 +998,10 @@ async function prepareChartSnapshots(
 				Number(ethers.utils.formatUnits(profit, decimals)) * priceUsd,
 		});
 	} catch {
-		// If we can't get current block, use last snapshot block + offset
-		const lastBlock = snapshots[snapshots.length - 1].blockNumber + 1000;
+		// If we can't get current block, use last plotted block + offset
+		const lastBlock =
+			(plotSnapshots[plotSnapshots.length - 1]?.blockNumber ??
+				startBlock) + 1000;
 		chartData.push({
 			block: lastBlock,
 			shares: Number(ethers.utils.formatUnits(currentShares, decimals)),
@@ -1051,7 +1103,7 @@ export default async function handler(
 					"getPerformanceFeeBps",
 				),
 				withTimeout(
-					getCutoffBlock(latestProvider, days),
+					getCutoffBlock(latestProvider, days, chainId),
 					"getCutoffBlock",
 				),
 				withTimeout(
@@ -1291,6 +1343,7 @@ export default async function handler(
 				vaultAddress,
 				priceUsd,
 				latestProvider,
+				cutoffBlock,
 			);
 		}
 
