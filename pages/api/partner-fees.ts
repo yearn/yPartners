@@ -101,7 +101,9 @@ const PRICE_PER_SHARE_SELECTOR = "0x99530b06";
 const DECIMALS_SELECTOR = "0x313ce567";
 const ASSET_SELECTOR = "0x38d52e0f";
 const ACCOUNTANT_SELECTOR = "0x4fb3ccc5";
-const VAULT_CONFIG_SELECTOR = "0xde1eb9a3";
+const VAULT_CONFIG_SELECTOR = "0xde1eb9a3"; // getVaultConfig(address)
+// Global performanceFee() — exposed by custom accountants without getVaultConfig.
+const PERFORMANCE_FEE_SELECTOR = "0x87788782";
 const DEFAULT_DECIMALS = 18;
 const DEFAULT_PERFORMANCE_FEE_BPS = 0;
 const REQUEST_TIMEOUT_MS = 12_000;
@@ -597,10 +599,33 @@ async function readAccountantFeeConfig(
 	return [words[0], words[1], words[2], words[3]];
 }
 
+// Some Yearn v3 accountants (e.g. the custom accountant behind the yvUSDC vault
+// 0x696d…) do not expose per-vault `getVaultConfig`. They expose a single global
+// `performanceFee()` (bps out of 10_000, same convention as the standard Fee
+// struct) instead, so the real fee — 0% until it is activated — is read directly
+// rather than masked by the 10% default below.
+async function readGlobalPerformanceFeeBps(
+	provider: ethers.providers.JsonRpcProvider,
+	vault: string,
+	block?: number,
+): Promise<number> {
+	const accountantHex = await provider.call(
+		{to: vault, data: ACCOUNTANT_SELECTOR},
+		block,
+	);
+	const accountantAddress = `0x${accountantHex.slice(-40)}`;
+	const data = await provider.call(
+		{to: accountantAddress, data: PERFORMANCE_FEE_SELECTOR},
+		block,
+	);
+	return BigNumber.from(data).toNumber();
+}
+
 async function getPerformanceFeeBps(
 	provider: ethers.providers.JsonRpcProvider,
 	vault: string,
 ): Promise<number> {
+	// Standard / older Yearn v3 accountants expose a per-vault `getVaultConfig`.
 	try {
 		const [managementFee, performanceFee, , maxFee] =
 			await readAccountantFeeConfig(provider, vault);
@@ -609,8 +634,14 @@ async function getPerformanceFeeBps(
 		}
 		return performanceFee.mul(10000).div(maxFee).toNumber();
 	} catch {
-		// Default fallback to 10% if accountant lookup fails
-		return 1000;
+		// Custom accountants without `getVaultConfig` expose a global
+		// `performanceFee()`. Fall back to it so the vault's real fee is used.
+		try {
+			return await readGlobalPerformanceFeeBps(provider, vault);
+		} catch {
+			// Fee unreadable: do not fabricate one.
+			return 0;
+		}
 	}
 }
 
