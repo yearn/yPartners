@@ -7,7 +7,7 @@ import {LOGOS, SHAREABLE_ADDRESSES} from 'utils/Partners';
 import type {GetStaticPathsResult, GetStaticPropsResult} from 'next';
 import type {ReactElement} from 'react';
 
-function Index({partnerID, windowValue, onWindowChange}: {partnerID: string, windowValue: number, onWindowChange: (value: number) => void}): ReactElement {
+function Index({partnerID, onWindowChange}: {partnerID: string, onWindowChange: (value: number) => void}): ReactElement {
 	const {isLoadingVaults} = usePartner();
 	const [lastSync, set_lastSync] = useState('');
 
@@ -35,10 +35,9 @@ function Index({partnerID, windowValue, onWindowChange}: {partnerID: string, win
 		return (
 			<DashboardTabsWrapper
 				partnerID={currentPartnerShortname}
-				windowValue={windowValue}
 				onWindowChange={onWindowChange} />
 		);
-	}, [currentPartner, isLoadingVaults, currentPartnerShortname, windowValue, onWindowChange]);
+	}, [currentPartner, isLoadingVaults, currentPartnerShortname, onWindowChange]);
 
 	return (
 		<main className={'mb-20 pb-20'}>
@@ -77,7 +76,6 @@ function	PartnerDashboardWrapper({partnerID}: {partnerID: string}): ReactElement
 		<PartnerContextApp partnerID={partnerID} windowDays={windowValue}>
 			<Index
 				partnerID={partnerID}
-				windowValue={windowValue}
 				onWindowChange={set_windowValue} />
 		</PartnerContextApp>
 	);

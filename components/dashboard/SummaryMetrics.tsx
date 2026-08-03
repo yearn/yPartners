@@ -1,32 +1,21 @@
 import {formatAmount} from 'lib/yearn/utils/format.number';
 
 import type {ReactElement} from 'react';
-import type {TPartnerVault} from 'types/types';
-import type {TDict} from 'lib/yearn/utils/types';
 
 type TProps = {
-	vaults: TDict<TPartnerVault>,
-	vault?: TPartnerVault,
-	selectedIndex: number,
 	tvlOverride?: number,
 	userCount?: number,
 	feesOverride?: number,
 	isLoadingFees?: boolean,
 }
 
-// Always pass metrics vaults as well as selected index?
-//  Give summary metrics vault and the vaults plus the selected index so it knows what to do
-
 function SummaryMetrics(props: TProps): ReactElement {
-	const {vault, vaults, tvlOverride, userCount, feesOverride, isLoadingFees} = props;
+	const {tvlOverride, userCount, feesOverride, isLoadingFees} = props;
 
-	const aggregatedTVL = tvlOverride ?? Object.values(vaults).reduce(((acc, vault): number => acc + vault.tvl), 0);
-	const aggregatedFees = feesOverride ?? Object.values(vaults).reduce(((acc, vault): number => acc + vault.totalPayout), 0);
 	const hasUserCount = typeof userCount === 'number';
-	const tvlValue = vault ? vault.tvl : aggregatedTVL;
-	const feeValue = vault ? vault.totalPayout : aggregatedFees;
+	const tvlValue = tvlOverride ?? 0;
+	const feeValue = feesOverride ?? 0;
 	const earningsValue = Math.ceil(feeValue * 50) / 100; // 50% of fees, rounded up to 2 decimals
-	const riskScore = vault ? vault.riskScore : undefined;
 
 	return (
 		<div>
@@ -61,9 +50,9 @@ function SummaryMetrics(props: TProps): ReactElement {
 				</div>
 
 				<div>
-					<p>{hasUserCount ? 'User count' : 'Risk Score'}</p>
+					<p>{'User count'}</p>
 					<b className={'text-2xl tabular-nums'}>
-						{hasUserCount ? userCount : (riskScore !== undefined ? formatAmount(riskScore, 0, 2) : '-')}
+						{hasUserCount ? userCount : '-'}
 					</b>
 				</div>
 			</div>
@@ -102,9 +91,9 @@ function SummaryMetrics(props: TProps): ReactElement {
 					</div>
 
 					<div className={'ml-8'}>
-						<p>{hasUserCount ? 'User count' : 'Risk Score'}</p>
+						<p>{'User count'}</p>
 						<b className={'text-2xl tabular-nums'}>
-							{hasUserCount ? userCount : (riskScore !== undefined ? formatAmount(riskScore, 0, 2) : '-')}
+							{hasUserCount ? userCount : '-'}
 						</b>
 					</div>
 				</div>
