@@ -25,18 +25,21 @@ const PARTNERS: TDict<TPartner> = {
 		name: 'Ceazor',
 		shortName: 'ceazor',
 		treasury: [toAddress('0x8244F0746396E06bD26F68C00E9b48b70b771472')],
+		feeStartDate: '2026-03-14',
 		logo: <img src="/partners/ceazor.jpg" alt="Ceazor" className="text-900" />
 	},
 	jumper: {
 		name: 'Jumper',
 		shortName: 'jumper',
 		treasury: [toAddress('0x3610486BD4975F5C3dC838A36E897bF97fAE15DD')],
+		feeStartDate: '2026-03-24',
 		logo: <img src="/partners/jumper.jpg" alt="Jumper" className="text-900" />
 	},
 	aihedge: {
 		name: 'AIHedge',
 		shortName: 'aihedge',
 		treasury: [toAddress('0x241ac8b7584dfe2f23b626c939fd88b9151d7684')],
+		feeStartDate: '2026-06-17',
 		logo: <img src="/partners/aihedge.jpg" alt="AIHedge" className="text-900" />
 	},
 	frankencoin: {
@@ -47,12 +50,14 @@ const PARTNERS: TDict<TPartner> = {
 		// the tracked depositors (the ysyBOLD collateral positions) are resolved
 		// dynamically from the Envio indexer by /api/partner-referrals.
 		treasury: [toAddress('0xDe12B620A8a714476A97EfD14E6F7180Ca653557')],
+		feeStartDate: '2026-07-24',
 		logo: <LogoFrankencoin className={'text-900'} />
 	},
 	alchemix: {
 		name: 'Alchemix',
 		shortName: 'alchemix',
 		treasury: [toAddress('0x29bcfeD246ce37319d94eBa107db90C453D4c43D')],
+		feeStartDate: '2026-07-29',
 		logo: <img src="/partner-logos/AlchemixMark_01.svg" alt="Alchemix" className="text-900" />
 	}
 };
@@ -119,14 +124,6 @@ const PARTNER_VAULT_CONFIG: TPartnerVaultConfig = {
 			],
 			[toAddress('0x182863131F9a4630fF9E27830d945B1413e347E8')]: [
 				toAddress('0x93A62dA5a14C80f265DAbC077fCEE437B1a0Efde')
-			]
-		}
-	},
-	ceazor: {
-		747474: {
-			// Example: [toAddress('0xVaultAddress')]: [toAddress('0xDepositorAddress1'), ...]
-			[toAddress('0xBe53A109B494E5c9f97b9Cd39Fe969BE68BF6204')]: [
-				toAddress('0x8244F0746396E06bD26F68C00E9b48b70b771472')
 			]
 		}
 	},
@@ -208,9 +205,15 @@ const LOGOS: TPartnerLogo = {
 
 const DEFAULT_PROFIT_SHARE = 0.5;
 
+// Date from which fee splitting/accrual begins for a partner. Deposits and
+// vault activity before this date are visible on the chart but earn no fees.
+// TESTING: applied to every partner; override per partner via TPartner.feeStartDate.
+const DEFAULT_FEE_START_DATE = '2026-07-15';
+
 export {
 	LOGOS,
 	PARTNERS,
+	DEFAULT_FEE_START_DATE,
 	SHAREABLE_ADDRESSES,
 	PARTNER_ADDRESS_GROUPS,
 	PARTNER_VAULT_CONFIG,
