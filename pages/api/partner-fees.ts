@@ -55,6 +55,10 @@ type TSnapshot = {
 	eventType: TEvent["type"];
 	sharesBalance: BigNumber;
 };
+type TPositionSnapshot = {
+	address: string;
+	snapshot: TSnapshot;
+};
 
 type TAccountFees = {
 	address: string;
@@ -1025,26 +1029,39 @@ export async function calculateIncrementalProfitAndFees(
 	};
 }
 
-function aggregateSnapshots(snapshots: TSnapshot[]): TSnapshot[] {
-	if (snapshots.length === 0) {
+export function aggregateSnapshots(positionSnapshots: TPositionSnapshot[]): TSnapshot[] {
+	if (positionSnapshots.length === 0) {
 		return [];
 	}
 
-	// Group snapshots by block number and sum shares
-	const blockMap = new Map<number, BigNumber>();
-
-	for (const snapshot of snapshots) {
-		const currentShares =
-			blockMap.get(snapshot.blockNumber) || BigNumber.from(0);
-		blockMap.set(
-			snapshot.blockNumber,
-			currentShares.add(snapshot.sharesBalance),
-		);
-	}
-
-	// Convert back to snapshot array and sort by block
+	// Each position emits a snapshot only when that position changes. Carry
+	// every position's latest balance forward so unrelated accounts do not
+	// make the aggregate chart appear to drop to zero between their events.
+	const orderedSnapshots = [...positionSnapshots].sort(
+		(a, b): number => a.snapshot.blockNumber - b.snapshot.blockNumber,
+	);
+	const balances = new Map<string, BigNumber>();
 	const aggregated: TSnapshot[] = [];
-	for (const [blockNumber, sharesBalance] of blockMap.entries()) {
+	let index = 0;
+
+	while (index < orderedSnapshots.length) {
+		const blockNumber = orderedSnapshots[index].snapshot.blockNumber;
+		while (
+			index < orderedSnapshots.length &&
+			orderedSnapshots[index].snapshot.blockNumber === blockNumber
+		) {
+			const positionSnapshot = orderedSnapshots[index];
+			balances.set(
+				positionSnapshot.address.toLowerCase(),
+				positionSnapshot.snapshot.sharesBalance,
+			);
+			index += 1;
+		}
+
+		let sharesBalance = BigNumber.from(0);
+		for (const balance of balances.values()) {
+			sharesBalance = sharesBalance.add(balance);
+		}
 		aggregated.push({
 			blockNumber,
 			eventType: "deposit", // Type doesn't matter for chart
@@ -1052,7 +1069,7 @@ function aggregateSnapshots(snapshots: TSnapshot[]): TSnapshot[] {
 		});
 	}
 
-	return aggregated.sort((a, b) => a.blockNumber - b.blockNumber);
+	return aggregated;
 }
 
 async function prepareChartSnapshots(
@@ -1571,7 +1588,7 @@ export default async function handler(
 		let totalFees = BigNumber.from(0);
 		let totalNetProfit = BigNumber.from(0);
 		let totalGrossProfit = BigNumber.from(0);
-		let allSnapshots: TSnapshot[] = [];
+		let allSnapshots: TPositionSnapshot[] = [];
 		let totalCurrentShares = BigNumber.from(0);
 
 		for (const { address, timeline, snapshots, currentShares } of positions) {
@@ -1597,7 +1614,9 @@ export default async function handler(
 			totalNetProfit = totalNetProfit.add(profitAndFees.netProfit);
 			totalGrossProfit = totalGrossProfit.add(profitAndFees.grossProfit);
 			totalCurrentShares = totalCurrentShares.add(currentShares);
-			allSnapshots = allSnapshots.concat(snapshots);
+			allSnapshots = allSnapshots.concat(
+				snapshots.map((snapshot) => ({address, snapshot})),
+			);
 			accountFees.push({
 				address,
 				totalFees: profitAndFees.totalFees.toString(),

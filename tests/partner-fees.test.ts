@@ -2,6 +2,7 @@ import {describe, expect, it} from 'vitest';
 import {BigNumber, ethers} from 'ethers';
 
 import {
+	aggregateSnapshots,
 	calculateIncrementalProfitAndFees,
 	getCurrentPricePerShare,
 	getEffectiveFeeCutoff,
@@ -60,6 +61,30 @@ describe('partner fee accrual', (): void => {
 			)
 		).resolves.toEqual(BigNumber.from('1234567890000000000'));
 	});
+	it('carries each position balance through aggregate chart snapshots', (): void => {
+		const scale = BigNumber.from(10).pow(6);
+		const snapshots = aggregateSnapshots([
+			{
+				address: '0x0000000000000000000000000000000000000001',
+				snapshot: {blockNumber: 100, eventType: 'deposit', sharesBalance: scale.mul(100)}
+			},
+			{
+				address: '0x0000000000000000000000000000000000000002',
+				snapshot: {blockNumber: 200, eventType: 'deposit', sharesBalance: scale.mul(10)}
+			},
+			{
+				address: '0x0000000000000000000000000000000000000001',
+				snapshot: {blockNumber: 300, eventType: 'withdraw', sharesBalance: scale.mul(80)}
+			}
+		]);
+
+		expect(snapshots.map((snapshot) => snapshot.sharesBalance.toString())).toEqual([
+			scale.mul(100).toString(),
+			scale.mul(110).toString(),
+			scale.mul(90).toString()
+		]);
+	});
+
 	it('accepts a standard accountant with a non-zero management fee', async (): Promise<void> => {
 		const accountantAddress = '0x0000000000000000000000000000000000000002';
 		const config = ethers.utils.defaultAbiCoder.encode(
