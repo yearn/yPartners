@@ -55,6 +55,10 @@ type TSnapshot = {
 	eventType: TEvent["type"];
 	sharesBalance: BigNumber;
 };
+type TPositionSnapshot = {
+	address: string;
+	snapshot: TSnapshot;
+};
 
 type TAccountFees = {
 	address: string;
@@ -72,8 +76,10 @@ type TAccountFees = {
 
 type TChartSnapshot = {
 	block: number;
+	timestamp: number;
 	shares: number;
 	profit: number;
+	feeSplit: number;
 };
 
 type TResponse =
@@ -84,6 +90,7 @@ type TResponse =
 			assetSymbol: string;
 			decimals: number;
 			performanceFeeBps: number;
+			managementFeeBps: number;
 			totalFees: string;
 			totalFeesNormalized: number;
 			netProfit: string;
@@ -94,6 +101,11 @@ type TResponse =
 			snapshots: TChartSnapshot[];
 	}
 	| { error: string };
+
+type TFeeConfig = {
+	managementFeeBps: number;
+	performanceFeeBps: number;
+};
 
 const DEFAULT_VAULT_ADDRESS = "0xBe53A109B494E5c9f97b9Cd39Fe969BE68BF6204";
 const ZERO_ADDRESS = ethers.constants.AddressZero;
@@ -109,6 +121,33 @@ const DEFAULT_PERFORMANCE_FEE_BPS = 0;
 const REQUEST_TIMEOUT_MS = 12_000;
 
 const pricePerShareCache: Map<string, BigNumber> = new Map();
+const blockTimestampCache: Map<string, number> = new Map();
+
+/**
+ * Resolve a block's Unix timestamp (seconds), cached per provider+block.
+ * Used to label chart points with real dates instead of raw block numbers.
+ * Best-effort: returns 0 if the block can't be read so the caller can degrade
+ * gracefully rather than failing the whole request.
+ */
+async function getBlockTimestamp(
+	provider: ethers.providers.JsonRpcProvider,
+	block: number,
+): Promise<number> {
+	const providerKey = getProviderCacheKey(provider);
+	const cacheKey = `${providerKey}-${block}`;
+	const cached = blockTimestampCache.get(cacheKey);
+	if (cached !== undefined) {
+		return cached;
+	}
+	try {
+		const blockData = await provider.getBlock(block);
+		const timestamp = blockData?.timestamp ?? 0;
+		blockTimestampCache.set(cacheKey, timestamp);
+		return timestamp;
+	} catch {
+		return 0;
+	}
+}
 
 function getProviderCacheKey(
 	provider: ethers.providers.JsonRpcProvider,
@@ -174,6 +213,7 @@ function buildEmptyResponse(
 		assetSymbol: "Unknown token",
 		decimals: DEFAULT_DECIMALS,
 		performanceFeeBps: DEFAULT_PERFORMANCE_FEE_BPS,
+		managementFeeBps: 0,
 		totalFees: "0",
 		totalFeesNormalized: 0,
 		netProfit: "0",
@@ -533,6 +573,26 @@ async function getPricePerShareAtBlock(
 	pricePerShareCache.set(cacheKey, value);
 	return value;
 }
+export async function getCurrentPricePerShare(
+	provider: ethers.providers.JsonRpcProvider,
+	vault: string,
+	fallbackPricePerShare?: string,
+): Promise<BigNumber> {
+	try {
+		return await getPricePerShareAtBlock(provider, vault);
+	} catch (error) {
+		if (!fallbackPricePerShare) {
+			throw error;
+		}
+		try {
+			const fallback = BigNumber.from(fallbackPricePerShare);
+			console.warn(`[partner-fees] Using Kong current PPS fallback for ${vault}`);
+			return fallback;
+		} catch {
+			throw error;
+		}
+	}
+}
 
 /**
  * Pre-fetch price-per-share for a set of historical blocks in a
@@ -580,8 +640,10 @@ async function readAccountantFeeConfig(
 		{ to: vault, data: ACCOUNTANT_SELECTOR },
 		block,
 	);
+	if (!accountantHex || accountantHex.replace(/^0x/i, "").length === 0) {
+		throw new Error("Accountant returned empty data");
+	}
 	const accountantAddress = `0x${accountantHex.slice(-40)}`;
-
 	const vaultParam = vault.toLowerCase().replace("0x", "").padStart(64, "0");
 	const data = await provider.call(
 		{
@@ -609,41 +671,90 @@ async function readGlobalPerformanceFeeBps(
 	vault: string,
 	block?: number,
 ): Promise<number> {
-	const accountantHex = await provider.call(
-		{to: vault, data: ACCOUNTANT_SELECTOR},
-		block,
-	);
-	const accountantAddress = `0x${accountantHex.slice(-40)}`;
-	const data = await provider.call(
-		{to: accountantAddress, data: PERFORMANCE_FEE_SELECTOR},
-		block,
-	);
-	return BigNumber.from(data).toNumber();
+	// Legacy Yearn vaults such as yBOLD expose performanceFee() directly on
+	// the vault and do not implement accountant(). Custom v3 accountants may
+	// expose the same method on the accountant instead, so try both layouts.
+	try {
+		const directData = await provider.call(
+			{to: vault, data: PERFORMANCE_FEE_SELECTOR},
+			block,
+		);
+		return BigNumber.from(directData).toNumber();
+	} catch {
+		const accountantHex = await provider.call(
+			{to: vault, data: ACCOUNTANT_SELECTOR},
+			block,
+		);
+		if (!accountantHex || accountantHex.replace(/^0x/i, "").length === 0) {
+			return 0;
+		}
+		const accountantAddress = `0x${accountantHex.slice(-40)}`;
+		if (accountantAddress.toLowerCase() === ZERO_ADDRESS.toLowerCase()) {
+			return 0;
+		}
+		const data = await provider.call(
+			{to: accountantAddress, data: PERFORMANCE_FEE_SELECTOR},
+			block,
+		);
+		if (!data || data.replace(/^0x/i, "").length === 0) {
+			return 0;
+		}
+		return BigNumber.from(data).toNumber();
+	}
 }
 
-async function getPerformanceFeeBps(
+async function getFeeConfig(
 	provider: ethers.providers.JsonRpcProvider,
 	vault: string,
-): Promise<number> {
-	// Standard / older Yearn v3 accountants expose a per-vault `getVaultConfig`.
+): Promise<TFeeConfig> {
+	// Standard / older Yearn v3 accountants expose a per-vault getVaultConfig.
+	// Both values are already basis points; maxFee is only a cap used by the
+	// accountant and is not the performance-fee denominator.
 	try {
-		const [managementFee, performanceFee, , maxFee] =
+		const [managementFee, performanceFee] =
 			await readAccountantFeeConfig(provider, vault);
-		if (managementFee.gt(0) || maxFee.isZero()) {
-			throw new Error("Unexpected fee config");
-		}
-		return performanceFee.mul(10000).div(maxFee).toNumber();
-	} catch {
-		// Custom accountants without `getVaultConfig` expose a global
-		// `performanceFee()`. Fall back to it so the vault's real fee is used.
+		return {
+			managementFeeBps: managementFee.toNumber(),
+			performanceFeeBps: performanceFee.toNumber()
+		};
+	} catch (configError) {
+		// Legacy vaults and custom accountants may expose only performanceFee().
+		// Management fees cannot be inferred from that interface, so they are
+		// zero unless the standard config is readable.
 		try {
-			return await readGlobalPerformanceFeeBps(provider, vault);
-		} catch {
-			// Fee unreadable: do not fabricate one.
-			return 0;
+			return {
+				managementFeeBps: 0,
+				performanceFeeBps: await readGlobalPerformanceFeeBps(provider, vault)
+			};
+		} catch (globalError) {
+			const configMessage =
+				configError instanceof Error ? configError.message : String(configError);
+			const globalMessage =
+				globalError instanceof Error ? globalError.message : String(globalError);
+			throw new Error(
+				`Unable to read performance fee for ${vault}: ${configMessage}; ${globalMessage}`,
+			);
 		}
 	}
 }
+
+export async function getPerformanceFeeBps(
+	provider: ethers.providers.JsonRpcProvider,
+	vault: string,
+): Promise<number> {
+	return (await getFeeConfig(provider, vault)).performanceFeeBps;
+}
+
+export function getEffectiveFeeCutoff(
+	cutoffBlock: number | null,
+	feeStartCutoff: number | null,
+): number | null {
+	if (cutoffBlock !== null && feeStartCutoff !== null) {
+		return Math.max(cutoffBlock, feeStartCutoff);
+	}
+	return feeStartCutoff ?? cutoffBlock;
+}
+
 
 function calculatePosition(events: TEvent[]): {
 	snapshots: TSnapshot[];
@@ -754,6 +865,23 @@ const SECONDS_PER_BLOCK_BY_CHAIN: Record<number, number> = {
 	747474: 1, // Katana
 };
 
+async function getCutoffBlockForTimestamp(
+	provider: ethers.providers.JsonRpcProvider,
+	targetTimestamp: number,
+	chainId: number = 1,
+): Promise<number | null> {
+	if (!targetTimestamp || targetTimestamp <= 0) {
+		return null; // No filter, return all history
+	}
+
+	const currentBlock = await provider.getBlockNumber();
+	const secondsPerBlock = SECONDS_PER_BLOCK_BY_CHAIN[chainId] ?? 12;
+	const secondsAgo = Math.max(0, Math.floor(Date.now() / 1000) - targetTimestamp);
+	const blocksAgo = Math.floor(secondsAgo / secondsPerBlock);
+
+	return Math.max(0, currentBlock - blocksAgo);
+}
+
 async function getCutoffBlock(
 	provider: ethers.providers.JsonRpcProvider,
 	days?: number,
@@ -763,14 +891,11 @@ async function getCutoffBlock(
 		return null; // No filter, return all history
 	}
 
-	const currentBlock = await provider.getBlockNumber();
-	const secondsPerBlock = SECONDS_PER_BLOCK_BY_CHAIN[chainId] ?? 12;
-	const blocksPerDay = 86400 / secondsPerBlock;
-
-	return Math.max(0, Math.floor(currentBlock - days * blocksPerDay));
+	const targetTimestamp = Math.floor(Date.now() / 1000) - days * 86400;
+	return getCutoffBlockForTimestamp(provider, targetTimestamp, chainId);
 }
 
-async function calculateIncrementalProfitAndFees(
+export async function calculateIncrementalProfitAndFees(
 	provider: ethers.providers.JsonRpcProvider,
 	snapshots: TSnapshot[],
 	performanceFeeBps: number,
@@ -778,6 +903,8 @@ async function calculateIncrementalProfitAndFees(
 	decimals: number,
 	vault: string,
 	cutoffBlock: number | null = null,
+	managementFeeBps: number = 0,
+	currentTimestamp: number = Math.floor(Date.now() / 1000),
 ): Promise<{
 	netProfit: BigNumber;
 	grossProfit: BigNumber;
@@ -796,9 +923,13 @@ async function calculateIncrementalProfitAndFees(
 	);
 
 	const scale = BigNumber.from(10).pow(decimals);
+	const basisPoints = BigNumber.from(10000);
+	const secondsPerYear = BigNumber.from(31_556_952);
 	let netProfit = BigNumber.from(0);
+	let managementFees = BigNumber.from(0);
 	let previousShares = BigNumber.from(0);
 	let previousPps: BigNumber;
+	let previousTimestamp: number;
 	let snapshotsInWindow = orderedSnapshots;
 
 	if (cutoffBlock !== null) {
@@ -813,6 +944,7 @@ async function calculateIncrementalProfitAndFees(
 			vault,
 			cutoffBlock,
 		);
+		previousTimestamp = await getBlockTimestamp(provider, cutoffBlock);
 		snapshotsInWindow = orderedSnapshots.filter(
 			(snapshot): boolean => snapshot.blockNumber >= cutoffBlock,
 		);
@@ -820,6 +952,10 @@ async function calculateIncrementalProfitAndFees(
 		previousPps = await getPricePerShareAtBlock(
 			provider,
 			vault,
+			orderedSnapshots[0].blockNumber,
+		);
+		previousTimestamp = await getBlockTimestamp(
+			provider,
 			orderedSnapshots[0].blockNumber,
 		);
 	}
@@ -830,55 +966,102 @@ async function calculateIncrementalProfitAndFees(
 			vault,
 			snapshot.blockNumber,
 		);
+		const snapshotTimestamp = await getBlockTimestamp(
+			provider,
+			snapshot.blockNumber,
+		);
 		const deltaPps = snapshotPps.sub(previousPps);
 		netProfit = netProfit.add(previousShares.mul(deltaPps).div(scale));
+
+		if (
+			managementFeeBps > 0 &&
+			previousTimestamp > 0 &&
+			snapshotTimestamp > previousTimestamp
+		) {
+			const duration = BigNumber.from(snapshotTimestamp - previousTimestamp);
+			const positionValue = previousShares.mul(previousPps).div(scale);
+			managementFees = managementFees.add(
+				positionValue
+					.mul(managementFeeBps)
+					.mul(duration)
+					.div(basisPoints)
+					.div(secondsPerYear),
+			);
+		}
+
 		previousShares = snapshot.sharesBalance;
 		previousPps = snapshotPps;
+		previousTimestamp = snapshotTimestamp;
 	}
 
 	netProfit = netProfit.add(
 		previousShares.mul(currentPps.sub(previousPps)).div(scale),
 	);
 
-	const basisPoints = 10000;
-	if (netProfit.lte(0) || performanceFeeBps >= basisPoints) {
-		return {
-			netProfit,
-			grossProfit: netProfit,
-			totalFees: BigNumber.from(0),
-		};
-	}
-
-	const grossProfit = netProfit
-		.mul(basisPoints)
-		.div(basisPoints - performanceFeeBps);
-	return {
-		netProfit,
-		grossProfit,
-		totalFees: grossProfit.sub(netProfit),
-	};
-}
-
-function aggregateSnapshots(snapshots: TSnapshot[]): TSnapshot[] {
-	if (snapshots.length === 0) {
-		return [];
-	}
-
-	// Group snapshots by block number and sum shares
-	const blockMap = new Map<number, BigNumber>();
-
-	for (const snapshot of snapshots) {
-		const currentShares =
-			blockMap.get(snapshot.blockNumber) || BigNumber.from(0);
-		blockMap.set(
-			snapshot.blockNumber,
-			currentShares.add(snapshot.sharesBalance),
+	if (
+		managementFeeBps > 0 &&
+		previousTimestamp > 0 &&
+		currentTimestamp > previousTimestamp
+	) {
+		const duration = BigNumber.from(currentTimestamp - previousTimestamp);
+		const positionValue = previousShares.mul(previousPps).div(scale);
+		managementFees = managementFees.add(
+			positionValue
+				.mul(managementFeeBps)
+				.mul(duration)
+				.div(basisPoints)
+				.div(secondsPerYear),
 		);
 	}
 
-	// Convert back to snapshot array and sort by block
+	let performanceFees = BigNumber.from(0);
+	if (netProfit.gt(0) && performanceFeeBps < basisPoints.toNumber()) {
+		const grossProfit = netProfit
+			.mul(basisPoints)
+			.div(basisPoints.sub(performanceFeeBps));
+		performanceFees = grossProfit.sub(netProfit);
+	}
+
+	return {
+		netProfit,
+		grossProfit: netProfit.add(performanceFees).add(managementFees),
+		totalFees: performanceFees.add(managementFees),
+	};
+}
+
+export function aggregateSnapshots(positionSnapshots: TPositionSnapshot[]): TSnapshot[] {
+	if (positionSnapshots.length === 0) {
+		return [];
+	}
+
+	// Each position emits a snapshot only when that position changes. Carry
+	// every position's latest balance forward so unrelated accounts do not
+	// make the aggregate chart appear to drop to zero between their events.
+	const orderedSnapshots = [...positionSnapshots].sort(
+		(a, b): number => a.snapshot.blockNumber - b.snapshot.blockNumber,
+	);
+	const balances = new Map<string, BigNumber>();
 	const aggregated: TSnapshot[] = [];
-	for (const [blockNumber, sharesBalance] of blockMap.entries()) {
+	let index = 0;
+
+	while (index < orderedSnapshots.length) {
+		const blockNumber = orderedSnapshots[index].snapshot.blockNumber;
+		while (
+			index < orderedSnapshots.length &&
+			orderedSnapshots[index].snapshot.blockNumber === blockNumber
+		) {
+			const positionSnapshot = orderedSnapshots[index];
+			balances.set(
+				positionSnapshot.address.toLowerCase(),
+				positionSnapshot.snapshot.sharesBalance,
+			);
+			index += 1;
+		}
+
+		let sharesBalance = BigNumber.from(0);
+		for (const balance of balances.values()) {
+			sharesBalance = sharesBalance.add(balance);
+		}
 		aggregated.push({
 			blockNumber,
 			eventType: "deposit", // Type doesn't matter for chart
@@ -886,10 +1069,10 @@ function aggregateSnapshots(snapshots: TSnapshot[]): TSnapshot[] {
 		});
 	}
 
-	return aggregated.sort((a, b) => a.blockNumber - b.blockNumber);
+	return aggregated;
 }
 
-async function prepareChartSnapshots(
+export async function prepareChartSnapshots(
 	provider: ethers.providers.JsonRpcProvider,
 	snapshots: TSnapshot[],
 	decimals: number,
@@ -898,7 +1081,11 @@ async function prepareChartSnapshots(
 	vault: string,
 	priceUsd: number,
 	latestProvider?: ethers.providers.JsonRpcProvider,
-	cutoffBlock: number | null = null,
+	plotCutoff: number | null = null,
+	accrualCutoff: number | null = null,
+	performanceFeeBps: number = 0,
+	managementFeeBps: number = 0,
+	profitShare: number = 0,
 ): Promise<TChartSnapshot[]> {
 	if (snapshots.length === 0) {
 		return [];
@@ -907,95 +1094,189 @@ async function prepareChartSnapshots(
 	const orderedSnapshots = [...snapshots].sort(
 		(a, b): number => a.blockNumber - b.blockNumber,
 	);
-
-	// When a time window is active, restrict the chart to that window. Seed the
-	// starting share balance with the position held at the cutoff (the last event
-	// before it) so unrealized profit accrues correctly from the window origin,
-	// and begin plotting at the cutoff block so the chart's x-axis reflects the
-	// selected window instead of all history.
+	// Restrict the plotted range to the selected time window (plotCutoff). Seed
+	// the starting share balance with the position held just before it so the
+	// chart shows real balances, and begin plotting at the window origin. Profit
+	// accrues from that origin — it is independent of the fee-share start date,
+	// which only affects off-chain fee accounting (calculateIncrementalProfitAndFees).
 	let plotSnapshots = orderedSnapshots;
 	let seedShares = BigNumber.from(0);
 	let startBlock = orderedSnapshots[0].blockNumber;
-	if (cutoffBlock !== null) {
+	if (plotCutoff !== null) {
 		const lastBeforeCutoff = [...orderedSnapshots]
 			.reverse()
-			.find((snapshot): boolean => snapshot.blockNumber < cutoffBlock);
+			.find((snapshot): boolean => snapshot.blockNumber < plotCutoff);
 		seedShares = lastBeforeCutoff
 			? lastBeforeCutoff.sharesBalance
 			: BigNumber.from(0);
 		plotSnapshots = orderedSnapshots.filter(
-			(snapshot): boolean => snapshot.blockNumber >= cutoffBlock,
+			(snapshot): boolean => snapshot.blockNumber >= plotCutoff,
 		);
-		startBlock = cutoffBlock;
+		startBlock = plotCutoff;
 	}
 
 	// OPTIMIZATION: Batch all RPC calls in parallel instead of sequential.
 	// Always include the start block (cutoff, or first snapshot) so the window
 	// origin has a price-per-share to diff against.
-	const blockNumbers = [startBlock, ...plotSnapshots.map((s) => s.blockNumber)];
-	const uniqueBlockNumbers = [...new Set(blockNumbers)];
+	const feeStartBlock =
+		accrualCutoff !== null ? Math.max(startBlock, accrualCutoff) : startBlock;
+	const blockNumbers = [
+		startBlock,
+		feeStartBlock,
+		...plotSnapshots.map((s) => s.blockNumber),
+	];
+	const uniqueBlockNumbers = Array.from(new Set(blockNumbers));
+	const scale = BigNumber.from(10).pow(decimals);
 
-	// Fetch all price-per-share values in parallel
-	const ppsValues = await Promise.all(
-		uniqueBlockNumbers.map((block) =>
-			getPricePerShareAtBlock(provider, vault, block),
+	// Fetch all price-per-share values and block timestamps in parallel.
+	// Timestamps let the chart label points by date instead of raw block number.
+	const [ppsValues, timestampValues] = await Promise.all([
+		Promise.all(
+			uniqueBlockNumbers.map((block) =>
+				getPricePerShareAtBlock(provider, vault, block),
+			),
 		),
-	);
+		Promise.all(
+			uniqueBlockNumbers.map((block) => getBlockTimestamp(provider, block)),
+		),
+	]);
 
-	// Create a map for quick lookup
+	// Create maps for quick lookup
 	const ppsMap = new Map<number, BigNumber>();
+	const timestampMap = new Map<number, number>();
 	uniqueBlockNumbers.forEach((block, idx) => {
 		ppsMap.set(block, ppsValues[idx]);
+		timestampMap.set(block, timestampValues[idx]);
 	});
 
-	// Now calculate profit using the pre-fetched values
-	const scale = BigNumber.from(10).pow(decimals);
-	const chartData: TChartSnapshot[] = [];
+	// The partner fee line combines performance fees on positive profit with
+	// management fees charged on the partner's position value over time.
+	const performanceFeeRate =
+		performanceFeeBps > 0 && performanceFeeBps < 10000
+			? performanceFeeBps / (10000 - performanceFeeBps)
+			: 0;
 	let profit = BigNumber.from(0);
+	let feeBase = BigNumber.from(0);
+	let managementFeeBase = BigNumber.from(0);
 	let previousShares = seedShares;
 	let previousPps = ppsMap.get(startBlock)!;
+	let feePreviousShares = seedShares;
+	let feePreviousPps = previousPps;
+	let feePreviousTimestamp = timestampMap.get(startBlock) ?? 0;
+	if (feeStartBlock !== startBlock) {
+		const lastBeforeFeeStart = [...orderedSnapshots]
+			.reverse()
+			.find((snapshot): boolean => snapshot.blockNumber < feeStartBlock);
+		feePreviousShares = lastBeforeFeeStart
+			? lastBeforeFeeStart.sharesBalance
+			: BigNumber.from(0);
+		feePreviousPps = ppsMap.get(feeStartBlock)!;
+		feePreviousTimestamp = timestampMap.get(feeStartBlock) ?? 0;
+	}
+	const feeSplitUsd = (): number => (
+		Number(ethers.utils.formatUnits(feeBase, decimals)) * performanceFeeRate +
+		Number(ethers.utils.formatUnits(managementFeeBase, decimals))
+	) * priceUsd * profitShare;
 
-	// Emit a zero-profit origin point at the cutoff so the chart visibly starts
-	// at the selected window rather than at the first in-window event.
-	if (cutoffBlock !== null) {
+	const chartData: TChartSnapshot[] = [];
+
+	// Emit a zero-profit origin point at the window start so the chart visibly
+	// begins at the selected window rather than at the first in-window event.
+	if (plotCutoff !== null) {
 		chartData.push({
-			block: cutoffBlock,
+			block: plotCutoff,
+			timestamp: timestampMap.get(plotCutoff) ?? 0,
 			shares: Number(ethers.utils.formatUnits(seedShares, decimals)),
 			profit: 0,
+			feeSplit: 0,
 		});
 	}
 
 	for (const snapshot of plotSnapshots) {
 		const snapshotPps = ppsMap.get(snapshot.blockNumber)!;
+		const snapshotTimestamp = timestampMap.get(snapshot.blockNumber) ?? 0;
 		const deltaPps = snapshotPps.sub(previousPps);
 		profit = profit.add(previousShares.mul(deltaPps).div(scale));
+
+		if (accrualCutoff === null || snapshot.blockNumber >= accrualCutoff) {
+			feeBase = feeBase.add(
+				feePreviousShares
+					.mul(snapshotPps.sub(feePreviousPps))
+					.div(scale),
+			);
+			if (
+				managementFeeBps > 0 &&
+				feePreviousTimestamp > 0 &&
+				snapshotTimestamp > feePreviousTimestamp
+			) {
+				const duration = BigNumber.from(snapshotTimestamp - feePreviousTimestamp);
+				const positionValue = feePreviousShares.mul(feePreviousPps).div(scale);
+				managementFeeBase = managementFeeBase.add(
+					positionValue
+						.mul(managementFeeBps)
+						.mul(duration)
+						.div(10000)
+						.div(31_556_952),
+				);
+			}
+			feePreviousShares = snapshot.sharesBalance;
+			feePreviousPps = snapshotPps;
+			feePreviousTimestamp = snapshotTimestamp;
+		}
+
 		previousShares = snapshot.sharesBalance;
 		previousPps = snapshotPps;
 
 		chartData.push({
 			block: snapshot.blockNumber,
+			timestamp: snapshotTimestamp,
 			shares: Number(
 				ethers.utils.formatUnits(snapshot.sharesBalance, decimals),
 			),
 			profit:
 				Number(ethers.utils.formatUnits(profit, decimals)) * priceUsd,
+			feeSplit: feeSplitUsd(),
 		});
 	}
 
-	// Add final data point with current state
+	// Add final data point with current state.
 	profit = profit.add(
 		previousShares.mul(currentPps.sub(previousPps)).div(scale),
 	);
+	const finalTimestamp = Math.floor(Date.now() / 1000);
+	feeBase = feeBase.add(
+		feePreviousShares
+			.mul(currentPps.sub(feePreviousPps))
+			.div(scale),
+	);
+	if (
+		managementFeeBps > 0 &&
+		feePreviousTimestamp > 0 &&
+		finalTimestamp > feePreviousTimestamp
+	) {
+		const duration = BigNumber.from(finalTimestamp - feePreviousTimestamp);
+		const positionValue = feePreviousShares.mul(feePreviousPps).div(scale);
+		managementFeeBase = managementFeeBase.add(
+			positionValue
+				.mul(managementFeeBps)
+				.mul(duration)
+				.div(10000)
+				.div(31_556_952),
+		);
+	}
 
 	try {
-		const currentBlock = await (
-			latestProvider ?? provider
-		).getBlockNumber();
+		const finalProvider = latestProvider ?? provider;
+		const currentBlock = await finalProvider.getBlockNumber();
+		const currentBlockData = await finalProvider.getBlock(currentBlock);
 		chartData.push({
 			block: currentBlock,
+			timestamp:
+				currentBlockData?.timestamp ?? Math.floor(Date.now() / 1000),
 			shares: Number(ethers.utils.formatUnits(currentShares, decimals)),
 			profit:
 				Number(ethers.utils.formatUnits(profit, decimals)) * priceUsd,
+			feeSplit: feeSplitUsd(),
 		});
 	} catch {
 		// If we can't get current block, use last plotted block + offset
@@ -1003,10 +1284,12 @@ async function prepareChartSnapshots(
 			(plotSnapshots[plotSnapshots.length - 1]?.blockNumber ??
 				startBlock) + 1000;
 		chartData.push({
+			timestamp: Math.floor(Date.now() / 1000),
 			block: lastBlock,
 			shares: Number(ethers.utils.formatUnits(currentShares, decimals)),
 			profit:
 				Number(ethers.utils.formatUnits(profit, decimals)) * priceUsd,
+			feeSplit: feeSplitUsd(),
 		});
 	}
 
@@ -1048,6 +1331,16 @@ export default async function handler(
 	const days = daysParam
 		? parseInt(Array.isArray(daysParam) ? daysParam[0] : daysParam, 10)
 		: undefined;
+	const feeStartParam = req.query.feeStart;
+	const feeStartSeconds = feeStartParam
+		? parseInt(Array.isArray(feeStartParam) ? feeStartParam[0] : feeStartParam, 10)
+		: NaN;
+	const profitShareParam = req.query.profitShare;
+	const profitShare = profitShareParam
+		? Number.parseFloat(
+				Array.isArray(profitShareParam) ? profitShareParam[0] : profitShareParam,
+			)
+		: 0;
 	const includeSnapshotsParam = req.query.includeSnapshots;
 	const includeSnapshots =
 		includeSnapshotsParam === "true" || includeSnapshotsParam === "1";
@@ -1096,11 +1389,11 @@ export default async function handler(
 			archiveRpcUrl,
 			chainId,
 		);
-		const [performanceFeeBpsResult, cutoffBlockResult, kongMetadataResult] =
+		const [feeConfigResult, cutoffBlockResult, kongMetadataResult] =
 			await Promise.allSettled([
 				withTimeout(
-					getPerformanceFeeBps(latestProvider, vaultAddress),
-					"getPerformanceFeeBps",
+					getFeeConfig(latestProvider, vaultAddress),
+					"getFeeConfig",
 				),
 				withTimeout(
 					getCutoffBlock(latestProvider, days, chainId),
@@ -1111,14 +1404,35 @@ export default async function handler(
 					"getKongVaultMetadata",
 				),
 			]);
-		const performanceFeeBps =
-			performanceFeeBpsResult.status === "fulfilled"
-				? performanceFeeBpsResult.value
-				: DEFAULT_PERFORMANCE_FEE_BPS;
+		let feeConfig: TFeeConfig;
+		if (feeConfigResult.status === "fulfilled") {
+			feeConfig = feeConfigResult.value;
+		} else {
+			// A transient latest-RPC failure must not silently turn an accrued
+			// fee into zero. Retry the read against the archive provider before
+			// allowing the request to fail visibly.
+			feeConfig = await withTimeout(
+				getFeeConfig(archiveProvider, vaultAddress),
+				"getFeeConfig.archive",
+			);
+		}
+		const currentTimestamp = Math.floor(Date.now() / 1000);
+		const {managementFeeBps, performanceFeeBps} = feeConfig;
 		const cutoffBlock =
 			cutoffBlockResult.status === "fulfilled"
 				? cutoffBlockResult.value
 				: null;
+
+		// Fee accrual never counts before the partner's fee start date. The
+		// effective cutoff is the later (more restrictive) of the selected time
+		// window and the start date.
+		const feeStartCutoff = Number.isFinite(feeStartSeconds)
+			? await getCutoffBlockForTimestamp(latestProvider, feeStartSeconds, chainId)
+			: null;
+		const effectiveFeeCutoff = getEffectiveFeeCutoff(
+			cutoffBlock,
+			feeStartCutoff,
+		);
 		const kongMetadata =
 			kongMetadataResult.status === "fulfilled"
 				? kongMetadataResult.value
@@ -1131,8 +1445,14 @@ export default async function handler(
 		// unrealized-profit term `shares * (currentPps - lastPps)` wildly wrong —
 		// it turned yvUSDC's true ~+$3.7k/week into a spurious −$71k. Kong is
 		// still trusted for asset address / decimals, which it reports correctly.
+		// Kong is only a fallback for a transient latest-RPC failure.
+		// Historical PPS values remain sourced from the archive RPC.
 		const currentPpsRaw = await withTimeout(
-			getPricePerShareAtBlock(latestProvider, vaultAddress),
+			getCurrentPricePerShare(
+				latestProvider,
+				vaultAddress,
+				kongMetadata?.pricePerShare,
+			),
 			"getPricePerShareAtBlock",
 		);
 		let decimals: number | null = kongMetadata?.decimals ?? null;
@@ -1245,6 +1565,9 @@ export default async function handler(
 		if (cutoffBlock !== null) {
 			ppsBlocks.add(cutoffBlock);
 		}
+		if (effectiveFeeCutoff !== null) {
+			ppsBlocks.add(effectiveFeeCutoff);
+		}
 		for (const { timeline, snapshots } of positions) {
 			for (const event of timeline) {
 				if (event.type === "transfer_in") {
@@ -1265,7 +1588,7 @@ export default async function handler(
 		let totalFees = BigNumber.from(0);
 		let totalNetProfit = BigNumber.from(0);
 		let totalGrossProfit = BigNumber.from(0);
-		let allSnapshots: TSnapshot[] = [];
+		let allSnapshots: TPositionSnapshot[] = [];
 		let totalCurrentShares = BigNumber.from(0);
 
 		for (const { address, timeline, snapshots, currentShares } of positions) {
@@ -1282,14 +1605,18 @@ export default async function handler(
 				currentPpsRaw,
 				decimals,
 				vaultAddress,
-				cutoffBlock,
+				effectiveFeeCutoff,
+				managementFeeBps,
+				currentTimestamp,
 			);
 
 			totalFees = totalFees.add(profitAndFees.totalFees);
 			totalNetProfit = totalNetProfit.add(profitAndFees.netProfit);
 			totalGrossProfit = totalGrossProfit.add(profitAndFees.grossProfit);
 			totalCurrentShares = totalCurrentShares.add(currentShares);
-			allSnapshots = allSnapshots.concat(snapshots);
+			allSnapshots = allSnapshots.concat(
+				snapshots.map((snapshot) => ({address, snapshot})),
+			);
 			accountFees.push({
 				address,
 				totalFees: profitAndFees.totalFees.toString(),
@@ -1344,6 +1671,10 @@ export default async function handler(
 				priceUsd,
 				latestProvider,
 				cutoffBlock,
+				effectiveFeeCutoff,
+				performanceFeeBps,
+				managementFeeBps,
+				profitShare,
 			);
 		}
 
@@ -1354,6 +1685,7 @@ export default async function handler(
 			assetSymbol: assetSymbol ?? "Unknown token",
 			decimals,
 			performanceFeeBps,
+			managementFeeBps,
 			totalFees: totalFees.toString(),
 			totalFeesNormalized:
 				Number(ethers.utils.formatUnits(totalFees, decimals || 6)) *
@@ -1372,7 +1704,11 @@ export default async function handler(
 			snapshots: chartSnapshots,
 		});
 	} catch (error) {
+		const errorMessage =
+			error instanceof Error ? error.message : String(error);
 		console.error("[partner-fees] Failed to fetch partner fees", error);
-		res.status(200).json(buildEmptyResponse(addresses, vaultAddress));
+		res.status(200).json({
+			error: `Unable to calculate partner fees: ${errorMessage}`,
+		});
 	}
 }

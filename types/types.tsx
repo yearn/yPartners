@@ -25,6 +25,7 @@ export type TPartner = {
 	description?: string;
 	proof?: string;
 	treasury?: TAddress[];
+	feeStartDate?: string;
 	logo: ReactElement;
 }
 

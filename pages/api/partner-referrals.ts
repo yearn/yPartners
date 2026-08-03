@@ -1,4 +1,4 @@
-import { toAddress } from "lib/yearn/utils/address";
+import { toAddress, ZERO_ADDRESS } from "lib/yearn/utils/address";
 import {SHAREABLE_ADDRESSES} from 'utils/Partners';
 import type { NextApiRequest, NextApiResponse } from "next";
 
@@ -15,6 +15,16 @@ type TReferralDeposit = {
 	receiver: string;
 	referrer: string;
 	vault: string;
+};
+type TShareDeposit = {
+	id: string;
+	shares: string;
+};
+
+type TShareTransfer = {
+	id: string;
+	receiver: string;
+	value: string;
 };
 
 type TPartnerVaultConfig = {
@@ -36,6 +46,15 @@ function parseChainIdFromEventId(eventId: string): number | null {
 		return null;
 	}
 	return chainId;
+}
+
+function parseBlockFromEventId(eventId: string): number | null {
+	const parts = eventId.split("_");
+	if (parts.length < 3) {
+		return null;
+	}
+	const block = parseInt(parts[1], 10);
+	return Number.isFinite(block) ? block : null;
 }
 
 async function queryEnvioGraphQL<T>(
@@ -102,6 +121,180 @@ async function getReferralDeposits(
 	});
 
 	return result?.ReferralDeposit || [];
+}
+
+// Maximum hops to follow when tracing forwarded referral shares. Atomic swap
+// routers forward within a handful of hops; this bounds pathological chains.
+const MAX_SHARE_TRACE_DEPTH = 10;
+
+// Envio stores addresses EIP-55 checksummed and `_in`/`_eq` are case-sensitive,
+// so we query both the lowercased and checksummed forms (mirrors buildOwnersList
+// in partner-fees.ts) to keep matching case-insensitive.
+function buildAddressVariants(address: string): string[] {
+	const variants = new Set<string>();
+	variants.add(address.toLowerCase());
+	const checksummed = toAddress(address);
+	if (checksummed !== ZERO_ADDRESS) {
+		variants.add(checksummed);
+	}
+	return Array.from(variants);
+}
+
+// Recover the minted share amount per deposit block for a referral receiver.
+// The Envio ReferralDeposit row carries no amount, so we read it from the
+// matching ERC4626 Deposit (same owner/vault/chain, same block/tx).
+async function getDepositSharesByOwner(
+	owner: string,
+	vaultAddress: string,
+	chainId: number,
+): Promise<Map<number, string>> {
+	const query = `
+		query GetOwnerShares($owners: [String!]!, $vaultAddress: String!, $chainId: Int!) {
+			Deposit(
+				where: {
+					owner: { _in: $owners }
+					vaultAddress: { _ilike: $vaultAddress }
+					chainId: { _eq: $chainId }
+				}
+				order_by: { id: asc }
+			) {
+				id
+				shares
+			}
+		}
+	`;
+	const result = await queryEnvioGraphQL<{ Deposit: TShareDeposit[] }>(query, {
+		owners: buildAddressVariants(owner),
+		vaultAddress: vaultAddress.toLowerCase(),
+		chainId,
+	});
+	const byBlock = new Map<number, string>();
+	for (const deposit of result?.Deposit || []) {
+		const block = parseBlockFromEventId(deposit.id);
+		if (block !== null && !byBlock.has(block)) {
+			byBlock.set(block, deposit.shares);
+		}
+	}
+	return byBlock;
+}
+
+// All vault share Transfers sent by `sender`, used to follow forwarding hops.
+async function getTransfersFromSender(
+	sender: string,
+	vaultAddress: string,
+	chainId: number,
+): Promise<TShareTransfer[]> {
+	const query = `
+		query GetSenderTransfers($senders: [String!]!, $vaultAddress: String!, $chainId: Int!) {
+			Transfer(
+				where: {
+					sender: { _in: $senders }
+					vaultAddress: { _ilike: $vaultAddress }
+					chainId: { _eq: $chainId }
+				}
+				order_by: { id: asc }
+			) {
+				id
+				receiver
+				value
+			}
+		}
+	`;
+	const result = await queryEnvioGraphQL<{ Transfer: TShareTransfer[] }>(query, {
+		senders: buildAddressVariants(sender),
+		vaultAddress: vaultAddress.toLowerCase(),
+		chainId,
+	});
+	return result?.Transfer || [];
+}
+
+// Trace the minted referral shares forward through Transfer events until they
+// reach an address that retains them, returning that holder.
+//
+// Aggregator-routed referral deposits (e.g. via Jumper) name the router as the
+// referral `receiver`. The router forwards the shares to the end user within the
+// same transaction, so the router itself holds nothing and would contribute 0
+// TVL/fees. We instead follow the exact minted share amount, hop by hop, scoped
+// to the deposit's own block (atomic forwarding), and attribute the deposit to
+// the address that ultimately holds the shares.
+async function traceShareHolder(
+	receiver: string,
+	vaultAddress: string,
+	chainId: number,
+	shares: string,
+	depositBlock: number,
+	transferCache: Map<string, TShareTransfer[]>,
+): Promise<string> {
+	let current = receiver;
+	const visited = new Set<string>();
+	for (let depth = 0; depth < MAX_SHARE_TRACE_DEPTH; depth += 1) {
+		const key = `${chainId}_${vaultAddress.toLowerCase()}_${current.toLowerCase()}`;
+		if (visited.has(current.toLowerCase())) {
+			break;
+		}
+		visited.add(current.toLowerCase());
+		let transfers = transferCache.get(key);
+		if (!transfers) {
+			transfers = await getTransfersFromSender(current, vaultAddress, chainId);
+			transferCache.set(key, transfers);
+		}
+		// Follow the forwarding transfer of the exact share amount within the
+		// deposit's own block (atomic swaps forward in the same tx/block).
+		const next = transfers.find(
+			(t) => t.value === shares && parseBlockFromEventId(t.id) === depositBlock,
+		);
+		if (!next) {
+			break;
+		}
+		current = next.receiver;
+	}
+	return current;
+}
+
+// Build the {chain → vault → depositors} config, resolving each referral
+// `receiver` to the ultimate holder of its minted shares. Falls back to the raw
+// receiver when the share amount cannot be recovered (no matching Deposit).
+async function resolveReferralHolders(
+	deposits: TReferralDeposit[],
+): Promise<TPartnerVaultConfig> {
+	const config: TPartnerVaultConfig = {};
+	const transferCache = new Map<string, TShareTransfer[]>();
+	const sharesCache = new Map<string, Map<number, string>>();
+
+	for (const deposit of deposits) {
+		const chainId = parseChainIdFromEventId(deposit.id);
+		const block = parseBlockFromEventId(deposit.id);
+		if (chainId === null || block === null) {
+			continue;
+		}
+
+		const vault = toAddress(deposit.vault);
+		const receiver = toAddress(deposit.receiver);
+
+		const sharesKey = `${chainId}_${vault}_${receiver.toLowerCase()}`;
+		let sharesByBlock = sharesCache.get(sharesKey);
+		if (!sharesByBlock) {
+			sharesByBlock = await getDepositSharesByOwner(receiver, vault, chainId);
+			sharesCache.set(sharesKey, sharesByBlock);
+		}
+
+		const shares = sharesByBlock.get(block);
+		const holder = shares
+			? toAddress(await traceShareHolder(receiver, vault, chainId, shares, block, transferCache))
+			: receiver;
+
+		if (!config[chainId]) {
+			config[chainId] = {};
+		}
+		if (!config[chainId][vault]) {
+			config[chainId][vault] = [];
+		}
+		if (!config[chainId][vault].includes(holder)) {
+			config[chainId][vault].push(holder);
+		}
+	}
+
+	return config;
 }
 type TFrankencoinPositionAccount = {
 	address: string;
@@ -193,31 +386,11 @@ export default async function handler(
 		}
 		const deposits = await getReferralDeposits(referrerAddress);
 
-		// Build the vault config structure grouped by chain.
-		// Chain ID is parsed from the envio event ID (format: "{chainId}_{blockNumber}_{logIndex}").
-		const config: TPartnerVaultConfig = {};
-
-		for (const deposit of deposits) {
-			const chainId = parseChainIdFromEventId(deposit.id);
-			if (chainId === null) {
-				continue;
-			}
-
-			const vault = toAddress(deposit.vault);
-			const receiver = toAddress(deposit.receiver);
-
-			if (!config[chainId]) {
-				config[chainId] = {};
-			}
-
-			if (!config[chainId][vault]) {
-				config[chainId][vault] = [];
-			}
-
-			if (!config[chainId][vault].includes(receiver)) {
-				config[chainId][vault].push(receiver);
-			}
-		}
+		// Resolve each referral deposit's ultimate share holder. Aggregator-routed
+		// deposits name the router as the referral `receiver`; the router forwards
+		// the shares to the end user in the same transaction, so we trace the
+		// minted shares forward and attribute the deposit to whoever holds them.
+		const config = await resolveReferralHolders(deposits);
 
 		res.status(200).json(config);
 	} catch (error) {
