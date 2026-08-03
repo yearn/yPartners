@@ -6,7 +6,8 @@ import {
 	calculateIncrementalProfitAndFees,
 	getCurrentPricePerShare,
 	getEffectiveFeeCutoff,
-	getPerformanceFeeBps
+	getPerformanceFeeBps,
+	prepareChartSnapshots
 } from '../pages/api/partner-fees';
 
 describe('partner fee accrual', (): void => {
@@ -83,6 +84,38 @@ describe('partner fee accrual', (): void => {
 			scale.mul(110).toString(),
 			scale.mul(90).toString()
 		]);
+	});
+
+	it('seeds a short chart window with balances from older deposits', async (): Promise<void> => {
+		const scale = BigNumber.from(10).pow(6);
+		const shares = scale.mul(100);
+		const provider = {
+			connection: {url: 'chart-window-baseline-regression'},
+			call: async (_request: unknown, block?: number): Promise<string> => {
+				if (block !== 200) {
+					throw new Error(`Missing PPS fixture for block ${block}`);
+				}
+				return scale.toHexString();
+			},
+			getBlock: async (block: number): Promise<{timestamp: number}> => ({
+				timestamp: block * 100
+			}),
+			getBlockNumber: async (): Promise<number> => 300
+		} as unknown as ethers.providers.JsonRpcProvider;
+
+		const chart = await prepareChartSnapshots(
+			provider,
+			[{blockNumber: 100, eventType: 'deposit', sharesBalance: shares}],
+			6,
+			scale,
+			shares,
+			'0x0000000000000000000000000000000000000001',
+			1,
+			provider,
+			200
+		);
+
+		expect(chart.map((snapshot) => snapshot.shares)).toEqual([100, 100]);
 	});
 
 	it('accepts a standard accountant with a non-zero management fee', async (): Promise<void> => {

@@ -26,11 +26,11 @@ const dataWindows = [
 const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
 
 function getComboAssetAddress(combo?: TVaultComboData): string | undefined {
-	return combo?.fees?.assetAddress ?? combo?.tvl?.assetAddress;
+	return combo?.assetAddress ?? combo?.fees?.assetAddress ?? combo?.tvl?.assetAddress;
 }
 
 function getComboAssetSymbol(combo?: TVaultComboData): string | undefined {
-	return combo?.fees?.assetSymbol ?? combo?.tvl?.assetSymbol;
+	return combo?.assetSymbol ?? combo?.fees?.assetSymbol ?? combo?.tvl?.assetSymbol;
 }
 
 function getComboTokenLogoSrc(combo?: TVaultComboData): string | null {
@@ -90,7 +90,8 @@ function	DashboardTabsWrapper({partnerID: _partnerID, onWindowChange}: {partnerI
 	const selectedUserCount = selectedCombo ? selectedCombo.addresses.length : userCount;
 	const shouldShowVaultDropdown = vaultComboData.length > 0;
 	const isLoadingTVL = vaultComboData.some((combo) => combo.isLoadingTVL);
-	const isLoadingData = isLoadingFees || isLoadingChart || isLoadingTVL;
+	const isLoadingAssets = vaultComboData.some((combo) => combo.isLoadingAsset);
+	const isLoadingData = isLoadingFees || isLoadingChart || isLoadingTVL || isLoadingAssets;
 	const isEmptyState = !isLoadingData && vaultComboData.length === 0;
 	const getVaultDropdownLabel = (combo: typeof selectedCombo): string => {
 		if (!combo) {

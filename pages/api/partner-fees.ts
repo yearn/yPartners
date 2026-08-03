@@ -1072,7 +1072,7 @@ export function aggregateSnapshots(positionSnapshots: TPositionSnapshot[]): TSna
 	return aggregated;
 }
 
-async function prepareChartSnapshots(
+export async function prepareChartSnapshots(
 	provider: ethers.providers.JsonRpcProvider,
 	snapshots: TSnapshot[],
 	decimals: number,
