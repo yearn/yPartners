@@ -175,9 +175,21 @@ export const KNOWN_DEPOSIT_ID = '747474_31743730_11';
 export const KNOWN_DEPOSIT_ASSETS = '44419000000000000000';
 export const KNOWN_DEPOSIT_SHARES = '43863018170588892564';
 
-/** Immutable historical event counts for KNOWN receiver/vault on Katana. */
+/** Intermediate hop the Jumper router forwards the anchor's shares through. */
+export const JUMPER_HOP = '0xC59fe32C9549e3E8B5dCcdAbC45BD287Bd5bA2bc';
+
+/** Final EOA that ultimately holds the anchor referral's shares (the end user). */
+export const JUMPER_FINAL_HOLDER = '0x9Db87d302D3442eF6108510AA08F276a82724633';
+
+/** Deposits for KNOWN receiver/vault on Katana (exact; stable). */
 export const KNOWN_DEPOSIT_COUNT = 2;
-export const KNOWN_WITHDRAW_COUNT = 5;
+
+/**
+ * Lower bound for withdrawals from KNOWN receiver/vault on Katana (observed 5
+ * on 2026-07-06). The receiver is an aggregator router that keeps transacting,
+ * so this count only grows — an exact assertion would drift, hence the bound.
+ */
+export const KNOWN_WITHDRAW_MIN = 5;
 
 /** Lower bound for Jumper referral rows on Katana (observed 19 on 2026-07-06). */
 export const JUMPER_REFERRAL_MIN = 19;

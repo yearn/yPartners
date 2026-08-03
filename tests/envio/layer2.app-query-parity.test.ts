@@ -2,6 +2,8 @@ import {beforeAll, describe, expect, it} from 'vitest';
 
 import {
 	buildOwnersList,
+	JUMPER_FINAL_HOLDER,
+	JUMPER_HOP,
 	JUMPER_RECEIVER,
 	JUMPER_REFERRER,
 	JUMPER_REFERRAL_MIN,
@@ -11,7 +13,7 @@ import {
 	KNOWN_DEPOSIT_ID,
 	KNOWN_DEPOSIT_SHARES,
 	KNOWN_REFERRAL_DEPOSIT_ID,
-	KNOWN_WITHDRAW_COUNT,
+	KNOWN_WITHDRAW_MIN,
 	loadEnvFile,
 	parseChainIdFromEventId,
 	queryEnvioGraphQL
@@ -59,9 +61,25 @@ const WITHDRAW_QUERY = `
 	}
 `;
 
+// pages/api/partner-referrals.ts -> getTransfersFromSender
+const TRANSFER_FROM_QUERY = `
+	query GetSenderTransfers($senders: [String!]!, $vaultAddress: String!, $chainId: Int!) {
+		Transfer(
+			where: {
+				sender: { _in: $senders }
+				vaultAddress: { _ilike: $vaultAddress }
+				chainId: { _eq: $chainId }
+			}
+			order_by: { id: asc }
+		) { id receiver value }
+	}
+`;
+
 type TReferralRow = {id: string; receiver: string; referrer: string; vault: string};
 type TDepositRow = {id: string; sender: string; owner: string; assets: string; shares: string};
 type TWithdrawRow = TDepositRow & {receiver: string};
+
+type TTransferRow = {id: string; receiver: string; value: string};
 
 beforeAll((): void => {
 	loadEnvFile();
@@ -129,7 +147,9 @@ describe('Layer 2 — partner-fees Deposit/Withdraw query parity', () => {
 			vaultAddress: KATANA_VAULT.toLowerCase(),
 			chainId: KATANA_CHAIN_ID
 		});
-		expect(data.Withdraw.length).toBe(KNOWN_WITHDRAW_COUNT);
+		// Withdrawals grow over time (the router keeps transacting); assert a lower
+		// bound rather than an exact count to avoid fixture drift.
+		expect(data.Withdraw.length).toBeGreaterThanOrEqual(KNOWN_WITHDRAW_MIN);
 	});
 });
 
@@ -178,5 +198,29 @@ describe('Layer 2 — case-sensitivity guard (the silent-zero regression)', () =
 			{referrerAddress: JUMPER_REFERRER.toLowerCase()}
 		);
 		expect(data.ReferralDeposit.length).toBeGreaterThanOrEqual(JUMPER_REFERRAL_MIN);
+	});
+});
+
+describe('Layer 2 — referral share holder resolution', () => {
+	it('the anchor referral shares forward receiver -> hop -> final holder EOA', async () => {
+		// The referral `receiver` is an aggregator router; it forwards the minted
+		// shares to the end user in the same transaction. partner-referrals traces
+		// the exact share amount hop-by-hop and attributes the deposit to the
+		// address that ultimately holds the shares.
+		const fromReceiver = await queryEnvioGraphQL<{Transfer: TTransferRow[]}>(
+			TRANSFER_FROM_QUERY,
+			{senders: buildOwnersList([JUMPER_RECEIVER]), vaultAddress: KATANA_VAULT.toLowerCase(), chainId: KATANA_CHAIN_ID}
+		);
+		const hop = fromReceiver.Transfer.find((t) => t.value === KNOWN_DEPOSIT_SHARES);
+		expect(hop, 'receiver must forward the exact minted share amount').toBeDefined();
+		expect(hop!.receiver.toLowerCase()).toBe(JUMPER_HOP.toLowerCase());
+
+		const fromHop = await queryEnvioGraphQL<{Transfer: TTransferRow[]}>(
+			TRANSFER_FROM_QUERY,
+			{senders: buildOwnersList([JUMPER_HOP]), vaultAddress: KATANA_VAULT.toLowerCase(), chainId: KATANA_CHAIN_ID}
+		);
+		const holder = fromHop.Transfer.find((t) => t.value === KNOWN_DEPOSIT_SHARES);
+		expect(holder, 'hop must forward the exact share amount to the holder').toBeDefined();
+		expect(holder!.receiver.toLowerCase()).toBe(JUMPER_FINAL_HOLDER.toLowerCase());
 	});
 });
