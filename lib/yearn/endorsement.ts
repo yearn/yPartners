@@ -1,11 +1,14 @@
 import {ethers} from 'ethers';
 import {getRpcUrlLatest} from 'lib/crypto/rpc';
+import {aggregate3} from 'lib/yearn/multicall';
 
 const ENDORSEMENT_CONTRACT = '0xd40ecF29e001c76Dcc4cC0D9cd50520CE845B038';
 
 const ENDORSEMENT_ABI = [
 	'function isEndorsed(address vault) view returns (bool)'
 ];
+
+const ENDORSEMENT_INTERFACE = new ethers.utils.Interface(ENDORSEMENT_ABI);
 
 const MAX_RETRIES = 3;
 const RETRY_DELAYS = [1000, 3000, 6000];
@@ -89,29 +92,79 @@ export async function isVaultEndorsed(chainId: number, vaultAddress: string): Pr
 }
 
 /**
- * Check multiple vaults for endorsement in parallel
+ * Check multiple vaults for endorsement with one Multicall3 request per chain.
+ * Falls back to individual calls when a chain does not support Multicall3.
  * @param vaults - Array of {chainId, vaultAddress} objects
  * @returns Promise<Map<string, boolean>> - Map of "chainId:vaultAddress" to endorsement status
  */
 export async function checkVaultsEndorsement(
 	vaults: Array<{chainId: number, vaultAddress: string}>
 ): Promise<Map<string, boolean>> {
-	const results = await Promise.allSettled(
-		vaults.map(async ({chainId, vaultAddress}) => {
-			const isEndorsed = await isVaultEndorsed(chainId, vaultAddress);
-			return {
-				key: `${chainId}:${vaultAddress.toLowerCase()}`,
-				isEndorsed
-			};
+	const endorsementMap = new Map<string, boolean>();
+	const uncachedVaults = new Map<string, {chainId: number, vaultAddress: string}>();
+
+	for (const vault of vaults) {
+		const key = `${vault.chainId}:${vault.vaultAddress.toLowerCase()}`;
+		if (endorsementCache.has(key)) {
+			endorsementMap.set(key, endorsementCache.get(key)!);
+			continue;
+		}
+		uncachedVaults.set(key, vault);
+	}
+
+	const vaultsByChain = new Map<number, Array<{chainId: number, vaultAddress: string}>>();
+	for (const vault of uncachedVaults.values()) {
+		const chainVaults = vaultsByChain.get(vault.chainId) ?? [];
+		chainVaults.push(vault);
+		vaultsByChain.set(vault.chainId, chainVaults);
+	}
+
+	const batches = await Promise.all(
+		Array.from(vaultsByChain.entries()).map(async ([chainId, chainVaults]) => {
+			const rpcUrl = getRpcUrlLatest(chainId);
+			if (!rpcUrl) {
+				return Promise.all(chainVaults.map(({vaultAddress}) => isVaultEndorsed(chainId, vaultAddress)));
+			}
+
+			const provider = new ethers.providers.StaticJsonRpcProvider(rpcUrl, {
+				chainId,
+				name: `chain-${chainId}`
+			});
+
+			try {
+				const results = await aggregate3(
+					provider,
+					chainVaults.map(({vaultAddress}) => ({
+						target: ENDORSEMENT_CONTRACT,
+						allowFailure: true,
+						callData: ENDORSEMENT_INTERFACE.encodeFunctionData('isEndorsed', [vaultAddress])
+					}))
+				);
+				return await Promise.all(results.map(async (result, index): Promise<boolean> => {
+					const vaultAddress = chainVaults[index].vaultAddress;
+					if (!result.success) {
+						return isVaultEndorsed(chainId, vaultAddress);
+					}
+					const [isEndorsed] = ENDORSEMENT_INTERFACE.decodeFunctionResult('isEndorsed', result.returnData);
+					endorsementCache.set(`${chainId}:${vaultAddress.toLowerCase()}`, isEndorsed);
+					return isEndorsed;
+				}));
+			} catch (error) {
+				console.warn(`[endorsement] Multicall failed on chain ${chainId}, falling back to individual checks`, error);
+				return Promise.all(chainVaults.map(({vaultAddress}) => isVaultEndorsed(chainId, vaultAddress)));
+			}
 		})
 	);
 
-	const endorsementMap = new Map<string, boolean>();
-	results.forEach((result) => {
-		if (result.status === 'fulfilled') {
-			endorsementMap.set(result.value.key, result.value.isEndorsed);
-		}
-	});
+	for (const [batchIndex, values] of batches.entries()) {
+		const [, chainVaults] = Array.from(vaultsByChain.entries())[batchIndex];
+		values.forEach((isEndorsed, index) => {
+			endorsementMap.set(
+				`${chainVaults[index].chainId}:${chainVaults[index].vaultAddress.toLowerCase()}`,
+				isEndorsed
+			);
+		});
+	}
 
 	return endorsementMap;
 }
