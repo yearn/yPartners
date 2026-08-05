@@ -128,8 +128,8 @@ async function getReferralDeposits(
 const MAX_SHARE_TRACE_DEPTH = 10;
 
 // Envio stores addresses EIP-55 checksummed and `_in`/`_eq` are case-sensitive,
-// so we query both the lowercased and checksummed forms (mirrors buildOwnersList
-// in partner-fees.ts) to keep matching case-insensitive.
+// so we query both the lowercased and checksummed forms (mirrors
+// buildAddressVariants in partner-fees.ts) to keep matching case-insensitive.
 function buildAddressVariants(address: string): string[] {
 	const variants = new Set<string>();
 	variants.add(address.toLowerCase());
@@ -149,11 +149,11 @@ async function getDepositSharesByOwner(
 	chainId: number,
 ): Promise<Map<number, string>> {
 	const query = `
-		query GetOwnerShares($owners: [String!]!, $vaultAddress: String!, $chainId: Int!) {
+		query GetOwnerShares($owners: [String!]!, $vaults: [String!]!, $chainId: Int!) {
 			Deposit(
 				where: {
 					owner: { _in: $owners }
-					vaultAddress: { _ilike: $vaultAddress }
+					vaultAddress: { _in: $vaults }
 					chainId: { _eq: $chainId }
 				}
 				order_by: { id: asc }
@@ -165,7 +165,7 @@ async function getDepositSharesByOwner(
 	`;
 	const result = await queryEnvioGraphQL<{ Deposit: TShareDeposit[] }>(query, {
 		owners: buildAddressVariants(owner),
-		vaultAddress: vaultAddress.toLowerCase(),
+		vaults: buildAddressVariants(vaultAddress),
 		chainId,
 	});
 	const byBlock = new Map<number, string>();
@@ -185,11 +185,11 @@ async function getTransfersFromSender(
 	chainId: number,
 ): Promise<TShareTransfer[]> {
 	const query = `
-		query GetSenderTransfers($senders: [String!]!, $vaultAddress: String!, $chainId: Int!) {
+		query GetSenderTransfers($senders: [String!]!, $vaults: [String!]!, $chainId: Int!) {
 			Transfer(
 				where: {
 					sender: { _in: $senders }
-					vaultAddress: { _ilike: $vaultAddress }
+					vaultAddress: { _in: $vaults }
 					chainId: { _eq: $chainId }
 				}
 				order_by: { id: asc }
@@ -202,7 +202,7 @@ async function getTransfersFromSender(
 	`;
 	const result = await queryEnvioGraphQL<{ Transfer: TShareTransfer[] }>(query, {
 		senders: buildAddressVariants(sender),
-		vaultAddress: vaultAddress.toLowerCase(),
+		vaults: buildAddressVariants(vaultAddress),
 		chainId,
 	});
 	return result?.Transfer || [];
@@ -370,10 +370,9 @@ export default async function handler(
 
 	const hasEnvioConfig = Boolean(process.env.ENVIO_GRAPHQL_URL);
 	if (!hasEnvioConfig) {
-		console.warn(
-			"[partner-referrals] ENVIO_GRAPHQL_URL not configured, returning empty config",
-		);
-		res.status(200).json({});
+		const error = "ENVIO_GRAPHQL_URL is not configured.";
+		console.warn(`[partner-referrals] ${error}`);
+		res.status(503).json({error});
 		return;
 	}
 
