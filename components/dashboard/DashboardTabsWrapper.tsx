@@ -146,7 +146,7 @@ function DashboardTabsContent({onWindowChange}: {onWindowChange: (value: number)
 		<div aria-label={'Vault Details'} className={'col-span-12 mb-4 flex flex-col bg-neutral-100'}>
 			{isLoadingData ? (
 				<div className={'mx-4 mt-6 rounded-lg border border-neutral-200 bg-white px-4 py-3 text-sm text-neutral-700 md:mx-8'} role={'status'}>
-					<p>{'Loading vault data...'}</p>
+					<p className={'text-lg font-medium'}>{'Loading vault data...'}</p>
 					<p className={'mt-1 text-neutral-500'}>{'Initial loads may take longer while historical vault data is fetched and cached.'}</p>
 				</div>
 			) : null}

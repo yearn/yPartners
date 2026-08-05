@@ -54,4 +54,14 @@ describe('vault endorsement batching', (): void => {
 			[`10:${vaultC.toLowerCase()}`, true]
 		]));
 	});
+	it('omits unavailable endorsement statuses instead of marking vaults unendorsed', async (): Promise<void> => {
+		mocks.getRpcUrlLatest.mockReturnValue(null);
+
+		const endorsements = await checkVaultsEndorsement([
+			{chainId: 999, vaultAddress: '0x0000000000000000000000000000000000000001'}
+		]);
+
+		expect(endorsements).toEqual(new Map());
+	});
+
 });
