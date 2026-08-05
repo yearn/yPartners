@@ -629,13 +629,13 @@ export const PartnerContextApp = ({
 		// If endorsement/vault type checks haven't completed yet, show all vaults
 		let filteredData = allComboData;
 
-		// Filter by endorsement if we have endorsement data
+		// Filter by endorsement when a status is confirmed. An unavailable RPC
+		// lookup leaves the status absent, so preserve the configured vault.
 		if (endorsementMap.size > 0) {
 			filteredData = filteredData.filter((combo): boolean => {
 				const endorsementKey = `${combo.chainId}:${combo.vaultAddress.toLowerCase()}`;
 				const isEndorsed = endorsementMap.get(endorsementKey);
-				// Only include if endorsed (exclude if explicitly false or missing)
-				return isEndorsed === true;
+				return isEndorsed !== false;
 			});
 		}
 
@@ -652,7 +652,9 @@ export const PartnerContextApp = ({
 			});
 		}
 
-		return filteredData;
+		// Endorsement and vault-kind lookups are advisory. A transient browser RPC
+		// failure must not erase every configured vault from an active partner.
+		return filteredData.length > 0 ? filteredData : allComboData;
 	}, [activeComboKeys, feesCallsByKey, tvlCallsByKey, vaultAssetCallsByKey, vaultCombos, isLoadingVaultAssets, isLoadingDepositorTVL, isLoadingDepositorFees, endorsementMap, vaultTypeMap]);
 
 	const apiErrors = useMemo((): string[] => {

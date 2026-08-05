@@ -1,4 +1,4 @@
-import {useMemo} from 'react';
+import {useEffect, useMemo, useState} from 'react';
 import {ComposedChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer} from 'recharts';
 import {formatAmount} from 'lib/yearn/utils/format.number';
 
@@ -51,6 +51,21 @@ function formatChartWindowDate(block: number, firstBlock: number, lastBlock: num
 }
 
 function BalanceProfitChart({snapshots, isLoading, feeStartTimestamp, windowDays}: TProps): ReactElement {
+	const [isMobile, setIsMobile] = useState(false);
+
+	useEffect((): (() => void) => {
+		const mediaQuery = window.matchMedia('(max-width: 767px)');
+		const handleChange = (event: MediaQueryListEvent): void => {
+			setIsMobile(event.matches);
+		};
+		setIsMobile(mediaQuery.matches);
+		mediaQuery.addEventListener('change', handleChange);
+		return (): void => mediaQuery.removeEventListener('change', handleChange);
+	}, []);
+
+	const leftAxisWidth = isMobile ? 42 : 70;
+	const rightAxisWidth = isMobile ? 48 : 84;
+	const axisTick = {fontSize: isMobile ? 10 : 12};
 	// Sample data if there are too many points (performance optimization)
 	const chartData = useMemo(() => {
 		if (snapshots.length <= 300) {
@@ -108,29 +123,29 @@ function BalanceProfitChart({snapshots, isLoading, feeStartTimestamp, windowDays
 					/>
 					<YAxis
 						yAxisId={'left'}
-						width={70}
-						label={{value: 'Shares', angle: -90, position: 'insideLeft', offset: 10, fill: '#3b82f6'}}
+						width={leftAxisWidth}
+						label={{value: 'Shares', angle: -90, position: 'insideLeft', offset: isMobile ? 2 : 10, fill: '#3b82f6'}}
 						tickFormatter={(value: number): string => SHARES_TICK_FORMATTER.format(value)}
-						tick={{fontSize: 12}}
+						tick={axisTick}
 						stroke={'#3b82f6'}
 					/>
 					<YAxis
 						yAxisId={'right'}
 						orientation={'right'}
-						width={84}
-						label={{value: 'Profit (USD)', angle: 90, position: 'insideRight', offset: 14, fill: '#10b981'}}
+						width={rightAxisWidth}
+						label={{value: 'Profit (USD)', angle: 90, position: 'insideRight', offset: isMobile ? 2 : 14, fill: '#10b981'}}
 						tickFormatter={(value: number): string => USD_TICK_FORMATTER.format(value)}
-						tick={{fontSize: 12}}
+						tick={axisTick}
 						stroke={'#10b981'}
 					/>
 					{hasFeeSplit ? (
 						<YAxis
 							yAxisId={'fee'}
 							orientation={'right'}
-							width={84}
-							label={{value: 'Fee (USD)', angle: 90, position: 'insideRight', offset: 14, fill: '#ef4444'}}
+							width={rightAxisWidth}
+							label={{value: 'Fee (USD)', angle: 90, position: 'insideRight', offset: isMobile ? 2 : 14, fill: '#ef4444'}}
 							tickFormatter={(value: number): string => USD_TICK_FORMATTER.format(value)}
-							tick={{fontSize: 12}}
+							tick={axisTick}
 							stroke={'#ef4444'}
 						/>
 					) : null}

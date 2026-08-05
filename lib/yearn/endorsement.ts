@@ -33,7 +33,7 @@ async function sleep(ms: number): Promise<void> {
 	return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-export async function isVaultEndorsed(chainId: number, vaultAddress: string): Promise<boolean> {
+async function tryIsVaultEndorsed(chainId: number, vaultAddress: string): Promise<boolean | undefined> {
 	const cacheKey = `${chainId}:${vaultAddress.toLowerCase()}`;
 
 	if (endorsementCache.has(cacheKey)) {
@@ -42,9 +42,8 @@ export async function isVaultEndorsed(chainId: number, vaultAddress: string): Pr
 
 	const rpcUrl = getRpcUrlLatest(chainId);
 	if (!rpcUrl) {
-		console.warn(`[endorsement] No RPC URL for chain ${chainId}, assuming not endorsed`);
-		endorsementCache.set(cacheKey, false);
-		return false;
+		console.warn(`[endorsement] No RPC URL for chain ${chainId}, endorsement status unavailable`);
+		return undefined;
 	}
 
 	for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
@@ -79,23 +78,27 @@ export async function isVaultEndorsed(chainId: number, vaultAddress: string): Pr
 					continue;
 				}
 				console.warn(`[endorsement] Rate-limited checking ${vaultAddress} on chain ${chainId} after ${MAX_RETRIES} retries, will retry on next call`);
-				return false;
+				return undefined;
 			}
 
 			console.warn(`[endorsement] Failed to check endorsement for ${vaultAddress} on chain ${chainId}: ${errorMsg}`);
-			endorsementCache.set(cacheKey, false);
-			return false;
+			return undefined;
 		}
 	}
 
-	return false;
+	return undefined;
+}
+
+export async function isVaultEndorsed(chainId: number, vaultAddress: string): Promise<boolean> {
+	return (await tryIsVaultEndorsed(chainId, vaultAddress)) ?? false;
 }
 
 /**
  * Check multiple vaults for endorsement with one Multicall3 request per chain.
  * Falls back to individual calls when a chain does not support Multicall3.
+ * Failed lookups are omitted so callers can retain the vault conservatively.
  * @param vaults - Array of {chainId, vaultAddress} objects
- * @returns Promise<Map<string, boolean>> - Map of "chainId:vaultAddress" to endorsement status
+ * @returns Promise<Map<string, boolean>> - Map of confirmed "chainId:vaultAddress" statuses
  */
 export async function checkVaultsEndorsement(
 	vaults: Array<{chainId: number, vaultAddress: string}>
@@ -118,12 +121,11 @@ export async function checkVaultsEndorsement(
 		chainVaults.push(vault);
 		vaultsByChain.set(vault.chainId, chainVaults);
 	}
-
 	const batches = await Promise.all(
 		Array.from(vaultsByChain.entries()).map(async ([chainId, chainVaults]) => {
 			const rpcUrl = getRpcUrlLatest(chainId);
 			if (!rpcUrl) {
-				return Promise.all(chainVaults.map(({vaultAddress}) => isVaultEndorsed(chainId, vaultAddress)));
+				return Promise.all(chainVaults.map(({vaultAddress}) => tryIsVaultEndorsed(chainId, vaultAddress)));
 			}
 
 			const provider = new ethers.providers.StaticJsonRpcProvider(rpcUrl, {
@@ -140,10 +142,10 @@ export async function checkVaultsEndorsement(
 						callData: ENDORSEMENT_INTERFACE.encodeFunctionData('isEndorsed', [vaultAddress])
 					}))
 				);
-				return await Promise.all(results.map(async (result, index): Promise<boolean> => {
+				return await Promise.all(results.map(async (result, index): Promise<boolean | undefined> => {
 					const vaultAddress = chainVaults[index].vaultAddress;
 					if (!result.success) {
-						return isVaultEndorsed(chainId, vaultAddress);
+						return tryIsVaultEndorsed(chainId, vaultAddress);
 					}
 					const [isEndorsed] = ENDORSEMENT_INTERFACE.decodeFunctionResult('isEndorsed', result.returnData);
 					endorsementCache.set(`${chainId}:${vaultAddress.toLowerCase()}`, isEndorsed);
@@ -151,7 +153,7 @@ export async function checkVaultsEndorsement(
 				}));
 			} catch (error) {
 				console.warn(`[endorsement] Multicall failed on chain ${chainId}, falling back to individual checks`, error);
-				return Promise.all(chainVaults.map(({vaultAddress}) => isVaultEndorsed(chainId, vaultAddress)));
+				return Promise.all(chainVaults.map(({vaultAddress}) => tryIsVaultEndorsed(chainId, vaultAddress)));
 			}
 		})
 	);
@@ -159,6 +161,9 @@ export async function checkVaultsEndorsement(
 	for (const [batchIndex, values] of batches.entries()) {
 		const [, chainVaults] = Array.from(vaultsByChain.entries())[batchIndex];
 		values.forEach((isEndorsed, index) => {
+			if (isEndorsed === undefined) {
+				return;
+			}
 			endorsementMap.set(
 				`${chainVaults[index].chainId}:${chainVaults[index].vaultAddress.toLowerCase()}`,
 				isEndorsed

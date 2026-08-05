@@ -70,7 +70,7 @@ CHAIN_CONFIG = {
         'name': 'Ethereum',
         'rpc_env': 'RPC_URL_ETHEREUM',
         'fallback_rpcs': [
-            'https://mainnet.gateway.tenderly.co/3V34wr9LQ5X3HupEWCw8kg',
+            'https://gateway.tenderly.co/public/mainnet',
             'https://eth.llamarpc.com',
             'https://rpc.ankr.com/eth',
             'https://ethereum.publicnode.com',
