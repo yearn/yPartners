@@ -1,5 +1,5 @@
 import {createContext, useContext, useEffect, useMemo, useState}	from 'react';
-import {PARTNER_ADDRESS_GROUPS, PARTNER_VAULT_CONFIG, PARTNERS, DEFAULT_FEE_START_DATE, DEFAULT_PROFIT_SHARE, SHAREABLE_ADDRESSES, VAULT_WHITELIST} from 'utils/Partners';
+import {PARTNER_ADDRESS_GROUPS, PARTNER_VAULT_CONFIG, PARTNERS, DEFAULT_FEE_START_DATE, SHAREABLE_ADDRESSES, VAULT_WHITELIST} from 'utils/Partners';
 import useSWR from 'swr';
 import {baseFetcher} from 'lib/yearn/utils/fetchers';
 import {toAddress} from 'lib/yearn/utils/address';
@@ -77,7 +77,6 @@ type TPartnerTVLResponse = {
 
 type TChartSnapshot = {
 	block: number,
-	timestamp: number,
 	shares: number,
 	profit: number,
 	feeSplit: number
@@ -142,8 +141,15 @@ type TPartnerAssetResponse = {
 	assetSymbol: string | null;
 };
 
-function buildPartnerAssetUrl(combo: TVaultCombo): string {
-	return `/api/vault-asset?vaultAddress=${combo.vaultAddress}&chainId=${combo.chainId}`;
+type TPartnerAssetsResponse = {
+	vaults: TPartnerAssetResponse[];
+};
+
+function buildPartnerAssetsUrl(combos: TVaultCombo[]): string {
+	const vaults = combos
+		.map((combo): string => `${combo.chainId}:${combo.vaultAddress}`)
+		.join(',');
+	return `/api/vault-assets?vaults=${encodeURIComponent(vaults)}`;
 }
 
 type TAPIError = {
@@ -169,8 +175,8 @@ function buildPartnerTVLUrl(combo: TVaultCombo): string {
 	return `/api/partner-tvl?addresses=${combo.addresses.join(',')}&vaultAddress=${combo.vaultAddress}&chainId=${combo.chainId}`;
 }
 
-function buildPartnerFeesUrl(combo: TVaultCombo, windowDays: number | undefined, includeSnapshots: boolean, feeStartSeconds?: number, profitShare?: number): string {
-	return `/api/partner-fees?addresses=${combo.addresses.join(',')}&vaultAddress=${combo.vaultAddress}&chainId=${combo.chainId}${windowDays ? `&days=${windowDays}` : ''}${feeStartSeconds ? `&feeStart=${feeStartSeconds}` : ''}${profitShare ? `&profitShare=${profitShare}` : ''}&includeSnapshots=${includeSnapshots ? 'true' : 'false'}`;
+function buildPartnerFeesUrl(combo: TVaultCombo, windowDays: number | undefined, includeSnapshots: boolean, feeStartSeconds?: number): string {
+	return `/api/partner-fees?addresses=${combo.addresses.join(',')}&vaultAddress=${combo.vaultAddress}&chainId=${combo.chainId}${windowDays ? `&days=${windowDays}` : ''}${feeStartSeconds ? `&feeStart=${feeStartSeconds}` : ''}&includeSnapshots=${includeSnapshots ? 'true' : 'false'}`;
 }
 
 export const PartnerContextApp = ({
@@ -189,7 +195,7 @@ export const PartnerContextApp = ({
 
 	// Fetch dynamic referral data for partners with dynamic vault config
 	const shouldFetchReferrals = !isSSR && isDynamicPartner && partnerID;
-	const {data: referralConfigResult, isLoading: isLoadingReferrals} = useSWR<TPartnerReferralConfig | TAPIError>(
+	const {data: referralConfigResult, error: referralRequestError, isLoading: isLoadingReferrals} = useSWR<TPartnerReferralConfig | TAPIError>(
 		shouldFetchReferrals ? ['partner-referrals', partnerID] : null,
 		async (): Promise<TPartnerReferralConfig | TAPIError> =>
 			baseFetcher<TPartnerReferralConfig | TAPIError>(`/api/partner-referrals?referrer=${partnerID}`),
@@ -399,15 +405,14 @@ export const PartnerContextApp = ({
 			.join('|');
 	}, [vaultCombos]);
 
-	const {data: vaultAssetResults, isLoading: isLoadingVaultAssets} = useSWR<(TPartnerAssetResponse | TAPIError)[]>(
+	const {data: vaultAssetsResult, error: vaultAssetsRequestError, isLoading: isLoadingVaultAssets} = useSWR<TPartnerAssetsResponse | TAPIError>(
 		!isSSR && vaultCombos.length > 0 ? ['vault-assets', vaultAssetIdentityKey] : null,
-		async (): Promise<(TPartnerAssetResponse | TAPIError)[]> => Promise.all(
-			vaultCombos.map((combo) => baseFetcher<TPartnerAssetResponse | TAPIError>(buildPartnerAssetUrl(combo)))
-		),
+		async (): Promise<TPartnerAssetsResponse | TAPIError> =>
+			baseFetcher<TPartnerAssetsResponse | TAPIError>(buildPartnerAssetsUrl(vaultCombos)),
 		{revalidateOnFocus: false}
 	);
 
-	const {data: tvlResults, isLoading: isLoadingDepositorTVL} = useSWR<(TPartnerTVLResponse | TAPIError)[]>(
+	const {data: tvlResults, error: tvlRequestError, isLoading: isLoadingDepositorTVL} = useSWR<(TPartnerTVLResponse | TAPIError)[]>(
 		shouldFetchCombos ? ['partner-tvl', comboIdentityKey] : null,
 		async (): Promise<(TPartnerTVLResponse | TAPIError)[]> => Promise.all(
 			activeCombos.map((combo) => baseFetcher<TPartnerTVLResponse | TAPIError>(buildPartnerTVLUrl(combo)))
@@ -415,16 +420,16 @@ export const PartnerContextApp = ({
 		{revalidateOnFocus: false}
 	);
 
-	const {data: feesResults, isLoading: isLoadingDepositorFees} = useSWR<(TPartnerFeesResponse | TAPIError)[]>(
-		shouldFetchCombos ? ['partner-fees', comboIdentityKey, windowDays, feeStartTimestamp, DEFAULT_PROFIT_SHARE] : null,
+	const {data: feesResults, error: feesRequestError, isLoading: isLoadingDepositorFees} = useSWR<(TPartnerFeesResponse | TAPIError)[]>(
+		shouldFetchCombos ? ['partner-fees', comboIdentityKey, windowDays, feeStartTimestamp] : null,
 		async (): Promise<(TPartnerFeesResponse | TAPIError)[]> => Promise.all(
-			activeCombos.map((combo) => baseFetcher<TPartnerFeesResponse | TAPIError>(buildPartnerFeesUrl(combo, windowDays, true, feeStartTimestamp, DEFAULT_PROFIT_SHARE)))
+			activeCombos.map((combo) => baseFetcher<TPartnerFeesResponse | TAPIError>(buildPartnerFeesUrl(combo, windowDays, true, feeStartTimestamp)))
 		),
 		{revalidateOnFocus: false}
 	);
 
-	const tvlCalls = tvlResults ?? [];
-	const feesCalls = feesResults ?? [];
+	const tvlCalls = useMemo((): (TPartnerTVLResponse | TAPIError)[] => tvlResults ?? [], [tvlResults]);
+	const feesCalls = useMemo((): (TPartnerFeesResponse | TAPIError)[] => feesResults ?? [], [feesResults]);
 	const activeComboKeys = useMemo((): Set<string> => {
 		return new Set(activeCombos.map((combo) => getComboKey(combo)));
 	}, [activeCombos]);
@@ -448,16 +453,17 @@ export const PartnerContextApp = ({
 		});
 		return map;
 	}, [activeCombos, feesCalls]);
-	const vaultAssetCallsByKey = useMemo((): Map<string, TPartnerAssetResponse | TAPIError> => {
-		const map = new Map<string, TPartnerAssetResponse | TAPIError>();
-		vaultCombos.forEach((combo, idx): void => {
-			const call = vaultAssetResults?.[idx];
-			if (call) {
-				map.set(getComboKey(combo), call);
-			}
+	const vaultAssetCallsByKey = useMemo((): Map<string, TPartnerAssetResponse> => {
+		const map = new Map<string, TPartnerAssetResponse>();
+		if (!vaultAssetsResult || isAPIError(vaultAssetsResult)) {
+			return map;
+		}
+
+		vaultAssetsResult.vaults.forEach((asset): void => {
+			map.set(`${asset.chainId}:${asset.vaultAddress.toLowerCase()}`, asset);
 		});
 		return map;
-	}, [vaultAssetResults, vaultCombos]);
+	}, [vaultAssetsResult]);
 
 	const isLoadingVaults = useMemo((): boolean => {
 		if (isSSR) {
@@ -656,10 +662,17 @@ export const PartnerContextApp = ({
 				errors.push(item.error);
 			}
 		};
+		const pushRequestError = (requestError: unknown): void => {
+			const message = requestError instanceof Error ? requestError.message : null;
+			if (message && !errors.includes(message)) {
+				errors.push(message);
+			}
+		};
 		tvlCalls.forEach(pushError);
 		feesCalls.forEach(pushError);
+		[referralRequestError, vaultAssetsRequestError, tvlRequestError, feesRequestError].forEach(pushRequestError);
 		return errors;
-	}, [tvlCalls, feesCalls]);
+	}, [feesCalls, feesRequestError, referralRequestError, tvlCalls, tvlRequestError, vaultAssetsRequestError]);
 
 	const userCount = useMemo((): number | undefined => {
 		if (depositorAddresses.length === 0) {

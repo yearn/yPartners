@@ -6,7 +6,9 @@ import {defineConfig} from 'vitest/config';
 export default defineConfig({
 	resolve: {
 		alias: {
-			lib: resolve(__dirname, 'lib')
+			lib: resolve(__dirname, 'lib'),
+			utils: resolve(__dirname, 'utils'),
+			components: resolve(__dirname, 'components')
 		}
 	},
 	test: {

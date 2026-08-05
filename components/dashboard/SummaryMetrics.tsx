@@ -1,3 +1,4 @@
+import {PARTNER_FEE_SHARE} from 'lib/yearn/partnerFeeShare';
 import {formatAmount} from 'lib/yearn/utils/format.number';
 
 import type {ReactElement} from 'react';
@@ -6,16 +7,17 @@ type TProps = {
 	tvlOverride?: number,
 	userCount?: number,
 	feesOverride?: number,
+	isLoadingTVL?: boolean,
 	isLoadingFees?: boolean,
 }
 
 function SummaryMetrics(props: TProps): ReactElement {
-	const {tvlOverride, userCount, feesOverride, isLoadingFees} = props;
+	const {tvlOverride, userCount, feesOverride, isLoadingTVL, isLoadingFees} = props;
 
 	const hasUserCount = typeof userCount === 'number';
 	const tvlValue = tvlOverride ?? 0;
 	const feeValue = feesOverride ?? 0;
-	const earningsValue = Math.ceil(feeValue * 50) / 100; // 50% of fees, rounded up to 2 decimals
+	const earningsValue = Math.ceil(feeValue * PARTNER_FEE_SHARE * 100) / 100;
 
 	return (
 		<div>
@@ -23,7 +25,11 @@ function SummaryMetrics(props: TProps): ReactElement {
 				<div>
 					<p>{'Contributed TVL'}</p>
 					<b className={'text-2xl tabular-nums'}>
-						{'$ '}{formatAmount(tvlValue)}
+						{isLoadingTVL ? (
+							<span className={'text-neutral-400'}>{'Loading...'}</span>
+						) : (
+							`$ ${formatAmount(tvlValue)}`
+						)}
 					</b>
 				</div>
 
@@ -62,7 +68,11 @@ function SummaryMetrics(props: TProps): ReactElement {
 					<div className={'mb-5'}>
 						<p>{'Contributed TVL'}</p>
 						<b className={'text-2xl tabular-nums'}>
-							{'$ '}{formatAmount(tvlValue)}
+							{isLoadingTVL ? (
+								<span className={'text-neutral-400'}>{'Loading...'}</span>
+							) : (
+								`$ ${formatAmount(tvlValue)}`
+							)}
 						</b>
 					</div>
 

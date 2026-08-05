@@ -203,7 +203,6 @@ const LOGOS: TPartnerLogo = {
 	alchemix: <img src="/partner-logos/AlchemixMark_01.svg" alt="Alchemix" className="h-3/4 w-3/4 object-contain" />
 };
 
-const DEFAULT_PROFIT_SHARE = 0.5;
 
 // Date from which fee splitting/accrual begins for a partner. Deposits and
 // vault activity before this date are visible on the chart but earn no fees.
@@ -217,7 +216,6 @@ export {
 	SHAREABLE_ADDRESSES,
 	PARTNER_ADDRESS_GROUPS,
 	PARTNER_VAULT_CONFIG,
-	DEFAULT_PROFIT_SHARE,
 	VAULT_WHITELIST
 };
 export type {TVaultConfig, TChainConfig, TPartnerVaultConfig};

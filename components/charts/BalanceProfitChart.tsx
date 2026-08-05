@@ -1,11 +1,20 @@
 import {useMemo} from 'react';
-import {ComposedChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ReferenceLine} from 'recharts';
+import {ComposedChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer} from 'recharts';
+import {formatAmount} from 'lib/yearn/utils/format.number';
 
 import type {ReactElement} from 'react';
 
+// Compact tick formatters keep axis labels short so stacked right-side axes stay readable.
+const SHARES_TICK_FORMATTER = new Intl.NumberFormat('en-US', {notation: 'compact', maximumFractionDigits: 1});
+const USD_TICK_FORMATTER = new Intl.NumberFormat('en-US', {
+	style: 'currency',
+	currency: 'USD',
+	notation: 'compact',
+	maximumFractionDigits: 1
+});
+
 type TChartSnapshot = {
 	block: number;
-	timestamp: number;
 	shares: number;
 	profit: number;
 	feeSplit: number;
@@ -15,9 +24,10 @@ type TProps = {
 	snapshots: TChartSnapshot[];
 	isLoading: boolean;
 	feeStartTimestamp?: number;
+	windowDays: number;
 };
 
-// Format a snapshot timestamp (Unix seconds) as "July 4, 2026".
+// Format a timestamp as "July 4, 2026".
 function formatChartDate(timestamp: number): string {
 	if (!timestamp) {
 		return '';
@@ -30,24 +40,17 @@ function formatChartDate(timestamp: number): string {
 	});
 }
 
-// Format a snapshot timestamp as "July 4, 2026 14:52 UTC".
-function formatChartDateTime(timestamp: number): string {
-	if (!timestamp) {
-		return '';
-	}
-	const date = new Date(timestamp * 1000);
-	const datePart = date.toLocaleString('en-US', {
-		month: 'long',
-		day: 'numeric',
-		year: 'numeric',
-		timeZone: 'UTC',
-	});
-	const hh = String(date.getUTCHours()).padStart(2, '0');
-	const mm = String(date.getUTCMinutes()).padStart(2, '0');
-	return `${datePart} ${hh}:${mm} UTC`;
+// Generate endpoint labels from the selected window without historical RPC data.
+function formatChartWindowDate(block: number, firstBlock: number, lastBlock: number, windowDays: number): string {
+	const progress = firstBlock === lastBlock
+		? 1
+		: Math.min(1, Math.max(0, (block - firstBlock) / (lastBlock - firstBlock)));
+	const elapsedDays = Math.round(progress * windowDays);
+	const timestamp = Math.floor(Date.now() / 1000) - ((windowDays - elapsedDays) * 86400);
+	return formatChartDate(timestamp);
 }
 
-function BalanceProfitChart({snapshots, isLoading, feeStartTimestamp}: TProps): ReactElement {
+function BalanceProfitChart({snapshots, isLoading, feeStartTimestamp, windowDays}: TProps): ReactElement {
 	// Sample data if there are too many points (performance optimization)
 	const chartData = useMemo(() => {
 		if (snapshots.length <= 300) {
@@ -66,6 +69,8 @@ function BalanceProfitChart({snapshots, isLoading, feeStartTimestamp}: TProps): 
 	// Only draw the partner fee-split line when there is accrued fee to show
 	// (e.g. skip vaults whose performance fee isn't active yet).
 	const hasFeeSplit = chartData.some((d) => d.feeSplit > 0);
+	const firstBlock = chartData[0]?.block ?? 0;
+	const lastBlock = chartData[chartData.length - 1]?.block ?? firstBlock;
 
 	if (snapshots.length === 0) {
 		return (
@@ -90,36 +95,31 @@ function BalanceProfitChart({snapshots, isLoading, feeStartTimestamp}: TProps): 
 				</p>
 			) : null}
 			<ResponsiveContainer width={'100%'} height={400}>
-				<ComposedChart data={chartData} margin={{top: 10, right: 80, left: 0, bottom: 0}}>
+				<ComposedChart data={chartData} margin={{top: 10, right: 8, left: 0, bottom: 0}}>
 					<CartesianGrid strokeDasharray={'3 3'} stroke={'#e5e7eb'} />
 					<XAxis
-						dataKey={'timestamp'}
+						dataKey={'block'}
 						type={'number'}
 						domain={['dataMin', 'dataMax']}
-						ticks={[chartData[0].timestamp, chartData[chartData.length - 1].timestamp]}
-						tickFormatter={(ts: number): string => formatChartDate(ts)}
+						ticks={[firstBlock, lastBlock]}
+						tickFormatter={(block: number): string => formatChartWindowDate(block, firstBlock, lastBlock, windowDays)}
 						tick={{fontSize: 12}}
 						stroke={'#6b7280'}
 					/>
-					{feeStartTimestamp && feeStartTimestamp > 0 &&
-						chartData[0].timestamp <= feeStartTimestamp &&
-						feeStartTimestamp <= chartData[chartData.length - 1].timestamp && (
-						<ReferenceLine
-							yAxisId={'left'}
-							stroke={'#ef4444'}
-							strokeWidth={2}
-							label={{value: `Fee start ${formatChartDate(feeStartTimestamp)}`, position: 'top', fill: '#ef4444', fontSize: 11}} />
-					)}
 					<YAxis
 						yAxisId={'left'}
-						label={{value: 'Shares', angle: -90, position: 'insideLeft'}}
+						width={70}
+						label={{value: 'Shares', angle: -90, position: 'insideLeft', offset: 10, fill: '#3b82f6'}}
+						tickFormatter={(value: number): string => SHARES_TICK_FORMATTER.format(value)}
 						tick={{fontSize: 12}}
 						stroke={'#3b82f6'}
 					/>
 					<YAxis
 						yAxisId={'right'}
 						orientation={'right'}
-						label={{value: 'Profit (USD)', angle: 90, position: 'insideRight'}}
+						width={84}
+						label={{value: 'Profit (USD)', angle: 90, position: 'insideRight', offset: 14, fill: '#10b981'}}
+						tickFormatter={(value: number): string => USD_TICK_FORMATTER.format(value)}
 						tick={{fontSize: 12}}
 						stroke={'#10b981'}
 					/>
@@ -127,7 +127,9 @@ function BalanceProfitChart({snapshots, isLoading, feeStartTimestamp}: TProps): 
 						<YAxis
 							yAxisId={'fee'}
 							orientation={'right'}
-							label={{value: 'Fee (USD)', angle: 90, position: 'insideRight', offset: 25}}
+							width={84}
+							label={{value: 'Fee (USD)', angle: 90, position: 'insideRight', offset: 14, fill: '#ef4444'}}
+							tickFormatter={(value: number): string => USD_TICK_FORMATTER.format(value)}
 							tick={{fontSize: 12}}
 							stroke={'#ef4444'}
 						/>
@@ -142,11 +144,11 @@ function BalanceProfitChart({snapshots, isLoading, feeStartTimestamp}: TProps): 
 						labelStyle={{fontWeight: 'bold', marginBottom: '0.25rem'}}
 						formatter={(value: number, name: string) => {
 							if (name === 'Shares') {
-								return [value.toFixed(2), 'Shares'];
+								return [formatAmount(value, 2, 2), 'Shares'];
 							}
-						return [`$${value.toFixed(2)}`, name];
+							return [`$${formatAmount(value, 2, 2)}`, name];
 						}}
-						labelFormatter={(label: number): string => formatChartDateTime(label)}
+						labelFormatter={(block: number): string => `Block: ${block}`}
 					/>
 					<Legend
 						wrapperStyle={{paddingTop: '1rem'}}

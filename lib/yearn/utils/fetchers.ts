@@ -7,9 +7,12 @@ export async function baseFetcher<TReturn = JSONValue>(url: string): Promise<TRe
 		const response = await fetch(url);
 
 		if (!response.ok) {
-			const error = `Failed to fetch ${url}: ${response.status} ${response.statusText}`;
-			console.error('[baseFetcher] Error:', error);
-			throw new Error(error);
+			const body = await response.json().catch((): null => null) as {error?: unknown} | null;
+			const errorMessage = typeof body?.error === 'string'
+				? body.error
+				: `Failed to fetch ${url}: ${response.status} ${response.statusText}`;
+			console.error('[baseFetcher] Error:', errorMessage);
+			throw new Error(errorMessage);
 		}
 
 		const data = await response.json() as Promise<TReturn>;

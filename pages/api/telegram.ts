@@ -64,7 +64,11 @@ export default async function handler(request: NextApiRequest, response: NextApi
 	const {name, tguser, protocol, website, message, turnstileToken} = request.body || {};
 
 	const turnstileSecret = process.env.CLOUDFLARE_TURNSTILE_SECRET;
-	if (turnstileSecret && turnstileToken) {
+	if (turnstileSecret) {
+		if (typeof turnstileToken !== 'string' || turnstileToken.trim() === '') {
+			return response.status(400).json({success: false, error: 'Verification is required'});
+		}
+
 		try {
 			const verifyResponse = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
 				method: 'POST',
@@ -75,12 +79,16 @@ export default async function handler(request: NextApiRequest, response: NextApi
 				})
 			});
 
+			if (!verifyResponse.ok) {
+				return response.status(503).json({success: false, error: 'Verification service unavailable'});
+			}
+
 			const verifyResult = await verifyResponse.json() as {success: boolean};
 			if (!verifyResult.success) {
 				return response.status(403).json({success: false, error: 'Verification failed'});
 			}
 		} catch {
-			// Turnstile unavailable — fail open
+			return response.status(503).json({success: false, error: 'Verification service unavailable'});
 		}
 	}
 

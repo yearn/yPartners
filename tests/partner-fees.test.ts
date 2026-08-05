@@ -6,6 +6,7 @@ import {
 	calculateIncrementalProfitAndFees,
 	getCurrentPricePerShare,
 	getEffectiveFeeCutoff,
+	getMillisecondsPerBlock,
 	getPerformanceFeeBps,
 	prepareChartSnapshots
 } from '../pages/api/partner-fees';
@@ -86,7 +87,7 @@ describe('partner fee accrual', (): void => {
 		]);
 	});
 
-	it('seeds a short chart window with balances from older deposits', async (): Promise<void> => {
+	it('seeds a short chart window without timestamp RPCs', async (): Promise<void> => {
 		const scale = BigNumber.from(10).pow(6);
 		const shares = scale.mul(100);
 		const provider = {
@@ -97,9 +98,6 @@ describe('partner fee accrual', (): void => {
 				}
 				return scale.toHexString();
 			},
-			getBlock: async (block: number): Promise<{timestamp: number}> => ({
-				timestamp: block * 100
-			}),
 			getBlockNumber: async (): Promise<number> => 300
 		} as unknown as ethers.providers.JsonRpcProvider;
 
@@ -112,10 +110,67 @@ describe('partner fee accrual', (): void => {
 			'0x0000000000000000000000000000000000000001',
 			1,
 			provider,
-			200
+			200,
+			null,
+			0,
+			1000
 		);
 
 		expect(chart.map((snapshot) => snapshot.shares)).toEqual([100, 100]);
+	});
+
+	it('anchors the partner fee line at zero until the accrual start', async (): Promise<void> => {
+		// Frankencoin scenario: a position exists before the fee start date and
+		// no events occur after it. The chart must stay flat at zero until the
+		// accrual cutoff block instead of drawing a straight diagonal from the
+		// window origin to today's accrued fee.
+		const scale = BigNumber.from(10).pow(18);
+		const shares = scale.mul(100);
+		const ppsByBlock = new Map<number, BigNumber>([
+			[100, scale],
+			[200, scale.mul(11).div(10)]
+		]);
+		const provider = {
+			connection: {url: 'fee-accrual-anchor-regression'},
+			call: async (_request: unknown, block?: number): Promise<string> => {
+				const pps = block === undefined ? undefined : ppsByBlock.get(block);
+				if (!pps) {
+					throw new Error(`Missing PPS fixture for block ${block}`);
+				}
+				return pps.toHexString();
+			},
+			getBlockNumber: async (): Promise<number> => 300
+		} as unknown as ethers.providers.JsonRpcProvider;
+
+		const chart = await prepareChartSnapshots(
+			provider,
+			[{blockNumber: 100, eventType: 'deposit', sharesBalance: shares}],
+			18,
+			scale.mul(13).div(10),
+			shares,
+			'0x0000000000000000000000000000000000000001',
+			1,
+			provider,
+			100, // plotCutoff: window start
+			200, // accrualCutoff: fee start date
+			1000, // performanceFeeBps
+			0, // managementFeeBps
+			300 // currentBlock
+		);
+
+		// A zero-fee anchor exists exactly at the accrual start block.
+		const anchor = chart.find((snapshot) => snapshot.block === 200);
+		expect(anchor).toBeDefined();
+		expect(anchor?.feeSplit).toBe(0);
+
+		// Every point before the accrual start is clamped to zero fees.
+		const preAccrual = chart.filter((snapshot) => snapshot.block < 200);
+		expect(preAccrual.length).toBeGreaterThan(0);
+		expect(preAccrual.every((snapshot) => snapshot.feeSplit === 0)).toBe(true);
+
+		// The fixed 50% partner share yields half of the computed $2.222… fee.
+		expect(chart[chart.length - 1].feeSplit).toBeCloseTo(1.1111111111111112, 6);
+		expect(anchor?.profit).toBeCloseTo(10, 6);
 	});
 
 	it('accepts a standard accountant with a non-zero management fee', async (): Promise<void> => {
@@ -145,12 +200,17 @@ describe('partner fee accrual', (): void => {
 		).resolves.toBe(1000);
 	});
 
-	it('accrues management fees on the partner position over time', async (): Promise<void> => {
+	it('accrues management fees from average block time without timestamp RPCs', async (): Promise<void> => {
 		const scale = BigNumber.from(10).pow(18);
 		const shares = scale.mul(100);
 		const year = 31_556_952;
-		const pps = new Map<number, BigNumber>([[100, scale], [200, scale], [300, scale]]);
-		const timestamps = new Map<number, number>([[100, 0], [200, year], [300, year * 2]]);
+		const blocksPerYear = year * 1000 / getMillisecondsPerBlock(1);
+		const firstYearBlock = 100 + blocksPerYear;
+		const currentBlock = 100 + blocksPerYear * 2;
+		const pps = new Map<number, BigNumber>([
+			[100, scale],
+			[firstYearBlock, scale],
+		]);
 		const provider = {
 			connection: {url: 'management-fee-regression'},
 			call: async (_request: unknown, block?: number): Promise<string> => {
@@ -159,26 +219,33 @@ describe('partner fee accrual', (): void => {
 					throw new Error(`Missing PPS fixture for block ${block}`);
 				}
 				return value.toHexString();
-			},
-			getBlock: async (block: number): Promise<{timestamp: number}> => ({
-				timestamp: timestamps.get(block) ?? 0
-			})
+			}
 		} as unknown as ethers.providers.JsonRpcProvider;
 
 		const result = await calculateIncrementalProfitAndFees(
 			provider,
-			[{blockNumber: 100, eventType: 'deposit', sharesBalance: shares}, {blockNumber: 300, eventType: 'deposit', sharesBalance: shares}],
+			[
+				{blockNumber: 100, eventType: 'deposit', sharesBalance: shares},
+				{blockNumber: firstYearBlock, eventType: 'deposit', sharesBalance: shares}
+			],
 			0,
 			scale,
 			18,
 			'0x0000000000000000000000000000000000000005',
-			200,
 			100,
-			year * 3
+			100,
+			currentBlock,
+			1
 		);
 
 		expect(result.netProfit.eq(0)).toBe(true);
 		expect(result.totalFees.eq(scale.mul(2))).toBe(true);
+	});
+
+	it('rejects unsupported chains instead of using an arbitrary block time', (): void => {
+		expect(() => getMillisecondsPerBlock(999999)).toThrow(
+			'Unsupported chain 999999'
+		);
 	});
 
 	it('reads performanceFee directly from legacy vaults without accountant()', async (): Promise<void> => {

@@ -4,6 +4,7 @@ import {getTokenPriceUsdWithDebug} from 'lib/crypto/defillama';
 import {getRpcUrlLatest} from 'lib/crypto/rpc';
 import {getTokenSymbol} from 'lib/crypto/tokenMetadata';
 import {getKongVaultMetadata} from 'lib/yearn/kong';
+import {aggregate3} from 'lib/yearn/multicall';
 import {toAddress} from 'lib/yearn/utils/address';
 
 type TAccountValue = {
@@ -36,6 +37,10 @@ const VAULT_ABI = [
 	'function decimals() view returns (uint8)',
 	'function asset() view returns (address)'
 ];
+
+const BALANCE_OF_INTERFACE = new ethers.utils.Interface([
+	'function balanceOf(address) view returns (uint256)'
+]);
 
 function	parseAddresses(addressParam: string | string[] | undefined): string[] {
 	if (!addressParam) {
@@ -93,6 +98,43 @@ function withTimeout<T>(promise: Promise<T>, label: string, timeoutMs: number = 
 	});
 }
 
+async function readVaultBalances(
+	provider: ethers.providers.JsonRpcProvider,
+	vaultContract: ethers.Contract,
+	vaultAddress: string,
+	addresses: string[]
+): Promise<BigNumber[]> {
+	try {
+		const results = await withTimeout(
+			aggregate3(
+				provider,
+				addresses.map((address) => ({
+					target: vaultAddress,
+					allowFailure: false,
+					callData: BALANCE_OF_INTERFACE.encodeFunctionData('balanceOf', [address])
+				}))
+			),
+			'multicall.balanceOf'
+		);
+
+		if (results.length !== addresses.length || results.some(({success}) => !success)) {
+			throw new Error('Multicall balanceOf response was incomplete');
+		}
+
+		return results.map(({returnData}): BigNumber => {
+			const [shares] = BALANCE_OF_INTERFACE.decodeFunctionResult('balanceOf', returnData);
+			return shares;
+		});
+	} catch (error) {
+		console.warn('[partner-tvl] Multicall balanceOf failed, falling back to direct reads', error);
+		const balances: BigNumber[] = [];
+		for (const address of addresses) {
+			balances.push(await withTimeout(vaultContract.balanceOf(address), 'vault.balanceOf'));
+		}
+		return balances;
+	}
+}
+
 export default async function handler(req: NextApiRequest, res: NextApiResponse<TResponseBody>): Promise<void> {
 	if (req.method !== 'GET') {
 		res.setHeader('Allow', 'GET');
@@ -118,8 +160,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
 	}
 
 	if (!rpcUrl) {
-		console.warn(`[partner-tvl] No RPC URL for chain ${chainId}, returning empty payload`);
-		res.status(200).json(buildEmptyResponse(addresses, vaultAddress));
+		const error = `No RPC URL configured for chain ${chainId}.`;
+		console.warn(`[partner-tvl] ${error}`);
+		res.status(503).json({error});
 		return;
 	}
 
@@ -163,61 +206,54 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
 			throw new Error('Missing vault metadata');
 		}
 
-			let assetPriceUsd: number | undefined;
-			let assetSymbol: string | undefined;
-			let pricingDebugDetails = '';
-			if (assetAddress.toLowerCase() !== ZERO_ADDRESS.toLowerCase()) {
-				const [priceResult, symbolResult] = await Promise.allSettled([
-					withTimeout(getTokenPriceUsdWithDebug(chainId, assetAddress), 'getTokenPriceUsd'),
-					withTimeout(getTokenSymbol(provider, assetAddress), 'getTokenSymbol')
-				]);
-				if (priceResult.status === 'fulfilled') {
-					const lookup = priceResult.value;
-					assetPriceUsd = typeof lookup.price === 'number' ? lookup.price : undefined;
-					if (assetPriceUsd === undefined) {
-						const message = lookup.message ? lookup.message.replace(/"/g, '\'') : undefined;
-						const details = [
-							lookup.reason ? `reason=${lookup.reason}` : undefined,
-							typeof lookup.status === 'number' ? `status=${lookup.status}` : undefined,
-							message ? `message="${message}"` : undefined
-						].filter(Boolean);
-						pricingDebugDetails = details.join(' ');
-					}
-				} else {
-					const errorMessage = priceResult.reason instanceof Error ? priceResult.reason.message : String(priceResult.reason);
-					pricingDebugDetails = `reason=request_failed message="${errorMessage.replace(/"/g, '\'')}"`;
+		let assetPriceUsd: number | undefined;
+		let assetSymbol: string | undefined;
+		let pricingDebugDetails = '';
+		if (assetAddress.toLowerCase() !== ZERO_ADDRESS.toLowerCase()) {
+			const [priceResult, symbolResult] = await Promise.allSettled([
+				withTimeout(getTokenPriceUsdWithDebug(chainId, assetAddress), 'getTokenPriceUsd'),
+				withTimeout(getTokenSymbol(provider, assetAddress), 'getTokenSymbol')
+			]);
+			if (priceResult.status === 'fulfilled') {
+				const lookup = priceResult.value;
+				assetPriceUsd = typeof lookup.price === 'number' ? lookup.price : undefined;
+				if (assetPriceUsd === undefined) {
+					const message = lookup.message ? lookup.message.replace(/"/g, '\'') : undefined;
+					const details = [
+						lookup.reason ? `reason=${lookup.reason}` : undefined,
+						typeof lookup.status === 'number' ? `status=${lookup.status}` : undefined,
+						message ? `message="${message}"` : undefined
+					].filter(Boolean);
+					pricingDebugDetails = details.join(' ');
 				}
-				assetSymbol = symbolResult.status === 'fulfilled' ? (symbolResult.value ?? undefined) : undefined;
 			} else {
-				assetSymbol = 'Unknown token';
+				const errorMessage = priceResult.reason instanceof Error ? priceResult.reason.message : String(priceResult.reason);
+				pricingDebugDetails = `reason=request_failed message="${errorMessage.replace(/"/g, '\'')}"`;
 			}
-			if (assetPriceUsd === undefined) {
-				const errorMessage = `Unable to resolve USD price for asset ${assetAddress} on chain ${chainId}${pricingDebugDetails ? ` (${pricingDebugDetails})` : ''}`;
-				console.warn(`[partner-tvl] ${errorMessage}`);
-				res.status(200).json({
-					error: errorMessage
-				});
-				return;
-			}
+			assetSymbol = symbolResult.status === 'fulfilled' ? (symbolResult.value ?? undefined) : undefined;
+		} else {
+			assetSymbol = 'Unknown token';
+		}
+		if (assetPriceUsd === undefined) {
+			const errorMessage = `Unable to resolve USD price for asset ${assetAddress} on chain ${chainId}${pricingDebugDetails ? ` (${pricingDebugDetails})` : ''}`;
+			console.warn(`[partner-tvl] ${errorMessage}`);
+			res.status(503).json({error: errorMessage});
+			return;
+		}
 		const priceUsd = assetPriceUsd;
 		const divisor = BigNumber.from(10).pow(decimals);
-		const accounts: TAccountValue[] = [];
-
-		for (const address of addresses) {
-			const shares: BigNumber = await withTimeout(
-				vaultContract.balanceOf(address),
-				'vault.balanceOf'
-			);
+		const balances = await readVaultBalances(provider, vaultContract, vaultAddress, addresses);
+		const accounts = addresses.map((address, index): TAccountValue => {
+			const shares = balances[index];
 			const currentValue = shares.mul(pricePerShare).div(divisor);
 
-			accounts.push({
+			return {
 				address,
 				shares: shares.toString(),
 				currentValue: currentValue.toString(),
 				currentValueNormalized: Number(ethers.utils.formatUnits(currentValue, decimals)) * priceUsd
-			});
-		}
-
+			};
+		});
 		const totalCurrentValue = accounts.reduce((acc, {currentValue}): BigNumber => {
 			return acc.add(BigNumber.from(currentValue));
 		}, BigNumber.from(0));
@@ -235,6 +271,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
 		});
 	} catch (error) {
 		console.error('[partner-tvl] Failed to fetch balances', error);
-		res.status(200).json(buildEmptyResponse(addresses, vaultAddress));
+		res.status(503).json({
+			error: 'Unable to fetch vault balances.'
+		});
 	}
 }
