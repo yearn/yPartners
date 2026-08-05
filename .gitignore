@@ -35,6 +35,7 @@ pnpm-debug.log*
 
 # TypeScript incremental artifacts
 *.tsbuildinfo
+next-env.d.ts
 
 # Tooling caches
 .eslintcache

@@ -48,6 +48,21 @@ function shortenAddress(address: string): string {
 	return `${address.slice(0, 6)}…${address.slice(-4)}`;
 }
 
+type TActivityAccount = {
+	currentSharesNormalized: number;
+	totalFeesNormalized: number;
+};
+
+export function hasVaultActivity(
+	tvlValue: number | undefined,
+	feesValue: number | undefined,
+	accountFees: readonly TActivityAccount[]
+): boolean {
+	return (tvlValue ?? 0) > 0 ||
+		(feesValue ?? 0) > 0 ||
+		accountFees.some((account) => account.currentSharesNormalized > 0 || account.totalFeesNormalized > 0);
+}
+
 type TVaultOptionLabelProps = {
 	tokenLogoSrc: string | null;
 	assetSymbol: string;
@@ -77,12 +92,12 @@ const VaultOptionLabel = memo(function VaultOptionLabel({
 	);
 });
 
-function	DashboardTabsWrapper({partnerID: _partnerID, onWindowChange}: {partnerID: string, onWindowChange: (value: number) => void}): ReactElement {
+function DashboardTabsContent({onWindowChange}: {onWindowChange: (value: number) => void}): ReactElement {
 	const {tvlOverride, userCount, feesOverride, isLoadingFees, isLoadingChart, chartSnapshots, accountFees, vaultComboData, apiErrors, selectedVaultKey, setSelectedVaultKey, feeStartTimestamp} = usePartner();
 	const [activeWindow, set_activeWindow] = useState('1 month');
+	const [hasObservedVaultActivity, setHasObservedVaultActivity] = useState(false);
 	const activeWindowDays = dataWindows.find((window) => window.name === activeWindow)?.value ?? 30;
 
-	void _partnerID;
 	const selectedCombo = vaultComboData.find((combo) => combo.key === selectedVaultKey);
 	const selectedTvl = selectedCombo?.tvl?.totalCurrentValueNormalized;
 	const selectedFees = selectedCombo?.fees?.totalFeesNormalized;
@@ -91,12 +106,17 @@ function	DashboardTabsWrapper({partnerID: _partnerID, onWindowChange}: {partnerI
 	const selectedLoadingFees = selectedCombo ? selectedCombo.isLoadingFees : isLoadingFees;
 	const selectedLoadingChart = selectedCombo ? selectedCombo.isLoadingChart : isLoadingChart;
 	const selectedUserCount = selectedCombo ? selectedCombo.addresses.length : userCount;
-	const shouldShowVaultDropdown = vaultComboData.length > 0;
+	const displayedTvl = selectedCombo ? selectedTvl : tvlOverride;
+	const displayedFees = selectedCombo ? selectedFees : feesOverride;
+	const displayedAccountFees = selectedCombo ? selectedAccountFees : accountFees;
+	const hasCurrentVaultActivity = hasVaultActivity(displayedTvl, displayedFees, displayedAccountFees);
+	const hasPartnerVaultActivity = hasObservedVaultActivity || hasCurrentVaultActivity;
+	const shouldShowVaultDropdown = hasPartnerVaultActivity && vaultComboData.length > 0;
 	const isLoadingTVL = vaultComboData.some((combo) => combo.isLoadingTVL);
 	const selectedLoadingTVL = selectedCombo ? selectedCombo.isLoadingTVL : isLoadingTVL;
 	const isLoadingAssets = vaultComboData.some((combo) => combo.isLoadingAsset);
 	const isLoadingData = isLoadingFees || isLoadingChart || isLoadingTVL || isLoadingAssets;
-	const isEmptyState = !isLoadingData && vaultComboData.length === 0;
+	const isEmptyState = !isLoadingData && !hasPartnerVaultActivity;
 	const selectedTokenLogoSrc = getComboTokenLogoSrc(selectedCombo);
 	const selectedAssetSymbol = getComboAssetSymbol(selectedCombo) || 'Vault';
 	const selectedChainLabel = selectedCombo ? (NETWORK_LABELS[selectedCombo.chainId] || 'Chain') : '';
@@ -115,14 +135,21 @@ function	DashboardTabsWrapper({partnerID: _partnerID, onWindowChange}: {partnerI
 			onWindowChange(+value);
 		});
 	}
+
+	function handleVaultChange(value: string): void {
+		if (hasCurrentVaultActivity) {
+			setHasObservedVaultActivity(true);
+		}
+		setSelectedVaultKey(value);
+	}
 	return (
 		<div aria-label={'Vault Details'} className={'col-span-12 mb-4 flex flex-col bg-neutral-100'}>
 			{isLoadingData ? (
-				<div className={'mx-4 mt-6 rounded-lg border border-neutral-200 bg-white px-4 py-3 text-sm text-neutral-700 md:mx-8'}>
-					{'Loading vault data...'}
+				<div className={'mx-4 mt-6 rounded-lg border border-neutral-200 bg-white px-4 py-3 text-sm text-neutral-700 md:mx-8'} role={'status'}>
+					<p>{'Loading vault data...'}</p>
+					<p className={'mt-1 text-neutral-500'}>{'Initial loads may take longer while historical vault data is fetched and cached.'}</p>
 				</div>
 			) : null}
-
 			{isEmptyState ? (
 				<div className={'mx-4 mt-6 rounded-lg border border-neutral-200 bg-white px-4 py-3 text-sm text-neutral-700 md:mx-8'}>
 					{'No vault data available yet for this partner.'}
@@ -140,7 +167,7 @@ function	DashboardTabsWrapper({partnerID: _partnerID, onWindowChange}: {partnerI
 							<label className={'text-sm font-medium text-neutral-700'}>{'Vault'}</label>
 							<Listbox
 								value={selectedVaultKey}
-								onChange={(value: string): void => setSelectedVaultKey(value)}>
+								onChange={handleVaultChange}>
 								{({open}): ReactElement => (
 									<div className={'relative mt-2 w-full md:max-w-2xl'}>
 										<Listbox.Button
@@ -252,6 +279,10 @@ function	DashboardTabsWrapper({partnerID: _partnerID, onWindowChange}: {partnerI
 			</div>
 		</div>
 	);
+}
+
+function DashboardTabsWrapper({partnerID, onWindowChange}: {partnerID: string, onWindowChange: (value: number) => void}): ReactElement {
+	return <DashboardTabsContent key={partnerID} onWindowChange={onWindowChange} />;
 }
 
 export {DashboardTabsWrapper};

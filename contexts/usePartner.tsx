@@ -652,7 +652,9 @@ export const PartnerContextApp = ({
 			});
 		}
 
-		return filteredData;
+		// Endorsement and vault-kind lookups are advisory. A transient browser RPC
+		// failure must not erase every configured vault from an active partner.
+		return filteredData.length > 0 ? filteredData : allComboData;
 	}, [activeComboKeys, feesCallsByKey, tvlCallsByKey, vaultAssetCallsByKey, vaultCombos, isLoadingVaultAssets, isLoadingDepositorTVL, isLoadingDepositorFees, endorsementMap, vaultTypeMap]);
 
 	const apiErrors = useMemo((): string[] => {

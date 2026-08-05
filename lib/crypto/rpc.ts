@@ -13,7 +13,6 @@ const CHAIN_CONFIG: Record<number, TChainConfig> = {
 		publicEnvVar: 'RPC_URL_MAINNET_PUBLIC',
 		privateEnvVar: 'RPC_URL_MAINNET_PRIVATE',
 		fallbackRpcs: [
-			'https://mainnet.gateway.tenderly.co/3V34wr9LQ5X3HupEWCw8kg',
 			'https://gateway.tenderly.co/public/mainnet',
 			'https://rpc.ankr.com/eth',
 			'https://ethereum.publicnode.com',
