@@ -19,15 +19,12 @@ Marketing site and analytics dashboard for Yearn's partner program. The landing 
 Other scripts:
 - `pnpm lint` – run ESLint
 - `pnpm lintfix` – run ESLint with auto-fix
-- `pnpm build` – type-check and build for production
 - `pnpm start` – start the built app
-- `pnpm export` – generate a static export (if needed)
 
 ## Configuration
 
 - Public metadata is set in `pages/_app.tsx` (site name, description, theme color, OG image). Update those values to rebrand the site.
 - Runtime environment variables live in `.env`:
-  - `YVISION_BASE_URI` – legacy (currently unused; historical Yearn Vision base)
   - `ENVIO_GRAPHQL_URL` – required Envio HyperIndex GraphQL endpoint used by `/api/partner-fees` and `/api/partner-referrals` for multi-chain event data
   - `ENVIO_PASSWORD` – optional Bearer token for authenticated Envio requests
   - `KONG_GRAPHQL_URL` – optional Kong GraphQL endpoint for vault metadata (defaults to https://kong.yearn.fi/api/gql)
@@ -36,12 +33,11 @@ Other scripts:
   - `RPC_URL_ARBITRUM_PUBLIC`, `RPC_URL_ARBITRUM_PRIVATE` – preferred public/latest and private/archive RPCs
   - `RPC_URL_KATANA_PUBLIC`, `RPC_URL_KATANA_PRIVATE` – preferred public/latest and private/archive RPCs
   - `RPC_URL_MAINNET`, `RPC_URL_BASE`, `RPC_URL_ARBITRUM`, `RPC_URL_KATANA` – legacy fallback RPCs if the split envs are unset
-  - `NEXTAUTH_SECRET` – secret for NextAuth usage
   - Price data is fetched from DefiLlama (no API key required) to convert non-USD vault values to USD
   - `TELEGRAM_BOT`, `TELEGRAM_RECIPIENT_USERID` – required by `pages/api/telegram.ts` to deliver Team Up form submissions
   - `IP_TO_BLOCK` – optional comma-separated IPs to deny from the contact form
   - `REDIS_URL` – optional Redis URL (e.g. Upstash) for rate limiting contact form submissions (2 submissions per 30 minutes per IP)
-  - `CLOUDFLARE_TURNSTILE_SITE_KEY`, `CLOUDFLARE_TURNSTILE_SECRET` – optional Cloudflare Turnstile CAPTCHA for the contact form
+  - `CLOUDFLARE_TURNSTILE_SITE_KEY`, `CLOUDFLARE_TURNSTILE_SECRET` – optional Cloudflare Turnstile CAPTCHA pair. Configure both together; setting the secret requires every contact-form submission to include a valid Turnstile token.
 
 ## Pages
 
@@ -59,7 +55,8 @@ Other scripts:
 |---|---|---|
 | `/api/fees` | Edge | Proxies DefiLlama fees summary (30-day total) for the landing page |
 | `/api/vault-count` | Edge | Proxies yDaemon to count active V3 vaults for the landing page |
-| `/api/vault-asset` | Node | Returns vault asset address metadata (chain ID, vault address, asset address) |
+| `/api/vault-asset` | Node | Returns metadata for one vault; retained for single-vault consumers |
+| `/api/vault-assets` | Node | Returns batched vault asset metadata for `chainId:address` query pairs |
 | `/api/partner-tvl` | Node | Returns current vault balances and USD-denominated TVL for given depositor addresses |
 | `/api/partner-fees` | Node | Returns fee calculations (gross/net profit, performance fees, chart snapshots) using Envio events + RPC calls |
 | `/api/partner-referrals` | Node | Returns dynamic vault/depositor config from Envio ReferralDeposit events for a given referrer address |
@@ -70,7 +67,7 @@ Other scripts:
 Partner metadata (name, treasury address, logo) is defined in `utils/Partners.tsx`. The login modal expects a treasury address that maps to an entry in `PARTNERS`; successful login routes to `/dashboard/[partnerID]` where vault balances and payouts are fetched via:
 - `/api/partner-tvl`
 - `/api/partner-fees` (with optional time-window and chart snapshots)
-- `/api/vault-asset` (for vault metadata)
+- `/api/vault-assets` (batched vault metadata)
 
 These endpoints aggregate over the vault + depositor configuration in `PARTNER_VAULT_CONFIG` and return normalized totals, asset metadata, and per-account breakdowns.
 
@@ -79,7 +76,7 @@ These endpoints aggregate over the vault + depositor configuration in `PARTNER_V
 - **Multi-chain, multi-vault support**: Each partner can have vaults across Ethereum, Base, Arbitrum, and Katana, each tracking multiple depositor addresses.
 - **Dynamic referral partners**: Partners like Ceazor and Jumper have their vault/depositor config dynamically merged with Envio ReferralDeposit events at runtime, so new depositors are picked up automatically.
 - **Vault filtering**: Vaults are checked against Yearn endorsement status and vault-type detection (to exclude strategies from the dropdown). A `VAULT_WHITELIST` allows overriding the strategy filter for specific addresses.
-- **Fee calculation**: Fees are computed by replaying deposit/withdraw/transfer events from Envio, fetching historical price-per-share from archive RPCs, and applying the vault's performance fee rate.
+- **Fee calculation**: Fees are computed by replaying deposit/withdraw/transfer events from Envio and fetching historical price-per-share from archive RPCs. Performance fees use observed vault performance; management fees use each chain's configured average block time, so dashboard totals are estimates.
 - **Time windows**: The dashboard supports 1 week, 1 month, 3 month views (All time is currently disabled).
 
 ### Current partners
