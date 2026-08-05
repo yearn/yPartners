@@ -70,7 +70,7 @@ function Index({partnerID, onWindowChange}: {partnerID: string, onWindowChange: 
 
 
 function	PartnerDashboardWrapper({partnerID}: {partnerID: string}): ReactElement {
-	const [windowValue, set_windowValue] = useState(29); // Default to 1 month
+	const [windowValue, set_windowValue] = useState(30); // Default to 1 month
 
 	return (
 		<PartnerContextApp partnerID={partnerID} windowDays={windowValue}>

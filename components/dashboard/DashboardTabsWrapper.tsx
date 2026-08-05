@@ -8,7 +8,7 @@ import {Button} from 'lib/yearn/components/Button';
 import IconLinkOut from 'lib/yearn/icons/IconLinkOut';
 import performBatchedUpdates from 'lib/yearn/utils/performBatchedUpdates';
 import Image from 'next/image';
-import {getChainLogoUrl, getTokenLogoUrl} from 'lib/crypto/tokenLogos';
+import {getTokenLogoUrl} from 'lib/crypto/tokenLogos';
 
 import {usePartner} from '../../contexts/usePartner';
 import type {TVaultComboData} from '../../contexts/usePartner';
@@ -19,7 +19,7 @@ import type {MouseEvent, ReactElement} from 'react';
 
 const dataWindows = [
 	{name: '1 week', value: 7},
-	{name: '1 month', value: 29},
+	{name: '1 month', value: 30},
 	{name: '3 month', value: 90},
 ];
 
@@ -44,33 +44,35 @@ function getComboTokenLogoSrc(combo?: TVaultComboData): string | null {
 	return getTokenLogoUrl(combo.chainId, assetAddress);
 }
 
-function getComboChainLogoSrc(combo?: TVaultComboData): string | null {
-	if (!combo) {
-		return null;
-	}
-	return getChainLogoUrl(combo.chainId);
+function shortenAddress(address: string): string {
+	return `${address.slice(0, 6)}…${address.slice(-4)}`;
 }
 
 type TVaultOptionLabelProps = {
 	tokenLogoSrc: string | null;
-	chainLogoSrc: string | null;
-	label: string;
+	assetSymbol: string;
+	chainLabel: string;
+	vaultAddress: string;
 };
 
 const VaultOptionLabel = memo(function VaultOptionLabel({
 	tokenLogoSrc,
-	chainLogoSrc,
-	label
+	assetSymbol,
+	chainLabel,
+	vaultAddress
 }: TVaultOptionLabelProps): ReactElement {
 	return (
-		<span className={'flex items-center gap-2'}>
+		<span className={'flex min-w-0 flex-1 items-center gap-3 text-left'}>
 			{tokenLogoSrc ? (
-				<Image src={tokenLogoSrc} alt={'Token logo'} width={16} height={16} className={'h-4 w-4'} />
-			) : null}
-			{chainLogoSrc ? (
-				<Image src={chainLogoSrc} alt={'Chain logo'} width={16} height={16} className={'h-4 w-4'} />
-			) : null}
-			<span>{label}</span>
+				<Image src={tokenLogoSrc} alt={''} width={32} height={32} className={'h-8 w-8 shrink-0'} />
+			) : (
+				<span aria-hidden={true} className={'h-8 w-8 shrink-0 rounded-full bg-neutral-100'} />
+			)}
+			<span className={'min-w-0 flex-1'}>
+				<span className={'block truncate font-medium text-neutral-900'}>{assetSymbol}</span>
+				<span className={'block truncate font-mono text-xs text-neutral-500'}>{`Vault · ${shortenAddress(vaultAddress)}`}</span>
+			</span>
+			<span className={'shrink-0 rounded-full bg-neutral-100 px-2 py-1 text-xs font-medium text-neutral-600'}>{chainLabel}</span>
 		</span>
 	);
 });
@@ -78,6 +80,7 @@ const VaultOptionLabel = memo(function VaultOptionLabel({
 function	DashboardTabsWrapper({partnerID: _partnerID, onWindowChange}: {partnerID: string, onWindowChange: (value: number) => void}): ReactElement {
 	const {tvlOverride, userCount, feesOverride, isLoadingFees, isLoadingChart, chartSnapshots, accountFees, vaultComboData, apiErrors, selectedVaultKey, setSelectedVaultKey, feeStartTimestamp} = usePartner();
 	const [activeWindow, set_activeWindow] = useState('1 month');
+	const activeWindowDays = dataWindows.find((window) => window.name === activeWindow)?.value ?? 30;
 
 	void _partnerID;
 	const selectedCombo = vaultComboData.find((combo) => combo.key === selectedVaultKey);
@@ -90,23 +93,13 @@ function	DashboardTabsWrapper({partnerID: _partnerID, onWindowChange}: {partnerI
 	const selectedUserCount = selectedCombo ? selectedCombo.addresses.length : userCount;
 	const shouldShowVaultDropdown = vaultComboData.length > 0;
 	const isLoadingTVL = vaultComboData.some((combo) => combo.isLoadingTVL);
+	const selectedLoadingTVL = selectedCombo ? selectedCombo.isLoadingTVL : isLoadingTVL;
 	const isLoadingAssets = vaultComboData.some((combo) => combo.isLoadingAsset);
 	const isLoadingData = isLoadingFees || isLoadingChart || isLoadingTVL || isLoadingAssets;
 	const isEmptyState = !isLoadingData && vaultComboData.length === 0;
-	const getVaultDropdownLabel = (combo: typeof selectedCombo): string => {
-		if (!combo) {
-			return 'Total';
-		}
-
-		const symbol = getComboAssetSymbol(combo);
-		const chainLabel = NETWORK_LABELS[combo.chainId] || 'Chain';
-		const addressLabel = combo.vaultAddress;
-		return symbol ? `${symbol} • ${chainLabel} • ${addressLabel}` : `${chainLabel} • ${addressLabel}`;
-	};
-
-	const vaultDropdownLabel = getVaultDropdownLabel(selectedCombo);
 	const selectedTokenLogoSrc = getComboTokenLogoSrc(selectedCombo);
-	const selectedChainLogoSrc = getComboChainLogoSrc(selectedCombo);
+	const selectedAssetSymbol = getComboAssetSymbol(selectedCombo) || 'Vault';
+	const selectedChainLabel = selectedCombo ? (NETWORK_LABELS[selectedCombo.chainId] || 'Chain') : '';
 
 	// Fetch vault name from yDaemon API
 	const {vault: yDaemonVaultData} = useYDaemonVault(
@@ -151,54 +144,62 @@ function	DashboardTabsWrapper({partnerID: _partnerID, onWindowChange}: {partnerI
 								{({open}): ReactElement => (
 									<div className={'relative mt-2 w-full md:max-w-2xl'}>
 										<Listbox.Button
-											className={'flex h-10 w-full items-center justify-between rounded-md border border-neutral-200 bg-white px-3 text-sm text-neutral-900 shadow-sm hover:border-neutral-300'}>
-									{selectedCombo ? (
-										<VaultOptionLabel
-											tokenLogoSrc={selectedTokenLogoSrc}
-											chainLogoSrc={selectedChainLogoSrc}
-											label={vaultDropdownLabel}
-										/>
-									) : (
-										<span>{vaultDropdownLabel}</span>
-									)}
-									<IconChevronDown
-										className={`transition-transform ${open ? 'rotate-0' : '-rotate-90'}`} />
-								</Listbox.Button>
-								<Transition
-									as={Fragment}
-									show={open}
-									enter={'transition duration-100 ease-out'}
-									enterFrom={'transform scale-95 opacity-0'}
-									enterTo={'transform scale-100 opacity-100'}
-									leave={'transition duration-75 ease-out'}
-									leaveFrom={'transform scale-100 opacity-100'}
-									leaveTo={'transform scale-95 opacity-0'}>
-									<Listbox.Options
-										className={'absolute z-50 mt-2 max-h-72 w-full overflow-auto rounded-md border border-neutral-200 bg-white shadow-lg'}>
-										<Listbox.Option
-											className={'cursor-pointer px-3 py-2 text-sm text-neutral-900 hover:bg-neutral-100'}
-											value={'total'}>
-											{'Total (all vaults)'}
-										</Listbox.Option>
-										{vaultComboData.map((combo) => {
-											const comboLabel = getVaultDropdownLabel(combo);
-											const comboTokenLogoSrc = getComboTokenLogoSrc(combo);
-											const comboChainLogoSrc = getComboChainLogoSrc(combo);
-											return (
-											<Listbox.Option
-												key={combo.key}
-												className={'cursor-pointer px-3 py-2 text-sm text-neutral-900 hover:bg-neutral-100'}
-												value={combo.key}>
+											className={'flex min-h-14 w-full items-center justify-between rounded-md border border-neutral-200 bg-white px-3 py-2 text-sm text-neutral-900 shadow-sm hover:border-neutral-300'}>
+											{selectedCombo ? (
 												<VaultOptionLabel
-													tokenLogoSrc={comboTokenLogoSrc}
-													chainLogoSrc={comboChainLogoSrc}
-													label={comboLabel}
+													tokenLogoSrc={selectedTokenLogoSrc}
+													assetSymbol={selectedAssetSymbol}
+													chainLabel={selectedChainLabel}
+													vaultAddress={selectedCombo.vaultAddress}
 												/>
-											</Listbox.Option>
-											);
-										})}
-									</Listbox.Options>
-								</Transition>
+											) : (
+												<span className={'min-w-0 flex-1 text-left'}>
+													<span className={'block font-medium text-neutral-900'}>{'All vaults'}</span>
+													<span className={'block text-xs text-neutral-500'}>{'Combined partner totals'}</span>
+												</span>
+											)}
+											<IconChevronDown
+												className={`shrink-0 transition-transform ${open ? 'rotate-0' : '-rotate-90'}`} />
+										</Listbox.Button>
+										<Transition
+											as={Fragment}
+											show={open}
+											enter={'transition duration-100 ease-out'}
+											enterFrom={'transform scale-95 opacity-0'}
+											enterTo={'transform scale-100 opacity-100'}
+											leave={'transition duration-75 ease-out'}
+											leaveFrom={'transform scale-100 opacity-100'}
+											leaveTo={'transform scale-95 opacity-0'}>
+											<Listbox.Options
+												className={'absolute z-50 mt-2 max-h-72 w-full overflow-auto rounded-md border border-neutral-200 bg-white shadow-lg'}>
+												<Listbox.Option
+													className={'cursor-pointer px-3 py-2.5 text-sm text-neutral-900 hover:bg-neutral-100'}
+													value={'total'}>
+													<span className={'block'}>
+														<span className={'block font-medium text-neutral-900'}>{'All vaults'}</span>
+														<span className={'block text-xs text-neutral-500'}>{'Combined partner totals'}</span>
+													</span>
+												</Listbox.Option>
+												{vaultComboData.map((combo) => {
+													const comboTokenLogoSrc = getComboTokenLogoSrc(combo);
+													const comboAssetSymbol = getComboAssetSymbol(combo) || 'Vault';
+													const comboChainLabel = NETWORK_LABELS[combo.chainId] || 'Chain';
+													return (
+													<Listbox.Option
+														key={combo.key}
+														className={'cursor-pointer px-3 py-2.5 text-sm text-neutral-900 hover:bg-neutral-100'}
+														value={combo.key}>
+														<VaultOptionLabel
+															tokenLogoSrc={comboTokenLogoSrc}
+															assetSymbol={comboAssetSymbol}
+															chainLabel={comboChainLabel}
+															vaultAddress={combo.vaultAddress}
+														/>
+													</Listbox.Option>
+													);
+												})}
+											</Listbox.Options>
+										</Transition>
 							</div>
 						)}
 					</Listbox>
@@ -239,10 +240,11 @@ function	DashboardTabsWrapper({partnerID: _partnerID, onWindowChange}: {partnerI
 				tvlOverride={selectedCombo ? (typeof selectedTvl === 'number' ? selectedTvl : undefined) : tvlOverride}
 				feesOverride={selectedCombo ? (typeof selectedFees === 'number' ? selectedFees : undefined) : feesOverride}
 				userCount={selectedUserCount}
+				isLoadingTVL={selectedLoadingTVL}
 				isLoadingFees={selectedLoadingFees}/>
 
 			<div className={'mt-8 px-4 md:px-8'}>
-				<BalanceProfitChart snapshots={selectedCombo ? selectedSnapshots : chartSnapshots} isLoading={selectedLoadingChart} feeStartTimestamp={feeStartTimestamp} />
+				<BalanceProfitChart snapshots={selectedCombo ? selectedSnapshots : chartSnapshots} isLoading={selectedLoadingChart} feeStartTimestamp={feeStartTimestamp} windowDays={activeWindowDays} />
 			</div>
 
 			<div className={'mt-8 px-4 md:px-8'}>
