@@ -26,26 +26,19 @@ async function checkOnChainVaultType(
 	try {
 		const provider = new ethers.providers.JsonRpcProvider(rpcUrl, chainId);
 		const contract = new ethers.Contract(address, VAULT_CHECK_ABI, provider);
-
-		// Try to call get_default_queue - this exists on Vaults (Allocator), not on Strategies
 		await contract.get_default_queue();
-		// If it succeeds, it's a vault
 		return 'vault';
-	} catch {
-		// get_default_queue reverted - likely a strategy
-		// Verify by checking apiVersion (both vaults and strategies have this)
+	} catch (firstError) {
+		void firstError;
 		try {
 			const provider = new ethers.providers.JsonRpcProvider(rpcUrl, chainId);
 			const contract = new ethers.Contract(address, VAULT_CHECK_ABI, provider);
 			const version = await contract.apiVersion();
-			// apiVersion exists but get_default_queue doesn't = strategy
-			if (version) {
-				return 'strategy';
-			}
-		} catch {
-			// Neither function works - unknown contract
+			return version ? 'strategy' : 'unknown';
+		} catch (secondError) {
+			void secondError;
+			return 'unknown';
 		}
-		return 'unknown';
 	}
 }
 
