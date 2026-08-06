@@ -44,6 +44,10 @@ function SortIcon({column, sortColumn, sortDirection}: TSortIconProps): ReactEle
 	);
 }
 
+function formatMobileAddress(address: string): string {
+	return `${address.slice(0, 6)}...${address.slice(-6)}`;
+}
+
 function AccountFeesTable({accountFees}: TProps): ReactElement {
 	const [sortColumn, setSortColumn] = useState<TSortColumn>('currentSharesNormalized');
 	const [sortDirection, setSortDirection] = useState<TSortDirection>('desc');
@@ -136,7 +140,8 @@ function AccountFeesTable({accountFees}: TProps): ReactElement {
 								key={account.address}
 								className={idx % 2 === 0 ? 'bg-white hover:bg-neutral-50' : 'bg-neutral-50 hover:bg-neutral-100'}>
 								<td className={`sticky left-0 z-10 whitespace-nowrap px-3 py-2 text-xs font-mono text-neutral-900 sm:px-6 sm:py-4 sm:text-sm md:static md:z-auto ${idx % 2 === 0 ? 'bg-white' : 'bg-neutral-50'}`}>
-									{account.address}
+									<span className={'sm:hidden'} title={account.address}>{formatMobileAddress(account.address)}</span>
+									<span className={'hidden sm:inline'}>{account.address}</span>
 								</td>
 								<td className={'whitespace-nowrap px-3 py-2 text-right text-xs text-neutral-900 sm:px-6 sm:py-4 sm:text-sm'}>
 									{account.currentSharesNormalized.toFixed(2)}
