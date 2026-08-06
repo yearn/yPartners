@@ -140,33 +140,33 @@ function DashboardTabsContent({onWindowChange}: {onWindowChange: (value: number)
 	return (
 		<div aria-label={'Vault Details'} className={'col-span-12 mb-4 flex flex-col bg-neutral-100'}>
 			{isLoadingData ? (
-				<div className={'mx-4 mt-6 rounded-lg border border-neutral-200 bg-white px-4 py-3 text-sm text-neutral-700 md:mx-8'} role={'status'}>
+				<div className={'mt-6 rounded-lg border border-neutral-200 bg-white px-4 py-3 text-sm text-neutral-700'} role={'status'}>
 					<p className={'text-lg font-medium'}>{'Loading vault data...'}</p>
 					<p className={'mt-1 text-neutral-500'}>{'Initial loads may take longer while historical vault data is fetched and cached.'}</p>
 				</div>
 			) : null}
 			{isEmptyState ? (
-				<div className={'mx-4 mt-6 rounded-lg border border-neutral-200 bg-white px-4 py-3 text-sm text-neutral-700 md:mx-8'}>
+				<div className={'mt-6 rounded-lg border border-neutral-200 bg-white px-4 py-3 text-sm text-neutral-700'}>
 					{'No vault data available yet for this partner.'}
 				</div>
 			) : null}
 
 			{apiErrors.length > 0 ? (
-				<div className={'mx-4 mt-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800 md:mx-8'}>
+				<div className={'mt-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800'}>
 					{apiErrors[0]}
 				</div>
 			) : null}
 
 			{shouldShowVaultDropdown ? (
-						<div className={'mt-6 px-4 md:px-8'}>
-							<label className={'text-sm font-medium text-neutral-700'}>{'Vault'}</label>
+						<div className={'mt-1 md:mt-2'}>
+							<label className={'text-[1.75rem] font-medium text-neutral-700'}>{'Vault'}</label>
 							<Listbox
 								value={selectedVaultKey}
 								onChange={handleVaultChange}>
 								{({open}): ReactElement => (
 									<div className={'relative mt-2 w-full md:max-w-2xl'}>
 										<Listbox.Button
-											className={'flex min-h-14 w-full items-center justify-between rounded-md border border-neutral-200 bg-white px-3 py-2 text-sm text-neutral-900 shadow-sm hover:border-neutral-300'}>
+											className={'group flex min-h-14 w-full items-center justify-between rounded-md border border-neutral-400 bg-neutral-50 px-3 py-2 text-sm text-neutral-900 shadow-sm transition-colors hover:border-primary-500 hover:bg-primary-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2'}>
 											{selectedCombo ? (
 												<VaultOptionLabel
 													tokenLogoSrc={selectedTokenLogoSrc}
@@ -181,7 +181,7 @@ function DashboardTabsContent({onWindowChange}: {onWindowChange: (value: number)
 												</span>
 											)}
 											<IconChevronDown
-												className={`shrink-0 transition-transform ${open ? 'rotate-0' : '-rotate-90'}`} />
+												className={`shrink-0 transition-transform ${open ? 'rotate-180' : 'rotate-0'}`} />
 										</Listbox.Button>
 										<Transition
 											as={Fragment}
@@ -193,9 +193,9 @@ function DashboardTabsContent({onWindowChange}: {onWindowChange: (value: number)
 											leaveFrom={'transform scale-100 opacity-100'}
 											leaveTo={'transform scale-95 opacity-0'}>
 											<Listbox.Options
-												className={'absolute z-50 mt-2 max-h-72 w-full overflow-auto rounded-md border border-neutral-200 bg-white shadow-lg'}>
+												className={'absolute z-50 mt-2 max-h-72 w-full overflow-auto rounded-md border border-neutral-300 bg-white shadow-lg'}>
 												<Listbox.Option
-													className={'cursor-pointer px-3 py-2.5 text-sm text-neutral-900 hover:bg-neutral-100'}
+													className={({active, selected}): string => `cursor-pointer px-3 py-2.5 text-sm ${active ? 'bg-primary-100' : ''} ${selected ? 'bg-primary-100 font-semibold text-primary-600' : 'text-neutral-900'}`}
 													value={'total'}>
 													<span className={'block'}>
 														<span className={'block font-medium text-neutral-900'}>{'All vaults'}</span>
@@ -209,7 +209,7 @@ function DashboardTabsContent({onWindowChange}: {onWindowChange: (value: number)
 													return (
 													<Listbox.Option
 														key={combo.key}
-														className={'cursor-pointer px-3 py-2.5 text-sm text-neutral-900 hover:bg-neutral-100'}
+														className={({active, selected}): string => `cursor-pointer px-3 py-2.5 text-sm ${active ? 'bg-primary-100' : ''} ${selected ? 'bg-primary-100 font-semibold text-primary-600' : 'text-neutral-900'}`}
 														value={combo.key}>
 														<VaultOptionLabel
 															tokenLogoSrc={comboTokenLogoSrc}
@@ -243,7 +243,7 @@ function DashboardTabsContent({onWindowChange}: {onWindowChange: (value: number)
 			</div>
 
 			{selectedCombo && selectedVaultKey !== 'total' ? (
-				<div className={'mt-6 px-4 md:px-8'}>
+				<div className={'mt-6'}>
 					<div className={'flex flex-wrap items-center gap-3'}>
 						<h2 className={'text-2xl font-bold text-neutral-900'}>
 							{vaultDisplayName || getComboAssetSymbol(selectedCombo) || 'Vault'}
@@ -281,11 +281,11 @@ function DashboardTabsContent({onWindowChange}: {onWindowChange: (value: number)
 				isLoadingTVL={selectedLoadingTVL}
 				isLoadingFees={selectedLoadingFees}/>
 
-			<div className={'mt-8 px-4 md:px-8'}>
+			<div className={'mt-2 md:mt-8'}>
 				<BalanceProfitChart snapshots={selectedCombo ? selectedSnapshots : chartSnapshots} isLoading={selectedLoadingChart} feeStartTimestamp={feeStartTimestamp} windowDays={activeWindowDays} />
 			</div>
 
-			<div className={'mt-8 px-4 md:px-8'}>
+			<div className={'mt-8'}>
 			<AccountFeesTable accountFees={selectedCombo ? selectedAccountFees : accountFees} />
 			</div>
 		</div>

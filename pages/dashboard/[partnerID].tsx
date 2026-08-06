@@ -41,22 +41,22 @@ function Index({partnerID, onWindowChange}: {partnerID: string, onWindowChange: 
 	}, [currentPartner, isLoadingVaults, currentPartnerShortname, onWindowChange]);
 
 	return (
-		<main className={'mb-20 pb-20'}>
-			<Link href={'/'} className={'project--nav mb-6 inline-block'}>
+		<main className={'mb-12 pb-12'}>
+			<Link href={'/'} className={'project--nav mb-2 inline-block'}>
 				{'← Back to homepage'}
 			</Link>
-			<section aria-label={'hero'} className={'mb-8 mt-3 grid grid-cols-8 md:mb-14 md:mt-[75px] md:grid-cols-12'}>
+			<section aria-label={'hero'} className={'mb-2 mt-1 grid grid-cols-8 md:mb-2 md:mt-[34px] md:grid-cols-12'}>
 
-				<div className={'col-span-3 md:hidden'}>
+				<div className={'col-span-3 -mb-3 md:hidden'}>
 					{currentPartnerLogo}
 				</div>
 
 					<div className={'col-span-8 lg:col-span-9'}>
-						<h1 className={`my-4 break-words leading-tight text-neutral-900 md:text-8xl ${currentPartner?.name === 'Abracadabra.Money' ? 'text-4xl sm:text-[3.5rem]' : 'text-4xl sm:text-5xl'}`}>
+						<h1 className={`my-4 mt-2 break-words leading-tight text-neutral-900 md:mt-4 md:text-8xl ${currentPartner?.name === 'Abracadabra.Money' ? 'text-4xl sm:text-[3.5rem]' : 'text-4xl sm:text-5xl'}`}>
 							{currentPartner?.name === 'Abracadabra.Money' ? 'Abracadabra': currentPartner?.name}
 						</h1>
 
-						<p className={'mb-6 w-full text-neutral-500 md:mb-10 md:w-3/4'}>{`Last updated ${lastSync}`}</p>
+						<p className={'mb-1 w-full text-neutral-500 md:mb-2 md:w-3/4'}>{`Data current as of ${lastSync}`}</p>
 					</div>
 
 				<div className={'hidden md:col-span-4 md:block lg:col-span-3'}>
