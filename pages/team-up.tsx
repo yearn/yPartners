@@ -1,7 +1,8 @@
 import axios from 'axios';
-import Script from 'next/script';
+import {Turnstile} from '@marsidev/react-turnstile';
 import {useCallback, useRef, useState} from 'react';
 
+import type {TurnstileInstance} from '@marsidev/react-turnstile';
 import type {FormEvent, ReactElement} from 'react';
 
 type TFormResponse = {
@@ -15,13 +16,11 @@ function	TeamUpPage(): ReactElement {
 	const [response, setResponse] = useState<TFormResponse | null>(null);
 	const [turnstileToken, setTurnstileToken] = useState('');
 	const formRef = useRef<HTMLFormElement>(null);
-	const turnstileRef = useRef<HTMLDivElement>(null);
+	const turnstileRef = useRef<TurnstileInstance | undefined>(undefined);
 
 	const resetTurnstile = useCallback((): void => {
 		setTurnstileToken('');
-		if (window.turnstile && turnstileRef.current) {
-			window.turnstile.reset(turnstileRef.current);
-		}
+		turnstileRef.current?.reset();
 	}, []);
 
 	const handleSubmit = async (event: FormEvent<HTMLFormElement>): Promise<void> => {
@@ -156,12 +155,13 @@ function	TeamUpPage(): ReactElement {
 						</div>
 						{process.env.CLOUDFLARE_TURNSTILE_SITE_KEY ? (
 							<div className={'md:col-span-2'}>
-								<div
+								<Turnstile
 									ref={turnstileRef}
-									className={'cf-turnstile'}
-									data-callback={'onTurnstileCallback'}
-									data-sitekey={process.env.CLOUDFLARE_TURNSTILE_SITE_KEY}
-									data-theme={'light'} />
+									siteKey={process.env.CLOUDFLARE_TURNSTILE_SITE_KEY}
+									options={{theme: 'light'}}
+									onSuccess={(token): void => setTurnstileToken(token)}
+									onExpire={(): void => setTurnstileToken('')}
+									onError={(): void => setTurnstileToken('')} />
 							</div>
 						) : null}
 						<div className={'md:col-span-2'}>
@@ -180,25 +180,8 @@ function	TeamUpPage(): ReactElement {
 				</div>
 			</div>
 
-			{process.env.CLOUDFLARE_TURNSTILE_SITE_KEY ? (
-				<Script
-					src={'https://challenges.cloudflare.com/turnstile/v0/api.js'}
-					strategy={'afterInteractive'}
-					onReady={(): void => {
-						(window as Window).onTurnstileCallback = (token: string): void => {
-							setTurnstileToken(token);
-						};
-					}} />
-			) : null}
 		</div>
 	);
-}
-
-declare global {
-	interface Window {
-		turnstile?: {reset: (element: HTMLElement) => void};
-		onTurnstileCallback?: (token: string) => void;
-	}
 }
 
 export default TeamUpPage;
