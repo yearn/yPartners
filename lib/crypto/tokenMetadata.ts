@@ -4,7 +4,7 @@ const SYMBOL_SELECTOR = '0x95d89b41';
 const symbolCache = new Map<string, string>();
 
 export async function getTokenSymbol(
-	provider: ethers.providers.JsonRpcProvider,
+	provider: ethers.providers.Provider,
 	tokenAddress: string
 ): Promise<string | null> {
 	const normalized = tokenAddress.toLowerCase();

@@ -51,7 +51,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
 	try {
 		const rpcUrl = getRpcUrlLatest(chainId);
 		const provider = rpcUrl ? new ethers.providers.JsonRpcProvider(rpcUrl, chainId) : null;
-
 		// Try to get asset address from Kong first
 		const metadata = await getKongVaultMetadata(chainId, vaultAddress);
 		let assetAddress: string | null = metadata?.assetAddress ?? null;

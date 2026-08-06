@@ -100,6 +100,7 @@ async function resolveVaultAssets(chainId: number, vaults: TAddress[]): Promise<
 	}));
 }
 
+
 export default async function handler(req: NextApiRequest, res: NextApiResponse<TResponse>): Promise<void> {
 	if (req.method !== 'GET') {
 		res.setHeader('Allow', 'GET');

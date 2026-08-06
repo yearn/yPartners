@@ -1,3 +1,7 @@
+import {ethers} from 'ethers';
+
+export type TRpcProvider = ethers.providers.Provider;
+
 type TChainConfig = {
 	name: string;
 	rpcEnvVar: string;
@@ -55,6 +59,71 @@ const CHAIN_CONFIG: Record<number, TChainConfig> = {
 		]
 	}
 };
+
+class FailoverProvider extends ethers.providers.StaticJsonRpcProvider {
+	private readonly providers: ethers.providers.StaticJsonRpcProvider[];
+
+	constructor(chainId: number, urls: string[]) {
+		super(urls[0], {chainId, name: `chain-${chainId}`});
+		this.providers = urls.map((url): ethers.providers.StaticJsonRpcProvider => (
+			new ethers.providers.StaticJsonRpcProvider(url, {chainId, name: `chain-${chainId}`})
+		));
+	}
+
+	public async send(method: string, params: Array<unknown>): Promise<unknown> {
+		let lastError: unknown;
+		for (const provider of this.providers) {
+			try {
+				return await provider.send(method, params);
+			} catch (error) {
+				lastError = error;
+			}
+		}
+		throw lastError instanceof Error ? lastError : new Error('All configured RPC providers failed');
+	}
+}
+
+function getRpcUrls(chainId: number, mode: 'latest' | 'archive'): string[] {
+	const config = CHAIN_CONFIG[chainId];
+	if (!config) {
+		console.warn(`[rpc] Unsupported chain ID: ${chainId}`);
+		return [];
+	}
+
+	const configuredRpc = mode === 'latest'
+		? process.env[config.publicEnvVar] || process.env[config.rpcEnvVar]
+		: process.env[config.privateEnvVar] || process.env[config.rpcEnvVar];
+
+	const urls: Array<string | undefined> = [
+		configuredRpc,
+		...config.fallbackRpcs
+	];
+	return Array.from(new Set(urls.filter(Boolean))) as string[];
+}
+
+function createFailoverProvider(chainId: number, urls: string[]): TRpcProvider | null {
+	if (urls.length === 0) {
+		return null;
+	}
+
+	return new FailoverProvider(chainId, urls);
+}
+
+export function getRpcUrlsLatest(chainId: number): string[] {
+	return getRpcUrls(chainId, 'latest');
+}
+
+export function getRpcUrlsArchive(chainId: number): string[] {
+	return getRpcUrls(chainId, 'archive');
+}
+
+export function getLatestProvider(chainId: number): TRpcProvider | null {
+	return createFailoverProvider(chainId, getRpcUrlsLatest(chainId));
+}
+
+export function getArchiveProvider(chainId: number): TRpcProvider | null {
+	return createFailoverProvider(chainId, getRpcUrlsArchive(chainId));
+}
 
 export function getRpcUrlLatest(chainId: number): string | null {
 	const config = CHAIN_CONFIG[chainId];

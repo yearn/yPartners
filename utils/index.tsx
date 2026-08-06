@@ -1,8 +1,8 @@
-export const NETWORK_LABELS: { [key: number]: string } = {
-	1: 'ETH',
-	8453: 'BASE',
-	42161: 'ARB',
-	747474: 'KATANA'
+export const NETWORK_LABELS: {[key: number]: string} = {
+	1: 'Ethereum',
+	8453: 'Base',
+	42161: 'Arbitrum',
+	747474: 'Katana'
 };
 
 export const NETWORK_CHAINID: { [key: string]: number } = {

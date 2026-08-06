@@ -6,7 +6,7 @@ type TLogo = {
 };
 
 // Frankencoin (ZCHF) official coin logo from media kit.
-function LogoFrankencoin({className, isColored: _isColored}: TLogo): ReactElement {
+function LogoFrankencoin({className}: TLogo): ReactElement {
 	return (
 		<svg
 			className={className}

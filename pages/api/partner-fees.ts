@@ -1,11 +1,13 @@
 import { BigNumber, ethers } from "ethers";
 import { getTokenPriceUsdWithDebug } from "lib/crypto/defillama";
-import { getRpcUrlArchive, getRpcUrlLatest } from "lib/crypto/rpc";
+import {getArchiveProvider, getLatestProvider, getRpcUrlArchive, getRpcUrlLatest} from 'lib/crypto/rpc';
 import { getTokenSymbol } from "lib/crypto/tokenMetadata";
 import { getKongVaultMetadata } from "lib/yearn/kong";
 import { PARTNER_FEE_SHARE } from "lib/yearn/partnerFeeShare";
 import { toAddress } from "lib/yearn/utils/address";
 import type { NextApiRequest, NextApiResponse } from "next";
+
+type TRpcProvider = ethers.providers.Provider;
 
 type TDepositEvent = {
 	id: string;
@@ -119,15 +121,58 @@ const PERFORMANCE_FEE_SELECTOR = "0x87788782";
 const DEFAULT_DECIMALS = 18;
 const DEFAULT_PERFORMANCE_FEE_BPS = 0;
 const REQUEST_TIMEOUT_MS = 12_000;
+
+const YDAEMON_BASE_URI = "https://ydaemon.yearn.fi";
+
+type TYDaemonFeeResponse = {
+	apr?: {
+		fees?: {
+			management?: number;
+			performance?: number;
+		};
+	};
+};
+
+function toFeeBps(value: number | undefined): number | null {
+	return typeof value === "number" && Number.isFinite(value) && value >= 0
+		? Math.round(value * 10000)
+		: null;
+}
+
+export async function getYDaemonFeeConfig(
+	chainId: number,
+	vault: string,
+): Promise<TFeeConfig> {
+	const response = await fetch(
+		`${YDAEMON_BASE_URI}/${chainId}/vaults/${vault}`,
+	);
+	if (!response.ok) {
+		throw new Error(`yDaemon returned HTTP ${response.status}`);
+	}
+	const payload = await response.json() as TYDaemonFeeResponse;
+	const managementFeeBps = toFeeBps(payload.apr?.fees?.management);
+	const performanceFeeBps = toFeeBps(payload.apr?.fees?.performance);
+	if (managementFeeBps === null && performanceFeeBps === null) {
+		throw new Error("yDaemon response does not include vault fee metadata");
+	}
+	return {
+		managementFeeBps: managementFeeBps ?? 0,
+		performanceFeeBps: performanceFeeBps ?? 0,
+	};
+}
 const pricePerShareCache: Map<string, BigNumber> = new Map();
 
 
 function getProviderCacheKey(
-	provider: ethers.providers.JsonRpcProvider,
+	provider: TRpcProvider,
 ): string {
-	const providerUrl = (provider.connection as { url?: string } | undefined)
-		?.url;
-	return providerUrl ?? "unknown-provider";
+	const providerWithConnection = provider as TRpcProvider & {
+		connection?: {url?: string};
+		network?: {chainId?: number};
+	};
+	const providerUrl = providerWithConnection.connection?.url;
+	const chainId = providerWithConnection.network?.chainId ?? 'unknown-chain';
+	return `${chainId}-${providerUrl ?? 'fallback-provider'}`;
 }
 
 function withTimeout<T>(
@@ -525,7 +570,7 @@ function buildEventTimeline(
 }
 
 async function getPricePerShareAtBlock(
-	provider: ethers.providers.JsonRpcProvider,
+	provider: TRpcProvider,
 	vault: string,
 	block?: number,
 ): Promise<BigNumber> {
@@ -548,7 +593,7 @@ async function getPricePerShareAtBlock(
 	return value;
 }
 export async function getCurrentPricePerShare(
-	provider: ethers.providers.JsonRpcProvider,
+	provider: TRpcProvider,
 	vault: string,
 	fallbackPricePerShare?: string,
 ): Promise<BigNumber> {
@@ -578,7 +623,7 @@ export async function getCurrentPricePerShare(
  * retries and surfaces the error if a value is genuinely unavailable.
  */
 async function prefetchPricePerShare(
-	provider: ethers.providers.JsonRpcProvider,
+	provider: TRpcProvider,
 	vault: string,
 	blocks: number[],
 	concurrency = 8,
@@ -598,7 +643,7 @@ async function prefetchPricePerShare(
 }
 
 async function getVaultAssetAddress(
-	provider: ethers.providers.JsonRpcProvider,
+	provider: TRpcProvider,
 	vault: string,
 ): Promise<string> {
 	const data = await provider.call({ to: vault, data: ASSET_SELECTOR });
@@ -606,7 +651,7 @@ async function getVaultAssetAddress(
 }
 
 async function readAccountantFeeConfig(
-	provider: ethers.providers.JsonRpcProvider,
+	provider: TRpcProvider,
 	vault: string,
 	block?: number,
 ): Promise<[BigNumber, BigNumber, BigNumber, BigNumber]> {
@@ -641,7 +686,7 @@ async function readAccountantFeeConfig(
 // struct) instead, so the real fee — 0% until it is activated — is read directly
 // rather than masked by the 10% default below.
 async function readGlobalPerformanceFeeBps(
-	provider: ethers.providers.JsonRpcProvider,
+	provider: TRpcProvider,
 	vault: string,
 	block?: number,
 ): Promise<number> {
@@ -678,7 +723,7 @@ async function readGlobalPerformanceFeeBps(
 }
 
 async function getFeeConfig(
-	provider: ethers.providers.JsonRpcProvider,
+	provider: TRpcProvider,
 	vault: string,
 ): Promise<TFeeConfig> {
 	// Standard / older Yearn v3 accountants expose a per-vault getVaultConfig.
@@ -713,7 +758,7 @@ async function getFeeConfig(
 }
 
 export async function getPerformanceFeeBps(
-	provider: ethers.providers.JsonRpcProvider,
+	provider: TRpcProvider,
 	vault: string,
 ): Promise<number> {
 	return (await getFeeConfig(provider, vault)).performanceFeeBps;
@@ -768,7 +813,7 @@ function calculatePosition(events: TEvent[]): {
 }
 
 async function calculateWeightedAverageEntryPps(
-	provider: ethers.providers.JsonRpcProvider,
+	provider: TRpcProvider,
 	events: TEvent[],
 	decimals: number,
 	vault: string,
@@ -864,7 +909,7 @@ function calculateManagementFee(
 }
 
 async function getCutoffBlockForTimestamp(
-	provider: ethers.providers.JsonRpcProvider,
+	provider: TRpcProvider,
 	targetTimestamp: number,
 	chainId: number = 1,
 ): Promise<number | null> {
@@ -882,7 +927,7 @@ async function getCutoffBlockForTimestamp(
 }
 
 async function getCutoffBlock(
-	provider: ethers.providers.JsonRpcProvider,
+	provider: TRpcProvider,
 	days?: number,
 	chainId: number = 1,
 ): Promise<number | null> {
@@ -895,7 +940,7 @@ async function getCutoffBlock(
 }
 
 export async function calculateIncrementalProfitAndFees(
-	provider: ethers.providers.JsonRpcProvider,
+	provider: TRpcProvider,
 	snapshots: TSnapshot[],
 	performanceFeeBps: number,
 	currentPps: BigNumber,
@@ -1069,14 +1114,14 @@ export function aggregateSnapshots(positionSnapshots: TPositionSnapshot[]): TSna
 }
 
 export async function prepareChartSnapshots(
-	provider: ethers.providers.JsonRpcProvider,
+	provider: TRpcProvider,
 	snapshots: TSnapshot[],
 	decimals: number,
 	currentPps: BigNumber,
 	currentShares: BigNumber,
 	vault: string,
 	priceUsd: number,
-	latestProvider?: ethers.providers.JsonRpcProvider,
+	latestProvider?: TRpcProvider,
 	plotCutoff: number | null = null,
 	accrualCutoff: number | null = null,
 	performanceFeeBps: number = 0,
@@ -1377,14 +1422,11 @@ export default async function handler(
 			);
 		}
 
-		const latestProvider = new ethers.providers.JsonRpcProvider(
-			latestRpcUrl,
-			chainId,
-		);
-		const archiveProvider = new ethers.providers.JsonRpcProvider(
-			archiveRpcUrl,
-			chainId,
-		);
+		const latestProvider = getLatestProvider(chainId);
+		const archiveProvider = getArchiveProvider(chainId);
+		if (!latestProvider || !archiveProvider) {
+			throw new Error(`Unable to create RPC providers for chain ${chainId}`);
+		}
 		const [feeConfigResult, cutoffBlockResult, kongMetadataResult] =
 			await Promise.allSettled([
 				withTimeout(
@@ -1405,12 +1447,34 @@ export default async function handler(
 			feeConfig = feeConfigResult.value;
 		} else {
 			// A transient latest-RPC failure must not silently turn an accrued
-			// fee into zero. Retry the read against the archive provider before
-			// allowing the request to fail visibly.
-			feeConfig = await withTimeout(
-				getFeeConfig(archiveProvider, vaultAddress),
-				"getFeeConfig.archive",
-			);
+			// fee into zero. Retry the read against the archive provider first.
+			try {
+				feeConfig = await withTimeout(
+					getFeeConfig(archiveProvider, vaultAddress),
+					"getFeeConfig.archive",
+				);
+			} catch (archiveError) {
+				// Retired vaults can keep valid yDaemon metadata after their
+				// accountant no longer exposes the live fee selectors.
+				try {
+					feeConfig = await withTimeout(
+						getYDaemonFeeConfig(chainId, vaultAddress),
+						"getFeeConfig.yDaemon",
+					);
+				} catch (yDaemonError) {
+					const archiveMessage =
+						archiveError instanceof Error
+							? archiveError.message
+							: String(archiveError);
+					const yDaemonMessage =
+						yDaemonError instanceof Error
+							? yDaemonError.message
+							: String(yDaemonError);
+					throw new Error(
+						`Unable to read fee configuration from RPC or yDaemon: ${archiveMessage}; ${yDaemonMessage}`,
+					);
+				}
+			}
 		}
 		const {managementFeeBps, performanceFeeBps} = feeConfig;
 		const currentBlock = managementFeeBps > 0

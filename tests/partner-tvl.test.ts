@@ -7,7 +7,7 @@ import type {TMulticallCall, TMulticallResult} from 'lib/yearn/multicall';
 const mocks = vi.hoisted(() => ({
 	aggregate3: vi.fn(),
 	getKongVaultMetadata: vi.fn(),
-	getRpcUrlLatest: vi.fn(),
+	getLatestProvider: vi.fn(),
 	getTokenPriceUsdWithDebug: vi.fn(),
 	getTokenSymbol: vi.fn()
 }));
@@ -19,7 +19,7 @@ vi.mock('lib/yearn/kong', () => ({
 	getKongVaultMetadata: mocks.getKongVaultMetadata
 }));
 vi.mock('lib/crypto/rpc', () => ({
-	getRpcUrlLatest: mocks.getRpcUrlLatest
+	getLatestProvider: mocks.getLatestProvider
 }));
 vi.mock('lib/crypto/defillama', () => ({
 	getTokenPriceUsdWithDebug: mocks.getTokenPriceUsdWithDebug
@@ -83,7 +83,7 @@ function createResponse(): TMockResponse {
 describe('partner TVL balance batching', (): void => {
 	beforeEach((): void => {
 		vi.resetAllMocks();
-		mocks.getRpcUrlLatest.mockReturnValue('https://rpc.example');
+		mocks.getLatestProvider.mockReturnValue(new ethers.providers.JsonRpcProvider('https://rpc.example', 1));
 		mocks.getKongVaultMetadata.mockResolvedValue({
 			assetAddress: asset,
 			decimals: 6,
@@ -133,7 +133,7 @@ describe('partner TVL balance batching', (): void => {
 	});
 
 	it('returns a typed service error when an RPC is unavailable', async (): Promise<void> => {
-		mocks.getRpcUrlLatest.mockReturnValue(null);
+		mocks.getLatestProvider.mockReturnValue(null);
 		const response = createResponse();
 		await handler(
 			{

@@ -1,4 +1,4 @@
-import {describe, expect, it} from 'vitest';
+import {describe, expect, it, vi} from 'vitest';
 import {BigNumber, ethers} from 'ethers';
 
 import {
@@ -8,6 +8,7 @@ import {
 	getEffectiveFeeCutoff,
 	getMillisecondsPerBlock,
 	getPerformanceFeeBps,
+	getYDaemonFeeConfig,
 	prepareChartSnapshots
 } from '../pages/api/partner-fees';
 
@@ -198,6 +199,31 @@ describe('partner fee accrual', (): void => {
 				'0x0000000000000000000000000000000000000003'
 			)
 		).resolves.toBe(1000);
+	});
+
+	it('converts yDaemon retired-vault fee metadata to basis points', async (): Promise<void> => {
+		const fetchMock = vi.fn().mockResolvedValue({
+			ok: true,
+			status: 200,
+			json: async (): Promise<unknown> => ({
+				apr: {fees: {management: 0, performance: 0.1}}
+			})
+		});
+		vi.stubGlobal('fetch', fetchMock);
+		try {
+			await expect(getYDaemonFeeConfig(
+				42161,
+				'0x6FAF8b7fFeE3306EfcFc2BA9Fec912b4d49834C1',
+			)).resolves.toEqual({
+				managementFeeBps: 0,
+				performanceFeeBps: 1000
+			});
+			expect(fetchMock).toHaveBeenCalledWith(
+				'https://ydaemon.yearn.fi/42161/vaults/0x6FAF8b7fFeE3306EfcFc2BA9Fec912b4d49834C1',
+			);
+		} finally {
+			vi.unstubAllGlobals();
+		}
 	});
 
 	it('accrues management fees from average block time without timestamp RPCs', async (): Promise<void> => {

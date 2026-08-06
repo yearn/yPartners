@@ -1,7 +1,7 @@
 import {BigNumber, ethers} from 'ethers';
 import type {NextApiRequest, NextApiResponse} from 'next';
 import {getTokenPriceUsdWithDebug} from 'lib/crypto/defillama';
-import {getRpcUrlLatest} from 'lib/crypto/rpc';
+import {getLatestProvider} from 'lib/crypto/rpc';
 import {getTokenSymbol} from 'lib/crypto/tokenMetadata';
 import {getKongVaultMetadata} from 'lib/yearn/kong';
 import {aggregate3} from 'lib/yearn/multicall';
@@ -99,7 +99,7 @@ function withTimeout<T>(promise: Promise<T>, label: string, timeoutMs: number = 
 }
 
 async function readVaultBalances(
-	provider: ethers.providers.JsonRpcProvider,
+	provider: ethers.providers.Provider,
 	vaultContract: ethers.Contract,
 	vaultAddress: string,
 	addresses: string[]
@@ -152,14 +152,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
 	const chainIdParam = req.query.chainId;
 	const parsedChainId = chainIdParam ? parseInt(Array.isArray(chainIdParam) ? chainIdParam[0] : chainIdParam, 10) : NaN;
 	const chainId = Number.isFinite(parsedChainId) ? parsedChainId : 1;
-	const rpcUrl = getRpcUrlLatest(chainId);
+	const provider = getLatestProvider(chainId);
 
 	if (addresses.length === 0) {
 		res.status(200).json(buildEmptyResponse(addresses, vaultAddress));
 		return;
 	}
 
-	if (!rpcUrl) {
+	if (!provider) {
 		const error = `No RPC URL configured for chain ${chainId}.`;
 		console.warn(`[partner-tvl] ${error}`);
 		res.status(503).json({error});
@@ -167,7 +167,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
 	}
 
 	try {
-		const provider = new ethers.providers.JsonRpcProvider(rpcUrl, chainId);
 		const vaultContract = new ethers.Contract(vaultAddress, VAULT_ABI, provider);
 
 		const kongMetadataResult = await Promise.allSettled([
