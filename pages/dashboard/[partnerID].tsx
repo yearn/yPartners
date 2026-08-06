@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import {useEffect, useMemo, useState} from 'react';
 import {DashboardTabsWrapper} from 'components/dashboard/DashboardTabsWrapper';
 import {PartnerContextApp, usePartner} from 'contexts/usePartner';
@@ -41,6 +42,9 @@ function Index({partnerID, onWindowChange}: {partnerID: string, onWindowChange: 
 
 	return (
 		<main className={'mb-20 pb-20'}>
+			<Link href={'/'} className={'project--nav mb-6 inline-block'}>
+				{'← Back to homepage'}
+			</Link>
 			<section aria-label={'hero'} className={'mb-8 mt-3 grid grid-cols-8 md:mb-14 md:mt-[75px] md:grid-cols-12'}>
 
 				<div className={'col-span-3 md:hidden'}>

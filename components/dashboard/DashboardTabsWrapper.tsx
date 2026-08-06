@@ -21,6 +21,7 @@ const dataWindows = [
 	{name: '1 week', value: 7},
 	{name: '1 month', value: 30},
 	{name: '3 month', value: 90},
+	{name: 'Since start', value: 0},
 ];
 
 const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
@@ -48,19 +49,13 @@ function shortenAddress(address: string): string {
 	return `${address.slice(0, 6)}…${address.slice(-4)}`;
 }
 
-type TActivityAccount = {
-	currentSharesNormalized: number;
-	totalFeesNormalized: number;
-};
+function formatFeeRate(feeBps?: number): string {
+	return typeof feeBps === 'number' ? `${(feeBps / 100).toFixed(2)}%` : '—';
+}
 
-export function hasVaultActivity(
-	tvlValue: number | undefined,
-	feesValue: number | undefined,
-	accountFees: readonly TActivityAccount[]
-): boolean {
-	return (tvlValue ?? 0) > 0 ||
-		(feesValue ?? 0) > 0 ||
-		accountFees.some((account) => account.currentSharesNormalized > 0 || account.totalFeesNormalized > 0);
+
+export function shouldRenderVaultDropdown(vaultComboCount: number): boolean {
+	return vaultComboCount > 0;
 }
 
 type TVaultOptionLabelProps = {
@@ -95,8 +90,10 @@ const VaultOptionLabel = memo(function VaultOptionLabel({
 function DashboardTabsContent({onWindowChange}: {onWindowChange: (value: number) => void}): ReactElement {
 	const {tvlOverride, userCount, feesOverride, isLoadingFees, isLoadingChart, chartSnapshots, accountFees, vaultComboData, apiErrors, selectedVaultKey, setSelectedVaultKey, feeStartTimestamp} = usePartner();
 	const [activeWindow, set_activeWindow] = useState('1 month');
-	const [hasObservedVaultActivity, setHasObservedVaultActivity] = useState(false);
-	const activeWindowDays = dataWindows.find((window) => window.name === activeWindow)?.value ?? 30;
+	const [sinceStartDays, set_sinceStartDays] = useState(0);
+	const activeWindowDays = activeWindow === 'Since start'
+		? sinceStartDays
+		: dataWindows.find((window) => window.name === activeWindow)?.value ?? 30;
 
 	const selectedCombo = vaultComboData.find((combo) => combo.key === selectedVaultKey);
 	const selectedTvl = selectedCombo?.tvl?.totalCurrentValueNormalized;
@@ -106,17 +103,13 @@ function DashboardTabsContent({onWindowChange}: {onWindowChange: (value: number)
 	const selectedLoadingFees = selectedCombo ? selectedCombo.isLoadingFees : isLoadingFees;
 	const selectedLoadingChart = selectedCombo ? selectedCombo.isLoadingChart : isLoadingChart;
 	const selectedUserCount = selectedCombo ? selectedCombo.addresses.length : userCount;
-	const displayedTvl = selectedCombo ? selectedTvl : tvlOverride;
-	const displayedFees = selectedCombo ? selectedFees : feesOverride;
-	const displayedAccountFees = selectedCombo ? selectedAccountFees : accountFees;
-	const hasCurrentVaultActivity = hasVaultActivity(displayedTvl, displayedFees, displayedAccountFees);
-	const hasPartnerVaultActivity = hasObservedVaultActivity || hasCurrentVaultActivity;
-	const shouldShowVaultDropdown = hasPartnerVaultActivity && vaultComboData.length > 0;
+	const hasConfiguredVaults = vaultComboData.length > 0;
+	const shouldShowVaultDropdown = shouldRenderVaultDropdown(vaultComboData.length);
 	const isLoadingTVL = vaultComboData.some((combo) => combo.isLoadingTVL);
 	const selectedLoadingTVL = selectedCombo ? selectedCombo.isLoadingTVL : isLoadingTVL;
 	const isLoadingAssets = vaultComboData.some((combo) => combo.isLoadingAsset);
 	const isLoadingData = isLoadingFees || isLoadingChart || isLoadingTVL || isLoadingAssets;
-	const isEmptyState = !isLoadingData && !hasPartnerVaultActivity;
+	const isEmptyState = !isLoadingData && !hasConfiguredVaults && apiErrors.length === 0;
 	const selectedTokenLogoSrc = getComboTokenLogoSrc(selectedCombo);
 	const selectedAssetSymbol = getComboAssetSymbol(selectedCombo) || 'Vault';
 	const selectedChainLabel = selectedCombo ? (NETWORK_LABELS[selectedCombo.chainId] || 'Chain') : '';
@@ -130,16 +123,18 @@ function DashboardTabsContent({onWindowChange}: {onWindowChange: (value: number)
 
 	function handleWindowChange(e: MouseEvent<HTMLButtonElement>): void {
 		const {name, value} = e.currentTarget;
+		const isSinceStart = name === 'Since start';
+		const requestedDays = isSinceStart && feeStartTimestamp > 0
+			? Math.max(1, Math.ceil((Date.now() / 1000 - feeStartTimestamp) / 86400))
+			: 0;
 		performBatchedUpdates((): void => {
 			set_activeWindow(name);
-			onWindowChange(+value);
+			set_sinceStartDays(requestedDays);
+			onWindowChange(isSinceStart ? 0 : +value);
 		});
 	}
 
 	function handleVaultChange(value: string): void {
-		if (hasCurrentVaultActivity) {
-			setHasObservedVaultActivity(true);
-		}
 		setSelectedVaultKey(value);
 	}
 	return (
@@ -248,18 +243,34 @@ function DashboardTabsContent({onWindowChange}: {onWindowChange: (value: number)
 			</div>
 
 			{selectedCombo && selectedVaultKey !== 'total' ? (
-				<div className={'mt-6 flex items-center gap-3 px-4 md:px-8'}>
-					<h2 className={'text-2xl font-bold text-neutral-900'}>
-						{vaultDisplayName || getComboAssetSymbol(selectedCombo) || 'Vault'}
-					</h2>
-					<a
-						href={`https://yearn.fi/vaults/${selectedCombo.chainId}/${selectedCombo.vaultAddress}`}
-						target={'_blank'}
-						rel={'noopener noreferrer'}
-						className={'inline-flex items-center gap-1 text-sm text-neutral-600 hover:text-neutral-900 hover:underline'}>
-						{'View on Yearn'}
-						<IconLinkOut className={'h-4 w-4'} />
-					</a>
+				<div className={'mt-6 px-4 md:px-8'}>
+					<div className={'flex flex-wrap items-center gap-3'}>
+						<h2 className={'text-2xl font-bold text-neutral-900'}>
+							{vaultDisplayName || getComboAssetSymbol(selectedCombo) || 'Vault'}
+						</h2>
+						<a
+							href={`https://yearn.fi/vaults/${selectedCombo.chainId}/${selectedCombo.vaultAddress}`}
+							target={'_blank'}
+							rel={'noopener noreferrer'}
+							className={'inline-flex items-center gap-1 text-sm text-neutral-600 hover:text-neutral-900 hover:underline'}>
+							{'View on Yearn'}
+							<IconLinkOut className={'h-4 w-4'} />
+						</a>
+					</div>
+					<div className={'mt-2 flex flex-wrap gap-x-4 gap-y-1 text-sm text-neutral-500'}>
+						<span>
+							{'Management fee: '}
+							<span className={'font-medium text-neutral-700'}>
+								{selectedCombo.isLoadingFees ? 'Loading...' : formatFeeRate(selectedCombo.fees?.managementFeeBps)}
+							</span>
+						</span>
+						<span>
+							{'Performance fee: '}
+							<span className={'font-medium text-neutral-700'}>
+								{selectedCombo.isLoadingFees ? 'Loading...' : formatFeeRate(selectedCombo.fees?.performanceFeeBps)}
+							</span>
+						</span>
+					</div>
 				</div>
 			) : null}
 

@@ -1,6 +1,7 @@
 import LogoDeFiSaver from 'components/icons/partners/LogoDeFiSaver';
 import LogoYearn from 'components/icons/LogoYearn';
 import LogoFrankencoin from 'components/icons/partners/LogoFrankencoin';
+import Image from 'next/image';
 import {toAddress} from 'lib/yearn/utils/address';
 
 import type {ReactElement} from 'react';
@@ -26,21 +27,21 @@ const PARTNERS: TDict<TPartner> = {
 		shortName: 'ceazor',
 		treasury: [toAddress('0x8244F0746396E06bD26F68C00E9b48b70b771472')],
 		feeStartDate: '2026-03-14',
-		logo: <img src="/partners/ceazor.jpg" alt="Ceazor" className="text-900" />
+		logo: <Image src={'/partners/ceazor.jpg'} alt={'Ceazor'} width={256} height={256} className={'text-900'} />,
 	},
 	jumper: {
 		name: 'Jumper',
 		shortName: 'jumper',
 		treasury: [toAddress('0x3610486BD4975F5C3dC838A36E897bF97fAE15DD')],
 		feeStartDate: '2026-03-24',
-		logo: <img src="/partners/jumper.jpg" alt="Jumper" className="text-900" />
+		logo: <Image src={'/partners/jumper.jpg'} alt={'Jumper'} width={256} height={256} className={'text-900'} />,
 	},
 	aihedge: {
 		name: 'AIHedge',
 		shortName: 'aihedge',
 		treasury: [toAddress('0x241ac8b7584dfe2f23b626c939fd88b9151d7684')],
 		feeStartDate: '2026-06-17',
-		logo: <img src="/partners/aihedge.jpg" alt="AIHedge" className="text-900" />
+		logo: <Image src={'/partners/aihedge.jpg'} alt={'AIHedge'} width={256} height={256} className={'text-900'} />,
 	},
 	frankencoin: {
 		name: 'Frankencoin',
@@ -58,7 +59,7 @@ const PARTNERS: TDict<TPartner> = {
 		shortName: 'alchemix',
 		treasury: [toAddress('0x29bcfeD246ce37319d94eBa107db90C453D4c43D')],
 		feeStartDate: '2026-07-29',
-		logo: <img src="/partner-logos/AlchemixMark_01.svg" alt="Alchemix" className="text-900" />
+		logo: <Image src={'/partner-logos/AlchemixMark_01.svg'} alt={'Alchemix'} width={256} height={256} className={'text-900'} />,
 	}
 };
 
@@ -196,11 +197,11 @@ type TPartnerLogo = {
 const LOGOS: TPartnerLogo = {
 	yearn: <LogoYearn className={'text-900 h-3/4 w-3/4'} />,
 	defisaver: <LogoDeFiSaver isColored={true} className={'text-900 h-3/4 w-3/4'} />,
-	ceazor: <img src="/partners/ceazor.jpg" alt="Ceazor" className="h-3/4 w-3/4 object-contain" />,
-	jumper: <img src="/partners/jumper.jpg" alt="Jumper" className="h-3/4 w-3/4 object-contain" />,
-	aihedge: <img src="/partners/aihedge.jpg" alt="AIHedge" className="h-3/4 w-3/4 object-contain" />,
+	ceazor: <Image src={'/partners/ceazor.jpg'} alt={'Ceazor'} width={256} height={256} className={'h-3/4 w-3/4 object-contain'} />,
+	jumper: <Image src={'/partners/jumper.jpg'} alt={'Jumper'} width={256} height={256} className={'h-3/4 w-3/4 object-contain'} />,
+	aihedge: <Image src={'/partners/aihedge.jpg'} alt={'AIHedge'} width={256} height={256} className={'h-3/4 w-3/4 object-contain'} />,
 	frankencoin: <LogoFrankencoin isColored={true} className={'text-900 h-3/4 w-3/4'} />,
-	alchemix: <img src="/partner-logos/AlchemixMark_01.svg" alt="Alchemix" className="h-3/4 w-3/4 object-contain" />
+	alchemix: <Image src={'/partner-logos/AlchemixMark_01.svg'} alt={'Alchemix'} width={256} height={256} className={'h-3/4 w-3/4 object-contain'} />
 };
 
 

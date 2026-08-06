@@ -1,4 +1,4 @@
-import {useEffect, useMemo, useState} from 'react';
+import {useMemo, useSyncExternalStore} from 'react';
 import {ComposedChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer} from 'recharts';
 import {formatAmount} from 'lib/yearn/utils/format.number';
 
@@ -12,6 +12,25 @@ const USD_TICK_FORMATTER = new Intl.NumberFormat('en-US', {
 	notation: 'compact',
 	maximumFractionDigits: 1
 });
+
+const MOBILE_QUERY = '(max-width: 767px)';
+
+function subscribeToMobileQuery(onChange: () => void): () => void {
+	if (typeof window === 'undefined') {
+		return (): void => undefined;
+	}
+	const mediaQuery = window.matchMedia(MOBILE_QUERY);
+	mediaQuery.addEventListener('change', onChange);
+	return (): void => mediaQuery.removeEventListener('change', onChange);
+}
+
+function getMobileSnapshot(): boolean {
+	return typeof window !== 'undefined' && window.matchMedia(MOBILE_QUERY).matches;
+}
+
+function getMobileServerSnapshot(): boolean {
+	return false;
+}
 
 type TChartSnapshot = {
 	block: number;
@@ -51,20 +70,11 @@ function formatChartWindowDate(block: number, firstBlock: number, lastBlock: num
 }
 
 function BalanceProfitChart({snapshots, isLoading, feeStartTimestamp, windowDays}: TProps): ReactElement {
-	const [isMobile, setIsMobile] = useState(false);
-
-	useEffect((): (() => void) => {
-		const mediaQuery = window.matchMedia('(max-width: 767px)');
-		const handleChange = (event: MediaQueryListEvent): void => {
-			setIsMobile(event.matches);
-		};
-		setIsMobile(mediaQuery.matches);
-		mediaQuery.addEventListener('change', handleChange);
-		return (): void => mediaQuery.removeEventListener('change', handleChange);
-	}, []);
+	const isMobile = useSyncExternalStore(subscribeToMobileQuery, getMobileSnapshot, getMobileServerSnapshot);
 
 	const leftAxisWidth = isMobile ? 42 : 70;
 	const rightAxisWidth = isMobile ? 48 : 84;
+	const feeAxisWidth = isMobile ? 24 : rightAxisWidth;
 	const axisTick = {fontSize: isMobile ? 10 : 12};
 	// Sample data if there are too many points (performance optimization)
 	const chartData = useMemo(() => {
@@ -90,7 +100,7 @@ function BalanceProfitChart({snapshots, isLoading, feeStartTimestamp, windowDays
 	if (snapshots.length === 0) {
 		return (
 			<div className={'flex h-96 items-center justify-center rounded-lg border border-neutral-200 bg-neutral-50'}>
-				<p className={'text-neutral-500'}>{isLoading ? 'Chart is loading...' : 'No chart data available'}</p>
+				<p className={'text-neutral-500'}>{isLoading ? 'Chart is loading...' : 'No deposits were recorded during the selected timeframe.'}</p>
 			</div>
 		);
 	}
@@ -133,7 +143,7 @@ function BalanceProfitChart({snapshots, isLoading, feeStartTimestamp, windowDays
 						yAxisId={'right'}
 						orientation={'right'}
 						width={rightAxisWidth}
-						label={{value: 'Profit (USD)', angle: 90, position: 'insideRight', offset: isMobile ? 2 : 14, fill: '#10b981'}}
+						label={{value: 'Profit (USD)', angle: 90, position: 'insideRight', offset: isMobile ? 18 : 14, dx: 0, fill: '#10b981'}}
 						tickFormatter={(value: number): string => USD_TICK_FORMATTER.format(value)}
 						tick={axisTick}
 						stroke={'#10b981'}
@@ -142,8 +152,8 @@ function BalanceProfitChart({snapshots, isLoading, feeStartTimestamp, windowDays
 						<YAxis
 							yAxisId={'fee'}
 							orientation={'right'}
-							width={rightAxisWidth}
-							label={{value: 'Fee (USD)', angle: 90, position: 'insideRight', offset: isMobile ? 2 : 14, fill: '#ef4444'}}
+							width={feeAxisWidth}
+							label={{value: 'Fee (USD)', angle: 90, position: 'insideRight', offset: isMobile ? 2 : 14, dx: isMobile ? 0 : -30, fill: '#ef4444'}}
 							tickFormatter={(value: number): string => USD_TICK_FORMATTER.format(value)}
 							tick={axisTick}
 							stroke={'#ef4444'}
