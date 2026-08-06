@@ -85,6 +85,7 @@ type TChartSnapshot = {
 type TPartnerFeesResponse = {
 	totalFeesNormalized: number,
 	managementFeeBps?: number,
+	performanceFeeBps?: number,
 	assetAddress?: string,
 	assetPriceUsd?: number,
 	assetSymbol?: string,

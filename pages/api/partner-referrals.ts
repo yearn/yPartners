@@ -4,11 +4,16 @@ import type { NextApiRequest, NextApiResponse } from "next";
 
 // Chains where YearnReferralWrapper (0x3744Df2673097d738aCaa3E463E6D638867757f2) is deployed
 const SUPPORTED_CHAIN_IDS = new Set([1, 8453, 42161, 747474]);
+// This address is the ysyBOLD vault used by Frankencoin collateral tracking,
+// but it must never be attributed as a referral depositor in any partner flow.
+const EXCLUDED_REFERRAL_ADDRESSES: Record<string, true> = {
+	'0x23346b04a7f55b8760e5860aa5a77383d63491cd': true
+};
+const FRANKENCOIN_PARTNER = "frankencoin";
 // ysyBOLD (Staked yBOLD, 0x23346B04…) is the Yearn V3 vault used as Frankencoin (ZCHF)
 // collateral. The Frankencoin partner has no static depositor list: the tracked
 // depositors are the Frankencoin V2 collateral positions, resolved dynamically below.
 const YSYBOLD_VAULT = "0x23346B04a7f55b8760E5860AA5A77383D63491cD";
-const FRANKENCOIN_PARTNER = "frankencoin";
 
 type TReferralDeposit = {
 	id: string;
@@ -270,7 +275,9 @@ async function resolveReferralHolders(
 
 		const vault = toAddress(deposit.vault);
 		const receiver = toAddress(deposit.receiver);
-
+		if (EXCLUDED_REFERRAL_ADDRESSES[receiver.toLowerCase()]) {
+			continue;
+		}
 		const sharesKey = `${chainId}_${vault}_${receiver.toLowerCase()}`;
 		let sharesByBlock = sharesCache.get(sharesKey);
 		if (!sharesByBlock) {
@@ -282,6 +289,9 @@ async function resolveReferralHolders(
 		const holder = shares
 			? toAddress(await traceShareHolder(receiver, vault, chainId, shares, block, transferCache))
 			: receiver;
+		if (EXCLUDED_REFERRAL_ADDRESSES[holder.toLowerCase()]) {
+			continue;
+		}
 
 		if (!config[chainId]) {
 			config[chainId] = {};
