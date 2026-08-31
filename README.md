@@ -77,7 +77,7 @@ These endpoints aggregate over the vault + depositor configuration in `PARTNER_V
 - **Dynamic referral partners**: Partners like Ceazor and Jumper have their vault/depositor config dynamically merged with Envio ReferralDeposit events at runtime, so new depositors are picked up automatically.
 - **Vault filtering**: Vaults are checked against Yearn endorsement status and vault-type detection (to exclude strategies from the dropdown). A `VAULT_WHITELIST` allows overriding the strategy filter for specific addresses.
 - **Fee calculation**: Fees are computed by replaying deposit/withdraw/transfer events from Envio and fetching historical price-per-share from archive RPCs. Performance fees use observed vault performance; management fees use each chain's configured average block time, so dashboard totals are estimates.
-- **Time windows**: The dashboard supports 1 week, 1 month, 3 month views (All time is currently disabled).
+- **Time windows**: The dashboard supports 1 week, 1 month, and 3 months views (All time is currently disabled).
 
 ### Current partners
 
@@ -105,7 +105,7 @@ const PARTNERS: TDict<TPartner> = {
     name: 'Your Partner Name',           // Display name
     shortName: 'yourpartner',            // URL-safe identifier (lowercase, no spaces)
     treasury: [toAddress('0xYourPartnerTreasuryAddress')],  // Partner's treasury address(es)
-    logo: <LogoYourPartner className={'text-900'} />        // Partner logo component
+    logo: <LogoYourPartner className={'text-neutral-900'} />        // Partner logo component
   }
 };
 ```
@@ -175,7 +175,7 @@ import LogoYourPartner from 'components/icons/partners/LogoYourPartner';
 And add it to the `LOGOS` object (keyed by `shortName`):
 ```typescript
 const LOGOS: TPartnerLogo = {
-  yourpartner: <LogoYourPartner className={'text-900 h-3/4 w-3/4'} />
+  yourpartner: <LogoYourPartner className={'text-neutral-900 h-3/4 w-3/4'} />
 };
 ```
 

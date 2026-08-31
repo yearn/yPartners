@@ -14,7 +14,7 @@ function Index({partnerID, onWindowChange}: {partnerID: string, onWindowChange: 
 
 	const currentPartner = SHAREABLE_ADDRESSES[partnerID];
 	const currentPartnerShortname = currentPartner ? currentPartner.shortName : '';
-	const currentPartnerLogo = LOGOS[currentPartnerShortname] || <DefaultLogo className={'text-900 h-3/4 w-3/4'} />;
+	const currentPartnerLogo = LOGOS[currentPartnerShortname] || <DefaultLogo className={'text-neutral-900 h-3/4 w-3/4'} />;
 
 	useEffect((): void => {
 		const latestSync = new Date().toLocaleString('default',

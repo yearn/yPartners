@@ -71,7 +71,7 @@ function	FAQPage(): ReactElement {
 						<div>
 							<p className={'text-lg font-semibold text-neutral-900 sm:text-xl'}>{'What if a single user deposits into Yearn from two different partner websites?'}</p>
 							<p>
-								{'Yes, that is a tricky situation for sure. Yearn does its best to calculate the fees owned to each party, our backend algo for this is improving every week. The goal is to keep the fee ratio split evenly between N partners, where deposits are attributed to a single partner but withdrawals withdraw from all partners (maintaining the same fee split ratio determined by deposits). If your calculations differ, we are happy to discuss!'}
+								{'Yes, that is a tricky situation for sure. Yearn does its best to calculate the fees owed to each party, our backend algo for this is improving every week. The goal is to keep the fee ratio split evenly between N partners, where deposits are attributed to a single partner but withdrawals withdraw from all partners (maintaining the same fee split ratio determined by deposits). If your calculations differ, we are happy to discuss!'}
 							</p>
 						</div>
 					</div>

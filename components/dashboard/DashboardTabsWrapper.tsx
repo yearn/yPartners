@@ -20,7 +20,7 @@ import type {MouseEvent, ReactElement} from 'react';
 const dataWindows = [
 	{name: '1 week', value: 7},
 	{name: '1 month', value: 30},
-	{name: '3 month', value: 90},
+	{name: '3 months', value: 90},
 	{name: 'Since start', value: 0},
 ];
 
