@@ -206,7 +206,7 @@ function	AppHeader(): ReactElement {
 												set_authOption('Log out');
 											});											
 
-											router.push(`dashboard/${partner.treasury[0]}`).then((): void => {
+											router.push(`/dashboard/${partner.treasury[0]}`).then((): void => {
 												performBatchedUpdates((): void => {
 													set_hasModal(false);
 													setTimeout((): void => set_isLoading(false), 1000);
