@@ -58,8 +58,6 @@
     "postcss.config.js",
     "tailwind.config.js",
     "next.config.js",
-    "theme.config.js",
-    ".eslintrc.js",
     ".next/types/**/*.ts"
   ]
 }

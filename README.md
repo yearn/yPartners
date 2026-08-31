@@ -54,6 +54,7 @@ Other scripts:
 | Endpoint | Type | Purpose |
 |---|---|---|
 | `/api/fees` | Edge | Proxies DefiLlama fees summary (30-day total) for the landing page |
+| `/api/tvl` | Edge | Proxies DefiLlama protocol TVL (current total) for the landing page |
 | `/api/vault-count` | Edge | Proxies yDaemon to count active V3 vaults for the landing page |
 | `/api/vault-asset` | Node | Returns metadata for one vault; retained for single-vault consumers |
 | `/api/vault-assets` | Node | Returns batched vault asset metadata for `chainId:address` query pairs |
@@ -89,6 +90,7 @@ These endpoints aggregate over the vault + depositor configuration in `PARTNER_V
 | `jumper` | Jumper | Katana (dynamic referrals) |
 | `aihedge` | AIHedge | Ethereum |
 | `frankencoin` | Frankencoin | Ethereum (dynamic ysyBOLD collateral) |
+| `alchemix` | Alchemix | Ethereum |
 
 ### Adding a new partner
 

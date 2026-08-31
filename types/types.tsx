@@ -1,6 +1,5 @@
 import type	{ReactElement}	from	'react';
 import type {TAddress} from 'lib/yearn/utils/address';
-import type {TDict} from 'lib/yearn/utils/types';
 
 export type TPartnerVault = {
 	address: string,
@@ -15,15 +14,9 @@ export type TPartnerVault = {
 	totalPayout: number;
 };
 
-export type TPartnerVaultsByNetwork = {
-	[network: string]: TDict<TPartnerVault>
-}
-
 export type TPartner = {
 	name: string;
 	shortName: string;
-	description?: string;
-	proof?: string;
 	treasury?: TAddress[];
 	feeStartDate?: string;
 	logo: ReactElement;
