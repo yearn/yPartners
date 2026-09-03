@@ -175,28 +175,34 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
 		const kongMetadata = kongMetadataResult[0].status === 'fulfilled'
 			? kongMetadataResult[0].value
 			: null;
-		let pricePerShare: BigNumber | null = null;
 		let decimals: number | null = kongMetadata?.decimals ?? null;
 		let assetAddress: string | null = kongMetadata?.assetAddress ?? null;
 
-		if (kongMetadata?.pricePerShare) {
-			try {
-				pricePerShare = BigNumber.from(kongMetadata.pricePerShare);
-			} catch {
-				pricePerShare = null;
+		// The current price-per-share MUST come from the live vault contract.
+		// Kong's `pricePerShare` is unreliable for vaults with custom
+		// accountants (it can lag the on-chain value by months), so it is only
+		// a fallback for a transient RPC failure — mirroring /api/partner-fees.
+		let pricePerShare: BigNumber | null = null;
+		try {
+			pricePerShare = await withTimeout(vaultContract.pricePerShare(), 'vault.pricePerShare');
+		} catch (error) {
+			console.warn(`[partner-tvl] Falling back to Kong pricePerShare for ${vaultAddress}:`, error);
+			if (kongMetadata?.pricePerShare) {
+				try {
+					pricePerShare = BigNumber.from(kongMetadata.pricePerShare);
+				} catch {
+					pricePerShare = null;
+				}
 			}
 		}
 
-		if (!pricePerShare || decimals === null || !assetAddress) {
-			const [rpcPricePerShareRaw, rpcDecimalsRaw, rpcAssetAddressRaw] = await Promise.all([
-				withTimeout(vaultContract.pricePerShare(), 'vault.pricePerShare'),
+		if (decimals === null || !assetAddress) {
+			const [rpcDecimalsRaw, rpcAssetAddressRaw] = await Promise.all([
 				withTimeout(vaultContract.decimals(), 'vault.decimals'),
 				withTimeout(vaultContract.asset(), 'vault.asset')
 			]);
-			const rpcPricePerShare = rpcPricePerShareRaw as BigNumber;
 			const rpcDecimals = rpcDecimalsRaw as BigNumber | number;
 			const rpcAssetAddress = rpcAssetAddressRaw as string;
-			pricePerShare = pricePerShare ?? rpcPricePerShare;
 			decimals = decimals ?? (BigNumber.isBigNumber(rpcDecimals) ? rpcDecimals.toNumber() : Number(rpcDecimals));
 			assetAddress = assetAddress ?? toAddress(rpcAssetAddress);
 		}

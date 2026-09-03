@@ -14,34 +14,34 @@ const PARTNERS: TDict<TPartner> = {
 		name: 'Yearn (demo)',
 		shortName: 'yearn',
 		treasury: [toAddress('0x93A62dA5a14C80f265DAbC077fCEE437B1a0Efde')],
-		logo: <LogoYearn className={'text-900'} />
+		logo: <LogoYearn className={'text-neutral-900'} />
 	},
 	defisaver: {
 		name: 'DeFi Saver',
 		shortName: 'defisaver',
 		treasury: [toAddress('0x81cA52CfE66421d0ceF82d5F33230e43b5F23D2B')],
-		logo: <LogoDeFiSaver className={'text-900'} />
+		logo: <LogoDeFiSaver className={'text-neutral-900'} />
 	},
 	ceazor: {
 		name: 'Ceazor',
 		shortName: 'ceazor',
 		treasury: [toAddress('0x8244F0746396E06bD26F68C00E9b48b70b771472')],
 		feeStartDate: '2026-03-14',
-		logo: <Image src={'/partners/ceazor.jpg'} alt={'Ceazor'} width={256} height={256} className={'text-900'} />,
+		logo: <Image src={'/partners/ceazor.jpg'} alt={'Ceazor'} width={256} height={256} className={'text-neutral-900'} />,
 	},
 	jumper: {
 		name: 'Jumper',
 		shortName: 'jumper',
 		treasury: [toAddress('0x3610486BD4975F5C3dC838A36E897bF97fAE15DD')],
 		feeStartDate: '2026-03-24',
-		logo: <Image src={'/partners/jumper.jpg'} alt={'Jumper'} width={256} height={256} className={'text-900'} />,
+		logo: <Image src={'/partners/jumper.jpg'} alt={'Jumper'} width={256} height={256} className={'text-neutral-900'} />,
 	},
 	aihedge: {
 		name: 'AIHedge',
 		shortName: 'aihedge',
 		treasury: [toAddress('0x241ac8b7584dfe2f23b626c939fd88b9151d7684')],
 		feeStartDate: '2026-06-17',
-		logo: <Image src={'/partners/aihedge.jpg'} alt={'AIHedge'} width={256} height={256} className={'text-900'} />,
+		logo: <Image src={'/partners/aihedge.jpg'} alt={'AIHedge'} width={256} height={256} className={'text-neutral-900'} />,
 	},
 	frankencoin: {
 		name: 'Frankencoin',
@@ -52,14 +52,14 @@ const PARTNERS: TDict<TPartner> = {
 		// dynamically from the Envio indexer by /api/partner-referrals.
 		treasury: [toAddress('0xDe12B620A8a714476A97EfD14E6F7180Ca653557')],
 		feeStartDate: '2026-07-24',
-		logo: <LogoFrankencoin className={'text-900'} />
+		logo: <LogoFrankencoin className={'text-neutral-900'} />
 	},
 	alchemix: {
 		name: 'Alchemix',
 		shortName: 'alchemix',
 		treasury: [toAddress('0x29bcfeD246ce37319d94eBa107db90C453D4c43D')],
 		feeStartDate: '2026-07-29',
-		logo: <Image src={'/partner-logos/AlchemixMark_01.svg'} alt={'Alchemix'} width={256} height={256} className={'text-900'} />,
+		logo: <Image src={'/partner-logos/AlchemixMark_01.svg'} alt={'Alchemix'} width={256} height={256} className={'text-neutral-900'} />,
 	}
 };
 
@@ -195,12 +195,12 @@ type TPartnerLogo = {
 }
 
 const LOGOS: TPartnerLogo = {
-	yearn: <LogoYearn className={'text-900 h-3/4 w-3/4'} />,
-	defisaver: <LogoDeFiSaver isColored={true} className={'text-900 h-3/4 w-3/4'} />,
+	yearn: <LogoYearn className={'text-neutral-900 h-3/4 w-3/4'} />,
+	defisaver: <LogoDeFiSaver isColored={true} className={'text-neutral-900 h-3/4 w-3/4'} />,
 	ceazor: <Image src={'/partners/ceazor.jpg'} alt={'Ceazor'} width={256} height={256} className={'h-3/4 w-3/4 object-contain'} />,
 	jumper: <Image src={'/partners/jumper.jpg'} alt={'Jumper'} width={256} height={256} className={'h-3/4 w-3/4 object-contain'} />,
 	aihedge: <Image src={'/partners/aihedge.jpg'} alt={'AIHedge'} width={256} height={256} className={'h-3/4 w-3/4 object-contain'} />,
-	frankencoin: <LogoFrankencoin isColored={true} className={'text-900 h-3/4 w-3/4'} />,
+	frankencoin: <LogoFrankencoin isColored={true} className={'text-neutral-900 h-3/4 w-3/4'} />,
 	alchemix: <Image src={'/partner-logos/AlchemixMark_01.svg'} alt={'Alchemix'} width={256} height={256} className={'h-3/4 w-3/4 object-contain'} />
 };
 

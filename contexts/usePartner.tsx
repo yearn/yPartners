@@ -1,4 +1,4 @@
-import {createContext, useContext, useEffect, useMemo, useState}	from 'react';
+import {createContext, useContext, useEffect, useMemo, useRef, useState}	from 'react';
 import {PARTNER_ADDRESS_GROUPS, PARTNER_VAULT_CONFIG, PARTNERS, DEFAULT_FEE_START_DATE, SHAREABLE_ADDRESSES, VAULT_WHITELIST} from 'utils/Partners';
 import useSWR from 'swr';
 import {baseFetcher} from 'lib/yearn/utils/fetchers';
@@ -283,9 +283,13 @@ export const PartnerContextApp = ({
 
 	const [selectedVaultKey, setSelectedVaultKey] = useState('');
 	const [endorsementMap, setEndorsementMap] = useState<Map<string, boolean>>(new Map());
-	const [isCheckingEndorsement, setIsCheckingEndorsement] = useState(false);
 	const [vaultTypeMap, setVaultTypeMap] = useState<Map<string, TVaultType>>(new Map());
-	const [isCheckingVaultTypes, setIsCheckingVaultTypes] = useState(false);
+	// Endorsement/vault-type checks are keyed by the combo set they covered.
+	// The previous implementation kept the in-flight flag in state and in the
+	// effect dep arrays; resetting it in `finally` retriggered the effects
+	// endlessly (one check → flag flip → another check, forever).
+	const lastEndorsementCheckKey = useRef('');
+	const lastVaultTypeCheckKey = useRef('');
 
 	const firstComboKey = useMemo((): string => {
 		return vaultCombos[0] ? getComboKey(vaultCombos[0]) : '';
@@ -309,12 +313,17 @@ export const PartnerContextApp = ({
 
 	// Lazy load endorsement status after vaults are loaded
 	useEffect((): void => {
-		if (isSSR || vaultCombos.length === 0 || isCheckingEndorsement) {
+		if (isSSR || vaultCombos.length === 0) {
 			return;
 		}
 
+		const combosKey = vaultCombos.map((combo): string => getComboKey(combo)).join('|');
+		if (lastEndorsementCheckKey.current === combosKey) {
+			return;
+		}
+		lastEndorsementCheckKey.current = combosKey;
+
 		const checkEndorsements = async (): Promise<void> => {
-			setIsCheckingEndorsement(true);
 			try {
 				const vaultsToCheck = vaultCombos.map((combo) => ({
 					chainId: combo.chainId,
@@ -332,22 +341,26 @@ export const PartnerContextApp = ({
 				}
 			} catch (error) {
 				console.error('[usePartner] Failed to check vault endorsements:', error);
-			} finally {
-				setIsCheckingEndorsement(false);
 			}
 		};
 
 		void checkEndorsements();
-	}, [vaultCombos, isSSR, isCheckingEndorsement]);
+	}, [vaultCombos, isSSR]);
+
 
 	// Check vault types to filter out strategies (only show vaults in dropdown)
 	useEffect((): void => {
-		if (isSSR || vaultCombos.length === 0 || isCheckingVaultTypes) {
+		if (isSSR || vaultCombos.length === 0) {
 			return;
 		}
 
+		const combosKey = vaultCombos.map((combo): string => getComboKey(combo)).join('|');
+		if (lastVaultTypeCheckKey.current === combosKey) {
+			return;
+		}
+		lastVaultTypeCheckKey.current = combosKey;
+
 		const checkVaultTypes = async (): Promise<void> => {
-			setIsCheckingVaultTypes(true);
 			try {
 				const results = new Map<string, TVaultType>();
 
@@ -372,13 +385,12 @@ export const PartnerContextApp = ({
 				}
 			} catch (error) {
 				console.error('[usePartner] Failed to check vault types:', error);
-			} finally {
-				setIsCheckingVaultTypes(false);
 			}
 		};
 
 		void checkVaultTypes();
-	}, [vaultCombos, isSSR, isCheckingVaultTypes]);
+	}, [vaultCombos, isSSR]);
+
 
 	const activeCombos = useMemo((): TVaultCombo[] => {
 		if (vaultCombos.length === 0) {

@@ -83,7 +83,14 @@ function createResponse(): TMockResponse {
 describe('partner TVL balance batching', (): void => {
 	beforeEach((): void => {
 		vi.resetAllMocks();
-		mocks.getLatestProvider.mockReturnValue(new ethers.providers.JsonRpcProvider('https://rpc.example', 1));
+		const provider = new ethers.providers.JsonRpcProvider('https://rpc.example', 1);
+		// The handler reads the current price-per-share from the vault contract
+		// (RPC-first; Kong is only a fallback), so the eth_call is stubbed to
+		// keep this test hermetic.
+		provider.call = vi.fn().mockResolvedValue(
+			ethers.utils.defaultAbiCoder.encode(['uint256'], ['1000000'])
+		);
+		mocks.getLatestProvider.mockReturnValue(provider);
 		mocks.getKongVaultMetadata.mockResolvedValue({
 			assetAddress: asset,
 			decimals: 6,
@@ -130,6 +137,23 @@ describe('partner TVL balance batching', (): void => {
 			{address: depositorB, shares: '4000000', currentValue: '4000000', currentValueNormalized: 6}
 		]
 	});
+	});
+
+	it('falls back to the Kong price-per-share when the RPC read fails', async (): Promise<void> => {
+		const provider = new ethers.providers.JsonRpcProvider('https://rpc.example', 1);
+		provider.call = vi.fn().mockRejectedValue(new Error('rpc down'));
+		mocks.getLatestProvider.mockReturnValue(provider);
+		const response = createResponse();
+		await handler(
+			{
+				method: 'GET',
+				query: {vaultAddress: vault, addresses: depositorA, chainId: '1'}
+			} as unknown as NextApiRequest,
+			response as unknown as NextApiResponse
+		);
+
+		expect(response.statusCode).toBe(200);
+		expect(response.body).toMatchObject({pricePerShare: '1000000', totalCurrentValueNormalized: 3});
 	});
 
 	it('returns a typed service error when an RPC is unavailable', async (): Promise<void> => {
