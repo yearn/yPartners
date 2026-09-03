@@ -35,7 +35,8 @@ const VAULT_ABI = [
 	'function balanceOf(address) view returns (uint256)',
 	'function pricePerShare() view returns (uint256)',
 	'function decimals() view returns (uint8)',
-	'function asset() view returns (address)'
+	'function asset() view returns (address)',
+	'function token() view returns (address)'
 ];
 
 const BALANCE_OF_INTERFACE = new ethers.utils.Interface([
@@ -195,16 +196,26 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
 				}
 			}
 		}
-
 		if (decimals === null || !assetAddress) {
-			const [rpcDecimalsRaw, rpcAssetAddressRaw] = await Promise.all([
+			// Yearn v2 vaults expose the underlying token via token() and revert on
+			// asset(), so each lookup is settled independently with that fallback.
+			const [rpcDecimalsSettled, rpcAssetSettled, rpcTokenSettled] = await Promise.allSettled([
 				withTimeout(vaultContract.decimals(), 'vault.decimals'),
-				withTimeout(vaultContract.asset(), 'vault.asset')
+				withTimeout(vaultContract.asset(), 'vault.asset'),
+				withTimeout(vaultContract.token(), 'vault.token')
 			]);
-			const rpcDecimals = rpcDecimalsRaw as BigNumber | number;
-			const rpcAssetAddress = rpcAssetAddressRaw as string;
-			decimals = decimals ?? (BigNumber.isBigNumber(rpcDecimals) ? rpcDecimals.toNumber() : Number(rpcDecimals));
-			assetAddress = assetAddress ?? toAddress(rpcAssetAddress);
+			if (rpcDecimalsSettled.status === 'fulfilled') {
+				const rpcDecimals = rpcDecimalsSettled.value as BigNumber | number;
+				decimals = decimals ?? (BigNumber.isBigNumber(rpcDecimals) ? rpcDecimals.toNumber() : Number(rpcDecimals));
+			}
+			if (assetAddress === null) {
+				const resolvedAsset = rpcAssetSettled.status === 'fulfilled'
+					? toAddress(rpcAssetSettled.value as string)
+					: rpcTokenSettled.status === 'fulfilled'
+						? toAddress(rpcTokenSettled.value as string)
+						: null;
+				assetAddress = resolvedAsset;
+			}
 		}
 
 		if (!pricePerShare || decimals === null || !assetAddress) {

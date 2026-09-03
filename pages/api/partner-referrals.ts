@@ -14,6 +14,13 @@ const FRANKENCOIN_PARTNER = "frankencoin";
 // collateral. The Frankencoin partner has no static depositor list: the tracked
 // depositors are the Frankencoin V2 collateral positions, resolved dynamically below.
 const YSYBOLD_VAULT = "0x23346B04a7f55b8760E5860AA5A77383D63491cD";
+const INVERSE_PARTNER = "inverse";
+// yvCurve-reUSD-sDOLA-f (0x7c439Df9…Ba71a86) is the Yearn v2 vault used as
+// collateral for the Inverse Finance FiRM market. Like Frankencoin, the Inverse
+// partner has no static depositor list: the tracked depositors are the FiRM
+// personal collateral escrows (created via CreateEscrow by the market contract),
+// resolved dynamically below.
+const INVERSE_ESCROW_VAULT = "0x7c439Df9ADE8831180EA4D546c1E910D4Ba71a86";
 
 type TReferralDeposit = {
 	id: string;
@@ -355,6 +362,56 @@ async function getFrankencoinCollateralConfig(): Promise<TPartnerVaultConfig> {
 	return config;
 }
 
+type TInverseEscrowCreated = {
+	escrow: string;
+	chainId: number;
+};
+
+// Resolve the Inverse Finance FiRM escrows holding yvCurve-reUSD-sDOLA-f as
+// collateral.
+//
+// The Envio indexer records every personal collateral escrow via
+// InverseEscrowDeposits.CreateEscrow(owner, escrow), emitted by the FiRM
+// "Yearn reUSD-sDOLA Market" (0x1fD4…6916). The market's only collateral is the
+// Yearn v2 vault 0x7c439Df9…Ba71a86 (verified via market.collateral()), so every
+// recorded escrow is an Inverse-attributed depositor of that vault; its share
+// balance (driven by Transfer events) is what /api/partner-tvl and
+// /api/partner-fees track. Same {chain → vault → depositors} shape as the
+// resolvers above. This is ground truth and needs no RPC.
+async function getInverseEscrowConfig(): Promise<TPartnerVaultConfig> {
+	const query = `
+		query GetInverseEscrows {
+			InverseEscrowCreated(
+				limit: 1000
+			) {
+				escrow
+				chainId
+			}
+		}
+	`;
+
+	const result = await queryEnvioGraphQL<{
+		InverseEscrowCreated: TInverseEscrowCreated[];
+	}>(query, {});
+
+	const config: TPartnerVaultConfig = {};
+	const vault = toAddress(INVERSE_ESCROW_VAULT);
+	for (const escrowCreated of result?.InverseEscrowCreated || []) {
+		if (!config[escrowCreated.chainId]) {
+			config[escrowCreated.chainId] = {};
+		}
+		if (!config[escrowCreated.chainId][vault]) {
+			config[escrowCreated.chainId][vault] = [];
+		}
+		const escrow = toAddress(escrowCreated.escrow);
+		if (!config[escrowCreated.chainId][vault].includes(escrow)) {
+			config[escrowCreated.chainId][vault].push(escrow);
+		}
+	}
+
+	return config;
+}
+
 export default async function handler(
 	req: NextApiRequest,
 	res: NextApiResponse<TResponseBody>,
@@ -391,6 +448,11 @@ export default async function handler(
 		if (partnerShortName === FRANKENCOIN_PARTNER) {
 			const collateralConfig = await getFrankencoinCollateralConfig();
 			res.status(200).json(collateralConfig);
+			return;
+		}
+		if (partnerShortName === INVERSE_PARTNER) {
+			const escrowConfig = await getInverseEscrowConfig();
+			res.status(200).json(escrowConfig);
 			return;
 		}
 		const deposits = await getReferralDeposits(referrerAddress);

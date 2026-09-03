@@ -60,6 +60,18 @@ const PARTNERS: TDict<TPartner> = {
 		treasury: [toAddress('0x29bcfeD246ce37319d94eBa107db90C453D4c43D')],
 		feeStartDate: '2026-07-29',
 		logo: <Image src={'/partner-logos/AlchemixMark_01.svg'} alt={'Alchemix'} width={256} height={256} className={'text-neutral-900'} />,
+	},
+	inverse: {
+		name: 'Inverse Finance',
+		shortName: 'inverse',
+		// Inverse Finance FiRM market (0x1fD4…6916, the "Yearn reUSD-sDOLA Market"):
+		// the contract that creates personal collateral escrows holding yvCurve-
+		// reUSD-sDOLA-f shares. Used as the routing/login identifier only; the
+		// tracked depositors (the FiRM escrows) are resolved dynamically from the
+		// Envio indexer by /api/partner-referrals.
+		treasury: [toAddress('0x1fD4985cdd57bDb1eD646B10B7952fCD58946916')],
+		feeStartDate: '2026-09-03',
+		logo: <Image src={'/partner-logos/Inverse_Finance_Logo_05.svg'} alt={'Inverse Finance'} width={256} height={256} className={'text-neutral-900'} />
 	}
 };
 
@@ -201,7 +213,8 @@ const LOGOS: TPartnerLogo = {
 	jumper: <Image src={'/partners/jumper.jpg'} alt={'Jumper'} width={256} height={256} className={'h-3/4 w-3/4 object-contain'} />,
 	aihedge: <Image src={'/partners/aihedge.jpg'} alt={'AIHedge'} width={256} height={256} className={'h-3/4 w-3/4 object-contain'} />,
 	frankencoin: <LogoFrankencoin isColored={true} className={'text-neutral-900 h-3/4 w-3/4'} />,
-	alchemix: <Image src={'/partner-logos/AlchemixMark_01.svg'} alt={'Alchemix'} width={256} height={256} className={'h-3/4 w-3/4 object-contain'} />
+	alchemix: <Image src={'/partner-logos/AlchemixMark_01.svg'} alt={'Alchemix'} width={256} height={256} className={'h-3/4 w-3/4 object-contain'} />,
+	inverse: <Image src={'/partner-logos/Inverse_Finance_Logo_05.svg'} alt={'Inverse Finance'} width={256} height={256} className={'h-3/4 w-3/4 object-contain'} />
 };
 
 

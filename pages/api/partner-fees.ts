@@ -114,6 +114,8 @@ const ZERO_ADDRESS = ethers.constants.AddressZero;
 const PRICE_PER_SHARE_SELECTOR = "0x99530b06";
 const DECIMALS_SELECTOR = "0x313ce567";
 const ASSET_SELECTOR = "0x38d52e0f";
+// token() — Yearn v2 vaults expose the underlying token this way instead of asset().
+const TOKEN_SELECTOR = "0xfc0c546a";
 const ACCOUNTANT_SELECTOR = "0x4fb3ccc5";
 const VAULT_CONFIG_SELECTOR = "0xde1eb9a3"; // getVaultConfig(address)
 // Global performanceFee() — exposed by custom accountants without getVaultConfig.
@@ -646,7 +648,13 @@ async function getVaultAssetAddress(
 	provider: TRpcProvider,
 	vault: string,
 ): Promise<string> {
-	const data = await provider.call({ to: vault, data: ASSET_SELECTOR });
+	let data: string;
+	try {
+		data = await provider.call({ to: vault, data: ASSET_SELECTOR });
+	} catch {
+		// Yearn v2 vaults revert on asset(); token() returns the underlying token.
+		data = await provider.call({ to: vault, data: TOKEN_SELECTOR });
+	}
 	return toAddress(`0x${data.slice(-40)}`);
 }
 

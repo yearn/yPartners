@@ -26,7 +26,7 @@ type TResponse =
 	| {error: string};
 
 const MAX_VAULTS = 100;
-const VAULT_ABI = ['function asset() view returns (address)'];
+const VAULT_ABI = ['function asset() view returns (address)', 'function token() view returns (address)'];
 
 function parseVaults(value: string | string[] | undefined): TVaultSpec[] | null {
 	const rawVaults = (Array.isArray(value) ? value.join(',') : value || '')
@@ -68,11 +68,16 @@ async function resolveVaultAssets(chainId: number, vaults: TAddress[]): Promise<
 	const assets = await Promise.all(vaults.map(async (vaultAddress): Promise<TVaultAsset> => {
 		let assetAddress = metadataByVault.get(vaultAddress.toLowerCase())?.assetAddress ?? null;
 		if (!assetAddress && provider) {
+			const vault = new ethers.Contract(vaultAddress, VAULT_ABI, provider);
 			try {
-				const vault = new ethers.Contract(vaultAddress, VAULT_ABI, provider);
 				assetAddress = toAddress(await vault.asset() as string);
-			} catch (error) {
-				console.warn(`[vault-assets] Failed to fetch asset for vault ${vaultAddress} on chain ${chainId}:`, error);
+			} catch {
+				// Yearn v2 vaults revert on asset(); token() returns the underlying token.
+				try {
+					assetAddress = toAddress(await vault.token() as string);
+				} catch (tokenError) {
+					console.warn(`[vault-assets] Failed to fetch asset for vault ${vaultAddress} on chain ${chainId}:`, tokenError);
+				}
 			}
 		}
 
