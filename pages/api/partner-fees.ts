@@ -760,6 +760,7 @@ async function getFeeConfig(
 				globalError instanceof Error ? globalError.message : String(globalError);
 			throw new Error(
 				`Unable to read performance fee for ${vault}: ${configMessage}; ${globalMessage}`,
+				{cause: globalError},
 			);
 		}
 	}
@@ -1480,6 +1481,7 @@ export default async function handler(
 							: String(yDaemonError);
 					throw new Error(
 						`Unable to read fee configuration from RPC or yDaemon: ${archiveMessage}; ${yDaemonMessage}`,
+						{cause: yDaemonError},
 					);
 				}
 			}

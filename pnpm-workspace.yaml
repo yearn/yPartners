@@ -14,3 +14,5 @@ trustPolicyExclude:
   - 'chokidar@4.0.3'
   - 'eslint-import-resolver-typescript@3.10.1'
   - 'semver@6.3.1'
+patchedDependencies:
+  eslint-plugin-react@7.37.5: patches/eslint-plugin-react@7.37.5.patch

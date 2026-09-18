@@ -3,9 +3,6 @@ const tseslint = require('typescript-eslint');
 const nextCoreWebVitals = require('eslint-config-next/core-web-vitals');
 
 module.exports = [
-	{
-		ignores: ['yearn.fi/**', '.next/**', 'node_modules/**', 'internal-docs/**']
-	},
 	...nextCoreWebVitals,
 	js.configs.recommended,
 	...tseslint.configs.recommended,

@@ -24,7 +24,7 @@ export async function getTokenSymbol(
 		return null;
 	}
 
-	let symbol: string | null = null;
+	let symbol: string | null;
 	try {
 		[symbol] = ethers.utils.defaultAbiCoder.decode(['string'], data);
 	} catch {
