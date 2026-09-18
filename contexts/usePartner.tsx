@@ -5,6 +5,7 @@ import {baseFetcher} from 'lib/yearn/utils/fetchers';
 import {toAddress} from 'lib/yearn/utils/address';
 import {checkVaultsEndorsement} from 'lib/yearn/endorsement';
 import {isVault, TVaultType} from 'lib/yearn/vaultDetection';
+import {DEFAULT_PARTNER_FEE_SHARE, getPartnerFeeShare} from 'lib/yearn/partnerFeeShare';
 
 import type {ReactElement} from 'react';
 import type {TAddress} from 'lib/yearn/utils/address';
@@ -32,6 +33,7 @@ type TPartnerContext = {
 	userCount?: number,
 	feesOverride?: number,
 	feeStartTimestamp: number,
+	feeShare: number,
 	chartSnapshots: TChartSnapshot[],
 	accountFees: TAccountFees[],
 	vaultComboData: TVaultComboData[],
@@ -48,6 +50,7 @@ const	defaultProps: TPartnerContext = {
 	userCount: undefined,
 	feesOverride: undefined,
 	feeStartTimestamp: 0,
+	feeShare: DEFAULT_PARTNER_FEE_SHARE,
 	chartSnapshots: [],
 	accountFees: [],
 	vaultComboData: [],
@@ -176,8 +179,8 @@ function buildPartnerTVLUrl(combo: TVaultCombo): string {
 	return `/api/partner-tvl?addresses=${combo.addresses.join(',')}&vaultAddress=${combo.vaultAddress}&chainId=${combo.chainId}`;
 }
 
-function buildPartnerFeesUrl(combo: TVaultCombo, windowDays: number | undefined, includeSnapshots: boolean, feeStartSeconds?: number): string {
-	return `/api/partner-fees?addresses=${combo.addresses.join(',')}&vaultAddress=${combo.vaultAddress}&chainId=${combo.chainId}${windowDays ? `&days=${windowDays}` : ''}${feeStartSeconds ? `&feeStart=${feeStartSeconds}` : ''}&includeSnapshots=${includeSnapshots ? 'true' : 'false'}`;
+function buildPartnerFeesUrl(combo: TVaultCombo, windowDays: number | undefined, includeSnapshots: boolean, feeStartSeconds?: number, partnerShortName?: string): string {
+	return `/api/partner-fees?addresses=${combo.addresses.join(',')}&vaultAddress=${combo.vaultAddress}&chainId=${combo.chainId}${windowDays ? `&days=${windowDays}` : ''}${feeStartSeconds ? `&feeStart=${feeStartSeconds}` : ''}${partnerShortName ? `&partner=${encodeURIComponent(partnerShortName)}` : ''}&includeSnapshots=${includeSnapshots ? 'true' : 'false'}`;
 }
 
 export const PartnerContextApp = ({
@@ -193,6 +196,7 @@ export const PartnerContextApp = ({
 	// timestamps ('YYYY-MM-DDTHH:mm:ssZ', exact to the second).
 	const feeStartDate = PARTNERS[currentPartner]?.feeStartDate ?? DEFAULT_FEE_START_DATE;
 	const feeStartTimestamp = Math.floor(new Date(feeStartDate).getTime() / 1000);
+	const feeShare = getPartnerFeeShare(currentPartner || undefined);
 	const isSSR = typeof window === 'undefined';
 	const isDynamicPartner = Boolean(currentPartner);
 
@@ -436,9 +440,9 @@ export const PartnerContextApp = ({
 	);
 
 	const {data: feesResults, error: feesRequestError, isLoading: isLoadingDepositorFees} = useSWR<(TPartnerFeesResponse | TAPIError)[]>(
-		shouldFetchCombos ? ['partner-fees', comboIdentityKey, windowDays, feeStartTimestamp] : null,
+		shouldFetchCombos ? ['partner-fees', comboIdentityKey, windowDays, feeStartTimestamp, feeShare] : null,
 		async (): Promise<(TPartnerFeesResponse | TAPIError)[]> => Promise.all(
-			activeCombos.map((combo) => baseFetcher<TPartnerFeesResponse | TAPIError>(buildPartnerFeesUrl(combo, windowDays, true, feeStartTimestamp)))
+			activeCombos.map((combo) => baseFetcher<TPartnerFeesResponse | TAPIError>(buildPartnerFeesUrl(combo, windowDays, true, feeStartTimestamp, currentPartner)))
 		),
 		{revalidateOnFocus: false}
 	);
@@ -708,6 +712,7 @@ export const PartnerContextApp = ({
 					userCount,
 					feesOverride,
 					feeStartTimestamp,
+					feeShare,
 					chartSnapshots,
 					accountFees,
 					vaultComboData,

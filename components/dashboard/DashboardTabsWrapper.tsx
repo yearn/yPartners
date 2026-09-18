@@ -88,7 +88,7 @@ const VaultOptionLabel = memo(function VaultOptionLabel({
 });
 
 function DashboardTabsContent({onWindowChange}: {onWindowChange: (value: number) => void}): ReactElement {
-	const {tvlOverride, userCount, feesOverride, isLoadingFees, isLoadingChart, chartSnapshots, accountFees, vaultComboData, apiErrors, selectedVaultKey, setSelectedVaultKey, feeStartTimestamp} = usePartner();
+	const {tvlOverride, userCount, feesOverride, isLoadingFees, isLoadingChart, chartSnapshots, accountFees, vaultComboData, apiErrors, selectedVaultKey, setSelectedVaultKey, feeStartTimestamp, feeShare} = usePartner();
 	const [activeWindow, set_activeWindow] = useState('1 month');
 	const [sinceStartDays, set_sinceStartDays] = useState(0);
 	const activeWindowDays = activeWindow === 'Since start'
@@ -271,7 +271,8 @@ function DashboardTabsContent({onWindowChange}: {onWindowChange: (value: number)
 				feesOverride={selectedCombo ? (typeof selectedFees === 'number' ? selectedFees : undefined) : feesOverride}
 				userCount={selectedUserCount}
 				isLoadingTVL={selectedLoadingTVL}
-				isLoadingFees={selectedLoadingFees}/>
+				isLoadingFees={selectedLoadingFees}
+				feeShare={feeShare}/>
 
 			<div className={'mt-2 md:mt-8'}>
 				<BalanceProfitChart snapshots={selectedCombo ? selectedSnapshots : chartSnapshots} isLoading={selectedLoadingChart} feeStartTimestamp={feeStartTimestamp} windowDays={activeWindowDays} />

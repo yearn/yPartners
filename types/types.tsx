@@ -19,6 +19,8 @@ export type TPartner = {
 	shortName: string;
 	treasury?: TAddress[];
 	feeStartDate?: string;
+	/** Partner's share of accrued fees (0-1); the remainder goes to Yearn. Defaults to 0.5. */
+	feeShare?: number;
 	logo: ReactElement;
 }
 

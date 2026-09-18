@@ -174,6 +174,54 @@ describe('partner fee accrual', (): void => {
 		expect(anchor?.profit).toBeCloseTo(10, 6);
 	});
 
+	it('applies a partner-specific fee share to chart fee splits', async (): Promise<void> => {
+		// Inverse scenario: 65% of accrued fees go to the partner instead of the
+		// default 50%. Same fee base, only the share differs.
+		const scale = BigNumber.from(10).pow(6);
+		const shares = scale.mul(100);
+		const provider = {
+			connection: {url: 'partner-fee-share-regression'},
+			call: async (_request: unknown, block?: number): Promise<string> => {
+				if (block !== 200) {
+					throw new Error(`Missing PPS fixture for block ${block}`);
+				}
+				return scale.toHexString();
+			},
+			getBlockNumber: async (): Promise<number> => 300
+		} as unknown as ethers.providers.JsonRpcProvider;
+
+		const runChart = async (partnerFeeShare?: number) => prepareChartSnapshots(
+			provider,
+			[{blockNumber: 100, eventType: 'deposit', sharesBalance: shares}],
+			6,
+			scale.mul(2),
+			shares,
+			'0x0000000000000000000000000000000000000001',
+			1,
+			provider,
+			200, // plotCutoff: window start
+			200, // accrualCutoff: fee start date
+			1000, // performanceFeeBps
+			0, // managementFeeBps
+			300, // currentBlock
+			1, // chainId
+			partnerFeeShare
+		);
+
+		const defaultChart = await runChart(undefined);
+		const halfChart = await runChart(0.5);
+		const inverseChart = await runChart(0.65);
+
+		// Omitting the share behaves exactly like the default 50/50 split.
+		expect(defaultChart[defaultChart.length - 1].feeSplit)
+			.toBeCloseTo(halfChart[halfChart.length - 1].feeSplit, 6);
+
+		// Fee base is $11.11… (100 * 1/9 performance fee); the shares scale it.
+		expect(halfChart[halfChart.length - 1].feeSplit).toBeCloseTo(100 / 9 * 0.5, 6);
+		expect(inverseChart[inverseChart.length - 1].feeSplit).toBeCloseTo(100 / 9 * 0.65, 6);
+		expect(inverseChart[inverseChart.length - 1].feeSplit / halfChart[halfChart.length - 1].feeSplit).toBeCloseTo(1.3, 6);
+	});
+
 	it('accepts a standard accountant with a non-zero management fee', async (): Promise<void> => {
 		const accountantAddress = '0x0000000000000000000000000000000000000002';
 		const config = ethers.utils.defaultAbiCoder.encode(
