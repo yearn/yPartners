@@ -1,4 +1,3 @@
-import {PARTNER_FEE_SHARE} from 'lib/yearn/partnerFeeShare';
 import {formatAmount} from 'lib/yearn/utils/format.number';
 
 import type {ReactElement} from 'react';
@@ -9,15 +8,16 @@ type TProps = {
 	feesOverride?: number,
 	isLoadingTVL?: boolean,
 	isLoadingFees?: boolean,
+	feeShare?: number,
 }
 
 function SummaryMetrics(props: TProps): ReactElement {
-	const {tvlOverride, userCount, feesOverride, isLoadingTVL, isLoadingFees} = props;
+	const {tvlOverride, userCount, feesOverride, isLoadingTVL, isLoadingFees, feeShare = 0.5} = props;
 
 	const hasUserCount = typeof userCount === 'number';
 	const tvlValue = tvlOverride ?? 0;
 	const feeValue = feesOverride ?? 0;
-	const earningsValue = Math.ceil(feeValue * PARTNER_FEE_SHARE * 100) / 100;
+	const earningsValue = Math.ceil(feeValue * feeShare * 100) / 100;
 
 	return (
 		<div>

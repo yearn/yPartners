@@ -3,7 +3,7 @@ import { getTokenPriceUsdWithDebug } from "lib/crypto/defillama";
 import {getArchiveProvider, getLatestProvider, getRpcUrlArchive, getRpcUrlLatest} from 'lib/crypto/rpc';
 import { getTokenSymbol } from "lib/crypto/tokenMetadata";
 import { getKongVaultMetadata } from "lib/yearn/kong";
-import { PARTNER_FEE_SHARE } from "lib/yearn/partnerFeeShare";
+import { getPartnerFeeShare } from "lib/yearn/partnerFeeShare";
 import { toAddress } from "lib/yearn/utils/address";
 import type { NextApiRequest, NextApiResponse } from "next";
 
@@ -1137,6 +1137,7 @@ export async function prepareChartSnapshots(
 	managementFeeBps: number = 0,
 	currentBlock?: number,
 	chainId: number = 1,
+	partnerFeeShare: number = 0.5,
 ): Promise<TChartSnapshot[]> {
 	if (snapshots.length === 0) {
 		return [];
@@ -1256,7 +1257,7 @@ export async function prepareChartSnapshots(
 	const feeSplitUsd = (): number => (
 		Number(ethers.utils.formatUnits(feeBase, decimals)) * performanceFeeRate +
 		Number(ethers.utils.formatUnits(managementFeeBase, decimals))
-	) * priceUsd * PARTNER_FEE_SHARE;
+	) * priceUsd * partnerFeeShare;
 
 	const chartData: TChartSnapshot[] = [];
 
@@ -1384,6 +1385,10 @@ export default async function handler(
 	const feeStartSeconds = feeStartParam
 		? parseInt(Array.isArray(feeStartParam) ? feeStartParam[0] : feeStartParam, 10)
 		: NaN;
+	const partnerParam = req.query.partner;
+	const partnerShortName = Array.isArray(partnerParam) ? partnerParam[0] : partnerParam;
+	// Resolved server-side from the partner config so clients cannot invent a split.
+	const partnerFeeShare = getPartnerFeeShare(partnerShortName);
 	const includeSnapshotsParam = req.query.includeSnapshots;
 	const includeSnapshots =
 		includeSnapshotsParam === "true" || includeSnapshotsParam === "1";
@@ -1752,6 +1757,7 @@ export default async function handler(
 				managementFeeBps,
 				currentBlock,
 				chainId,
+				partnerFeeShare,
 			);
 		}
 

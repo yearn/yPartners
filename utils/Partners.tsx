@@ -70,7 +70,10 @@ const PARTNERS: TDict<TPartner> = {
 		// tracked depositors (the FiRM escrows) are resolved dynamically from the
 		// Envio indexer by /api/partner-referrals.
 		treasury: [toAddress('0x1fD4985cdd57bDb1eD646B10B7952fCD58946916')],
-		feeStartDate: '2026-09-03',
+		// Partnership start = block 0x18c13fd (tx 0xb2f191…2a73a), exact to the second.
+		feeStartDate: '2026-09-11T23:13:11Z',
+		// Custom split: 35% Yearn / 65% Inverse (default is 50/50).
+		feeShare: 0.65,
 		logo: <Image src={'/partner-logos/Inverse_Finance_Logo_05.svg'} alt={'Inverse Finance'} width={256} height={256} className={'text-neutral-900'} />
 	}
 };
