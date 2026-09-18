@@ -189,8 +189,10 @@ export const PartnerContextApp = ({
 
 	// Date from which fee accrual begins for this partner (Unix seconds). Drives
 	// the fee-accrual floor in /api/partner-fees and the start-date marker on the chart.
+	// Accepts date-only ISO ('YYYY-MM-DD', parsed as UTC midnight) or full ISO
+	// timestamps ('YYYY-MM-DDTHH:mm:ssZ', exact to the second).
 	const feeStartDate = PARTNERS[currentPartner]?.feeStartDate ?? DEFAULT_FEE_START_DATE;
-	const feeStartTimestamp = Math.floor(new Date(`${feeStartDate}T00:00:00Z`).getTime() / 1000);
+	const feeStartTimestamp = Math.floor(new Date(feeStartDate).getTime() / 1000);
 	const isSSR = typeof window === 'undefined';
 	const isDynamicPartner = Boolean(currentPartner);
 
