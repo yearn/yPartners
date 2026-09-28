@@ -2,6 +2,7 @@
 	"name": "ypartners",
 	"version": "0.2.0",
 	"private": false,
+	"packageManager": "pnpm@11.7.0",
 	"scripts": {
 		"dev": "next",
 		"dev:ts": "tsc --watch",
