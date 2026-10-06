@@ -17,9 +17,14 @@ trustPolicyExclude:
 patchedDependencies:
   eslint-plugin-react@7.37.5: patches/eslint-plugin-react@7.37.5.patch
 overrides:
-  # GHSA-35rv-wx7c-jr7c (memory-exhaustion DoS) — ws is pulled in by ethers v5's
-  # websocket providers. The elliptic (GHSA-848j-6mx2-7j84) and braces
-  # (GHSA-v3mw-4g3v-6v7r) advisories reference patched releases that are not
-  # published yet (elliptic >= 6.6.2, braces >= 3.0.4), so they stay until
-  # upstream ships them or ethers moves to v6.
+  # Dedupe ethers' bundled @types/node (22.7.5 drags in undici-types@6.19.8,
+  # published without a provenance attestation) onto the same attested 24.x
+  # line the repo itself uses. Keeps the trust policy fully enforced: no
+  # undici-types exclusion is needed.
+  'ethers>@types/node': 24.19.0
+  # GHSA-35rv-wx7c-jr7c (memory-exhaustion DoS): ethers (v5 and v6 alike)
+  # depends on ws for its WebSocket providers; pin >= 8.21 so resolutions
+  # cannot drift back into the vulnerable range. The braces advisory
+  # (GHSA-v3mw-4g3v-6v7r) references a release (>= 3.0.4) that is not
+  # published yet; elliptic left the tree with the ethers v6 migration.
   ws: ^8.21.0

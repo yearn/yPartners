@@ -1,5 +1,7 @@
 import {describe, expect, it, vi} from 'vitest';
-import {BigNumber, ethers} from 'ethers';
+import {AbiCoder, zeroPadValue} from 'ethers';
+
+import type {Provider} from 'ethers';
 
 import {
 	aggregateSnapshots,
@@ -17,36 +19,35 @@ describe('partner fee accrual', (): void => {
 		expect(getEffectiveFeeCutoff(100, 200)).toBe(200);
 		expect(getEffectiveFeeCutoff(null, 200)).toBe(200);
 
-		const scale = BigNumber.from(10).pow(18);
-		const shares = scale.mul(100);
-		const ppsByBlock = new Map<number, BigNumber>([
+		const scale = 10n ** 18n;
+		const shares = scale * 100n;
+		const ppsByBlock = new Map<number, bigint>([
 			[100, scale],
-			[200, scale.mul(11).div(10)],
-			[300, scale.mul(12).div(10)]
+			[200, scale * 11n / 10n],
+			[300, scale * 12n / 10n]
 		]);
 		const provider = {
 			connection: {url: 'fee-accrual-regression'},
-			call: async (_request: unknown, block?: number): Promise<string> => {
-				const pps = ppsByBlock.get(block ?? -1);
+			call: async ({blockTag}: {blockTag?: number}): Promise<string> => {
+				const pps = ppsByBlock.get(blockTag ?? -1);
 				if (!pps) {
-					throw new Error(`Missing PPS fixture for block ${block}`);
+					throw new Error(`Missing PPS fixture for block ${blockTag}`);
 				}
-				return pps.toHexString();
+				return `0x${pps.toString(16).padStart(64, '0')}`;
 			}
-		} as unknown as ethers.providers.JsonRpcProvider;
-
+		} as unknown as Provider;
 		const result = await calculateIncrementalProfitAndFees(
 			provider,
 			[{blockNumber: 100, eventType: 'deposit', sharesBalance: shares}, {blockNumber: 300, eventType: 'deposit', sharesBalance: shares}],
 			1000,
-			scale.mul(13).div(10),
+			scale * 13n / 10n,
 			18,
 			'0x0000000000000000000000000000000000000001',
 			200
 		);
 
-		expect(result.netProfit.eq(scale.mul(20))).toBe(true);
-		expect(result.totalFees.gt(0)).toBe(true);
+		expect(result.netProfit === scale * 20n).toBe(true);
+		expect(result.totalFees > 0n).toBe(true);
 	});
 	it('uses the Kong PPS fallback when the latest RPC read fails', async (): Promise<void> => {
 		const provider = {
@@ -54,7 +55,7 @@ describe('partner fee accrual', (): void => {
 			call: async (): Promise<string> => {
 				throw new Error('transient latest RPC failure');
 			}
-		} as unknown as ethers.providers.JsonRpcProvider;
+		} as unknown as Provider;
 
 		await expect(
 			getCurrentPricePerShare(
@@ -62,45 +63,45 @@ describe('partner fee accrual', (): void => {
 				'0x0000000000000000000000000000000000000007',
 				'1234567890000000000',
 			)
-		).resolves.toEqual(BigNumber.from('1234567890000000000'));
+		).resolves.toEqual(1234567890000000000n);
 	});
 	it('carries each position balance through aggregate chart snapshots', (): void => {
-		const scale = BigNumber.from(10).pow(6);
+		const scale = 10n ** 6n;
 		const snapshots = aggregateSnapshots([
 			{
 				address: '0x0000000000000000000000000000000000000001',
-				snapshot: {blockNumber: 100, eventType: 'deposit', sharesBalance: scale.mul(100)}
+				snapshot: {blockNumber: 100, eventType: 'deposit', sharesBalance: scale * 100n}
 			},
 			{
 				address: '0x0000000000000000000000000000000000000002',
-				snapshot: {blockNumber: 200, eventType: 'deposit', sharesBalance: scale.mul(10)}
+				snapshot: {blockNumber: 200, eventType: 'deposit', sharesBalance: scale * 10n}
 			},
 			{
 				address: '0x0000000000000000000000000000000000000001',
-				snapshot: {blockNumber: 300, eventType: 'withdraw', sharesBalance: scale.mul(80)}
+				snapshot: {blockNumber: 300, eventType: 'withdraw', sharesBalance: scale * 80n}
 			}
 		]);
 
 		expect(snapshots.map((snapshot) => snapshot.sharesBalance.toString())).toEqual([
-			scale.mul(100).toString(),
-			scale.mul(110).toString(),
-			scale.mul(90).toString()
+			(scale * 100n).toString(),
+			(scale * 110n).toString(),
+			(scale * 90n).toString()
 		]);
 	});
 
 	it('seeds a short chart window without timestamp RPCs', async (): Promise<void> => {
-		const scale = BigNumber.from(10).pow(6);
-		const shares = scale.mul(100);
+		const scale = 10n ** 6n;
+		const shares = scale * 100n;
 		const provider = {
 			connection: {url: 'chart-window-baseline-regression'},
-			call: async (_request: unknown, block?: number): Promise<string> => {
-				if (block !== 200) {
-					throw new Error(`Missing PPS fixture for block ${block}`);
+			call: async ({blockTag}: {blockTag?: number}): Promise<string> => {
+				if (blockTag !== 200) {
+					throw new Error(`Missing PPS fixture for block ${blockTag}`);
 				}
-				return scale.toHexString();
+				return `0x${scale.toString(16).padStart(64, '0')}`;
 			},
 			getBlockNumber: async (): Promise<number> => 300
-		} as unknown as ethers.providers.JsonRpcProvider;
+		} as unknown as Provider;
 
 		const chart = await prepareChartSnapshots(
 			provider,
@@ -125,29 +126,29 @@ describe('partner fee accrual', (): void => {
 		// no events occur after it. The chart must stay flat at zero until the
 		// accrual cutoff block instead of drawing a straight diagonal from the
 		// window origin to today's accrued fee.
-		const scale = BigNumber.from(10).pow(18);
-		const shares = scale.mul(100);
-		const ppsByBlock = new Map<number, BigNumber>([
+		const scale = 10n ** 18n;
+		const shares = scale * 100n;
+		const ppsByBlock = new Map<number, bigint>([
 			[100, scale],
-			[200, scale.mul(11).div(10)]
+			[200, scale * 11n / 10n]
 		]);
 		const provider = {
 			connection: {url: 'fee-accrual-anchor-regression'},
-			call: async (_request: unknown, block?: number): Promise<string> => {
-				const pps = block === undefined ? undefined : ppsByBlock.get(block);
+			call: async ({blockTag}: {blockTag?: number}): Promise<string> => {
+				const pps = blockTag === undefined ? undefined : ppsByBlock.get(blockTag);
 				if (!pps) {
-					throw new Error(`Missing PPS fixture for block ${block}`);
+					throw new Error(`Missing PPS fixture for block ${blockTag}`);
 				}
-				return pps.toHexString();
+				return `0x${pps.toString(16).padStart(64, '0')}`;
 			},
 			getBlockNumber: async (): Promise<number> => 300
-		} as unknown as ethers.providers.JsonRpcProvider;
+		} as unknown as Provider;
 
 		const chart = await prepareChartSnapshots(
 			provider,
 			[{blockNumber: 100, eventType: 'deposit', sharesBalance: shares}],
 			18,
-			scale.mul(13).div(10),
+			scale * 13n / 10n,
 			shares,
 			'0x0000000000000000000000000000000000000001',
 			1,
@@ -177,24 +178,24 @@ describe('partner fee accrual', (): void => {
 	it('applies a partner-specific fee share to chart fee splits', async (): Promise<void> => {
 		// Inverse scenario: 65% of accrued fees go to the partner instead of the
 		// default 50%. Same fee base, only the share differs.
-		const scale = BigNumber.from(10).pow(6);
-		const shares = scale.mul(100);
+		const scale = 10n ** 6n;
+		const shares = scale * 100n;
 		const provider = {
 			connection: {url: 'partner-fee-share-regression'},
-			call: async (_request: unknown, block?: number): Promise<string> => {
-				if (block !== 200) {
-					throw new Error(`Missing PPS fixture for block ${block}`);
+			call: async ({blockTag}: {blockTag?: number}): Promise<string> => {
+				if (blockTag !== 200) {
+					throw new Error(`Missing PPS fixture for block ${blockTag}`);
 				}
-				return scale.toHexString();
+				return `0x${scale.toString(16).padStart(64, '0')}`;
 			},
 			getBlockNumber: async (): Promise<number> => 300
-		} as unknown as ethers.providers.JsonRpcProvider;
+		} as unknown as Provider;
 
 		const runChart = async (partnerFeeShare?: number) => prepareChartSnapshots(
 			provider,
 			[{blockNumber: 100, eventType: 'deposit', sharesBalance: shares}],
 			6,
-			scale.mul(2),
+			scale * 2n,
 			shares,
 			'0x0000000000000000000000000000000000000001',
 			1,
@@ -224,7 +225,7 @@ describe('partner fee accrual', (): void => {
 
 	it('accepts a standard accountant with a non-zero management fee', async (): Promise<void> => {
 		const accountantAddress = '0x0000000000000000000000000000000000000002';
-		const config = ethers.utils.defaultAbiCoder.encode(
+		const config = AbiCoder.defaultAbiCoder().encode(
 			['uint256', 'uint256', 'uint256', 'uint256'],
 			[25, 1000, 0, 5000]
 		);
@@ -232,14 +233,14 @@ describe('partner fee accrual', (): void => {
 			connection: {url: 'katana-fee-config-regression'},
 			call: async (request: {data?: string}): Promise<string> => {
 				if (request.data === '0x4fb3ccc5') {
-					return ethers.utils.hexZeroPad(accountantAddress, 32);
+					return zeroPadValue(accountantAddress, 32);
 				}
 				if (request.data?.startsWith('0xde1eb9a3')) {
 					return config;
 				}
 				throw new Error('global performanceFee() must not be used');
 			}
-		} as unknown as ethers.providers.JsonRpcProvider;
+		} as unknown as Provider;
 
 		await expect(
 			getPerformanceFeeBps(
@@ -275,26 +276,26 @@ describe('partner fee accrual', (): void => {
 	});
 
 	it('accrues management fees from average block time without timestamp RPCs', async (): Promise<void> => {
-		const scale = BigNumber.from(10).pow(18);
-		const shares = scale.mul(100);
+		const scale = 10n ** 18n;
+		const shares = scale * 100n;
 		const year = 31_556_952;
 		const blocksPerYear = year * 1000 / getMillisecondsPerBlock(1);
 		const firstYearBlock = 100 + blocksPerYear;
 		const currentBlock = 100 + blocksPerYear * 2;
-		const pps = new Map<number, BigNumber>([
+		const pps = new Map<number, bigint>([
 			[100, scale],
 			[firstYearBlock, scale],
 		]);
 		const provider = {
 			connection: {url: 'management-fee-regression'},
-			call: async (_request: unknown, block?: number): Promise<string> => {
-				const value = pps.get(block ?? -1);
+			call: async ({blockTag}: {blockTag?: number}): Promise<string> => {
+				const value = pps.get(blockTag ?? -1);
 				if (!value) {
-					throw new Error(`Missing PPS fixture for block ${block}`);
+					throw new Error(`Missing PPS fixture for block ${blockTag}`);
 				}
-				return value.toHexString();
+				return `0x${value.toString(16).padStart(64, '0')}`;
 			}
-		} as unknown as ethers.providers.JsonRpcProvider;
+		} as unknown as Provider;
 
 		const result = await calculateIncrementalProfitAndFees(
 			provider,
@@ -312,8 +313,8 @@ describe('partner fee accrual', (): void => {
 			1
 		);
 
-		expect(result.netProfit.eq(0)).toBe(true);
-		expect(result.totalFees.eq(scale.mul(2))).toBe(true);
+		expect(result.netProfit === 0n).toBe(true);
+		expect(result.totalFees === scale * 2n).toBe(true);
 	});
 
 	it('rejects unsupported chains instead of using an arbitrary block time', (): void => {
@@ -327,11 +328,11 @@ describe('partner fee accrual', (): void => {
 			connection: {url: 'legacy-vault-fee-regression'},
 			call: async (request: {to?: string, data?: string}): Promise<string> => {
 				if (request.data === '0x87788782' && request.to?.toLowerCase() === '0x0000000000000000000000000000000000000004') {
-					return ethers.utils.hexZeroPad('0x3e8', 32);
+					return zeroPadValue('0x03e8', 32);
 				}
 				throw new Error('unsupported selector');
 			}
-		} as unknown as ethers.providers.JsonRpcProvider;
+		} as unknown as Provider;
 
 		await expect(
 			getPerformanceFeeBps(
@@ -344,7 +345,7 @@ describe('partner fee accrual', (): void => {
 		const provider = {
 			connection: {url: 'empty-fee-selector-regression'},
 			call: async (): Promise<string> => '0x'
-		} as unknown as ethers.providers.JsonRpcProvider;
+		} as unknown as Provider;
 
 		await expect(
 			getPerformanceFeeBps(

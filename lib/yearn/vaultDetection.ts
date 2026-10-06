@@ -1,4 +1,4 @@
-import {ethers} from 'ethers';
+import {Contract, JsonRpcProvider} from 'ethers';
 import {getRpcUrlLatest} from 'lib/crypto/rpc';
 import type {TAddress} from './utils/address';
 
@@ -24,15 +24,15 @@ async function checkOnChainVaultType(
 	}
 
 	try {
-		const provider = new ethers.providers.JsonRpcProvider(rpcUrl, chainId);
-		const contract = new ethers.Contract(address, VAULT_CHECK_ABI, provider);
+		const provider = new JsonRpcProvider(rpcUrl, chainId);
+		const contract = new Contract(address, VAULT_CHECK_ABI, provider);
 		await contract.get_default_queue();
 		return 'vault';
 	} catch (firstError) {
 		void firstError;
 		try {
-			const provider = new ethers.providers.JsonRpcProvider(rpcUrl, chainId);
-			const contract = new ethers.Contract(address, VAULT_CHECK_ABI, provider);
+			const provider = new JsonRpcProvider(rpcUrl, chainId);
+			const contract = new Contract(address, VAULT_CHECK_ABI, provider);
 			const version = await contract.apiVersion();
 			return version ? 'strategy' : 'unknown';
 		} catch (secondError) {

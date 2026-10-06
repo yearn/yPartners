@@ -1,4 +1,6 @@
-import {BigNumber, ethers} from 'ethers';
+import {Contract, Interface, ZeroAddress, formatUnits} from 'ethers';
+
+import type {Provider} from 'ethers';
 import type {NextApiRequest, NextApiResponse} from 'next';
 import {getTokenPriceUsdWithDebug} from 'lib/crypto/defillama';
 import {getLatestProvider} from 'lib/crypto/rpc';
@@ -28,7 +30,7 @@ type TResponseBody = {
 
 const DEFAULT_VAULT_ADDRESS = '0xBe53A109B494E5c9f97b9Cd39Fe969BE68BF6204';
 const DEFAULT_DECIMALS = 18;
-const ZERO_ADDRESS = ethers.constants.AddressZero;
+const ZERO_ADDRESS = ZeroAddress;
 const REQUEST_TIMEOUT_MS = 12_000;
 
 const VAULT_ABI = [
@@ -39,7 +41,7 @@ const VAULT_ABI = [
 	'function token() view returns (address)'
 ];
 
-const BALANCE_OF_INTERFACE = new ethers.utils.Interface([
+const BALANCE_OF_INTERFACE = new Interface([
 	'function balanceOf(address) view returns (uint256)'
 ]);
 
@@ -54,7 +56,7 @@ function	parseAddresses(addressParam: string | string[] | undefined): string[] {
 	for (const addr of rawAddresses) {
 		try {
 			const formatted = toAddress(addr);
-			if (formatted !== ethers.constants.AddressZero) {
+			if (formatted !== ZERO_ADDRESS) {
 				uniqueAddresses.add(formatted);
 			}
 		} catch {
@@ -68,7 +70,7 @@ function	parseAddresses(addressParam: string | string[] | undefined): string[] {
 function buildEmptyResponse(addresses: string[], vaultAddress: string): TResponseBody {
 	return {
 		vaultAddress,
-		assetAddress: ethers.constants.AddressZero,
+		assetAddress: ZeroAddress,
 		assetPriceUsd: 0,
 		assetSymbol: 'Unknown token',
 		decimals: DEFAULT_DECIMALS,
@@ -100,11 +102,11 @@ function withTimeout<T>(promise: Promise<T>, label: string, timeoutMs: number = 
 }
 
 async function readVaultBalances(
-	provider: ethers.providers.Provider,
-	vaultContract: ethers.Contract,
+	provider: Provider,
+	vaultContract: Contract,
 	vaultAddress: string,
 	addresses: string[]
-): Promise<BigNumber[]> {
+): Promise<bigint[]> {
 	try {
 		const results = await withTimeout(
 			aggregate3(
@@ -122,13 +124,13 @@ async function readVaultBalances(
 			throw new Error('Multicall balanceOf response was incomplete');
 		}
 
-		return results.map(({returnData}): BigNumber => {
+		return results.map(({returnData}): bigint => {
 			const [shares] = BALANCE_OF_INTERFACE.decodeFunctionResult('balanceOf', returnData);
 			return shares;
 		});
 	} catch (error) {
 		console.warn('[partner-tvl] Multicall balanceOf failed, falling back to direct reads', error);
-		const balances: BigNumber[] = [];
+		const balances: bigint[] = [];
 		for (const address of addresses) {
 			balances.push(await withTimeout(vaultContract.balanceOf(address), 'vault.balanceOf'));
 		}
@@ -168,7 +170,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
 	}
 
 	try {
-		const vaultContract = new ethers.Contract(vaultAddress, VAULT_ABI, provider);
+		const vaultContract = new Contract(vaultAddress, VAULT_ABI, provider);
 
 		const kongMetadataResult = await Promise.allSettled([
 			withTimeout(getKongVaultMetadata(chainId, vaultAddress), 'getKongVaultMetadata')
@@ -183,14 +185,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
 		// Kong's `pricePerShare` is unreliable for vaults with custom
 		// accountants (it can lag the on-chain value by months), so it is only
 		// a fallback for a transient RPC failure — mirroring /api/partner-fees.
-		let pricePerShare: BigNumber | null = null;
+		let pricePerShare: bigint | null = null;
 		try {
 			pricePerShare = await withTimeout(vaultContract.pricePerShare(), 'vault.pricePerShare');
 		} catch (error) {
 			console.warn(`[partner-tvl] Falling back to Kong pricePerShare for ${vaultAddress}:`, error);
 			if (kongMetadata?.pricePerShare) {
 				try {
-					pricePerShare = BigNumber.from(kongMetadata.pricePerShare);
+					pricePerShare = BigInt(kongMetadata.pricePerShare);
 				} catch {
 					pricePerShare = null;
 				}
@@ -205,8 +207,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
 				withTimeout(vaultContract.token(), 'vault.token')
 			]);
 			if (rpcDecimalsSettled.status === 'fulfilled') {
-				const rpcDecimals = rpcDecimalsSettled.value as BigNumber | number;
-				decimals = decimals ?? (BigNumber.isBigNumber(rpcDecimals) ? rpcDecimals.toNumber() : Number(rpcDecimals));
+				const rpcDecimals = rpcDecimalsSettled.value as number | bigint;
+				decimals = decimals ?? Number(rpcDecimals);
 			}
 			if (assetAddress === null) {
 				const resolvedAsset = rpcAssetSettled.status === 'fulfilled'
@@ -218,7 +220,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
 			}
 		}
 
-		if (!pricePerShare || decimals === null || !assetAddress) {
+		if (pricePerShare === null || decimals === null || !assetAddress) {
 			throw new Error('Missing vault metadata');
 		}
 
@@ -257,22 +259,22 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
 			return;
 		}
 		const priceUsd = assetPriceUsd;
-		const divisor = BigNumber.from(10).pow(decimals);
+		const divisor = 10n ** BigInt(decimals);
 		const balances = await readVaultBalances(provider, vaultContract, vaultAddress, addresses);
 		const accounts = addresses.map((address, index): TAccountValue => {
 			const shares = balances[index];
-			const currentValue = shares.mul(pricePerShare).div(divisor);
+			const currentValue = shares * pricePerShare / divisor;
 
 			return {
 				address,
 				shares: shares.toString(),
 				currentValue: currentValue.toString(),
-				currentValueNormalized: Number(ethers.utils.formatUnits(currentValue, decimals)) * priceUsd
+				currentValueNormalized: Number(formatUnits(currentValue, decimals)) * priceUsd
 			};
 		});
-		const totalCurrentValue = accounts.reduce((acc, {currentValue}): BigNumber => {
-			return acc.add(BigNumber.from(currentValue));
-		}, BigNumber.from(0));
+		const totalCurrentValue = accounts.reduce((acc, {currentValue}): bigint => {
+			return acc + BigInt(currentValue);
+		}, 0n);
 
 		res.status(200).json({
 			vaultAddress,
@@ -282,7 +284,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
 			decimals: Number(decimals),
 			pricePerShare: pricePerShare.toString(),
 			totalCurrentValue: totalCurrentValue.toString(),
-			totalCurrentValueNormalized: Number(ethers.utils.formatUnits(totalCurrentValue, decimals)) * priceUsd,
+			totalCurrentValueNormalized: Number(formatUnits(totalCurrentValue, decimals)) * priceUsd,
 			accounts
 		});
 	} catch (error) {

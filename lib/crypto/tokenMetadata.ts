@@ -1,10 +1,12 @@
-import {ethers} from 'ethers';
+import {AbiCoder, decodeBytes32String} from 'ethers';
+
+import type {Provider} from 'ethers';
 
 const SYMBOL_SELECTOR = '0x95d89b41';
 const symbolCache = new Map<string, string>();
 
 export async function getTokenSymbol(
-	provider: ethers.providers.Provider,
+	provider: Provider,
 	tokenAddress: string
 ): Promise<string | null> {
 	const normalized = tokenAddress.toLowerCase();
@@ -26,10 +28,10 @@ export async function getTokenSymbol(
 
 	let symbol: string | null;
 	try {
-		[symbol] = ethers.utils.defaultAbiCoder.decode(['string'], data);
+		[symbol] = AbiCoder.defaultAbiCoder().decode(['string'], data);
 	} catch {
 		try {
-			symbol = ethers.utils.parseBytes32String(data);
+			symbol = decodeBytes32String(data);
 		} catch {
 			symbol = null;
 		}

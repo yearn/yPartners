@@ -3,7 +3,13 @@
     "rootDirs": [
       "."
     ],
-    "baseUrl": ".",
+    /* TypeScript 7 removed baseUrl; the paths wildcard preserves the
+       baseUrl-style resolution of non-relative imports (e.g. 'lib/...'). */
+    "paths": {
+      "*": [
+        "./*"
+      ]
+    },
     /* Basic Options */
     "target": "esnext",
     "module": "esnext",
@@ -56,7 +62,6 @@
     "**/*.d.tsx",
     "public",
     "postcss.config.js",
-    "tailwind.config.js",
     "next.config.js",
     ".next/types/**/*.ts"
   ]

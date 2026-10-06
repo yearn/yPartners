@@ -1,5 +1,5 @@
 import {beforeEach, describe, expect, it, vi} from 'vitest';
-import {BigNumber, ethers} from 'ethers';
+import {AbiCoder, Interface, JsonRpcProvider} from 'ethers';
 
 import type {NextApiRequest, NextApiResponse} from 'next';
 import type {TMulticallCall, TMulticallResult} from 'lib/yearn/multicall';
@@ -50,7 +50,7 @@ type TMockResponse = {
 	json(body: TResponseBody): TMockResponse;
 };
 
-const BALANCE_OF_INTERFACE = new ethers.utils.Interface([
+const BALANCE_OF_INTERFACE = new Interface([
 	'function balanceOf(address) view returns (uint256)'
 ]);
 
@@ -83,12 +83,12 @@ function createResponse(): TMockResponse {
 describe('partner TVL balance batching', (): void => {
 	beforeEach((): void => {
 		vi.resetAllMocks();
-		const provider = new ethers.providers.JsonRpcProvider('https://rpc.example', 1);
+		const provider = new JsonRpcProvider('https://rpc.example', 1);
 		// The handler reads the current price-per-share from the vault contract
 		// (RPC-first; Kong is only a fallback), so the eth_call is stubbed to
 		// keep this test hermetic.
 		provider.call = vi.fn().mockResolvedValue(
-			ethers.utils.defaultAbiCoder.encode(['uint256'], ['1000000'])
+			AbiCoder.defaultAbiCoder().encode(['uint256'], ['1000000'])
 		);
 		mocks.getLatestProvider.mockReturnValue(provider);
 		mocks.getKongVaultMetadata.mockResolvedValue({
@@ -105,7 +105,7 @@ describe('partner TVL balance batching', (): void => {
 			success: true,
 			returnData: BALANCE_OF_INTERFACE.encodeFunctionResult(
 				'balanceOf',
-				[BigNumber.from(index === 0 ? '2000000' : '4000000')]
+				[BigInt(index === 0 ? '2000000' : '4000000')]
 			)
 		})));
 	});
@@ -140,7 +140,7 @@ describe('partner TVL balance batching', (): void => {
 	});
 
 	it('falls back to the Kong price-per-share when the RPC read fails', async (): Promise<void> => {
-		const provider = new ethers.providers.JsonRpcProvider('https://rpc.example', 1);
+		const provider = new JsonRpcProvider('https://rpc.example', 1);
 		provider.call = vi.fn().mockRejectedValue(new Error('rpc down'));
 		mocks.getLatestProvider.mockReturnValue(provider);
 		const response = createResponse();

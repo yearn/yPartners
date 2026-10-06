@@ -1,4 +1,4 @@
-import {utils} from 'ethers';
+import {getAddress} from 'ethers';
 
 const DEFILLAMA_API_BASE = 'https://coins.llama.fi/prices/current';
 const CACHE_TTL_MS = 5 * 60 * 1000;
@@ -53,7 +53,7 @@ export async function getTokenPriceUsdWithDebug(chainId: number, contractAddress
 
 	let address: string;
 	try {
-		address = utils.getAddress(contractAddress);
+		address = getAddress(contractAddress);
 	} catch {
 		return {
 			price: null,

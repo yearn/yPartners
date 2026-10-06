@@ -1,7 +1,59 @@
+@import 'tailwindcss';
 @import './public/fonts/fonts.css';
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+
+/* Tailwind v4 source hints (replaces tailwind.config.js `content`): */
+@source '../pages/**/*.{js,jsx,ts,tsx}';
+@source '../components/**/*.{js,jsx,ts,tsx}';
+@source '../contexts/**/*.{js,jsx,ts,tsx}';
+@source '../utils/**/*.{js,jsx,ts,tsx}';
+@source '../lib/yearn/**/*.{js,jsx,ts,tsx}';
+
+/* Tailwind v4 theme tokens (migrated from tailwind.config.js theme.extend).
+   The scale below intentionally replaces the stock neutral/red/pink/yellow
+   shades with the Yearn palette; unspecified shades fall back to Tailwind's
+   defaults, matching the previous `extend` semantics for every key in use. */
+@theme {
+	--color-neutral-0: #FFFFFF;
+	--color-neutral-100: #F5F5F5;
+	--color-neutral-200: #EBEBEB;
+	--color-neutral-300: #E0E0E0;
+	--color-neutral-400: #9E9E9E;
+	--color-neutral-500: #7F7F7F;
+	--color-neutral-600: #5C5C5C;
+	--color-neutral-700: #424242;
+	--color-neutral-800: #292929;
+	--color-neutral-900: #0D0D0D;
+
+	--color-accent-500: #2663FF;
+	--color-accent-600: #0F46D8;
+
+	--color-primary-100: #E3ECFF;
+	--color-primary-200: #C2D6FF;
+	--color-primary-500: #2663FF;
+	--color-primary-600: #0F46D8;
+
+	--color-red-200: #FFE5E5;
+	--color-red-300: #FFD6D6;
+	--color-red-900: #FF1F1F;
+
+	--color-pink-200: #FBD6EA;
+	--color-pink-300: #F6CCE3;
+	--color-pink-900: #D72C91;
+
+	--color-yellow-200: #FFE4B8;
+	--color-yellow-300: #FFEED1;
+	--color-yellow-900: #FF7A00;
+
+	--font-aeonik: 'Aeonik', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+	--font-mono: 'Aeonik Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
+
+	--text-3xl: 32px;
+	--text-3xl--line-height: 40px;
+	--text-8xl: 88px;
+	--text-8xl--line-height: 104px;
+
+	--container-5xl: 1120px;
+}
 
 :root {
 	--default-rounded: 0rem;

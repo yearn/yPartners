@@ -1,5 +1,5 @@
 import type {NextApiRequest, NextApiResponse} from 'next';
-import {ethers} from 'ethers';
+import {Contract, JsonRpcProvider} from 'ethers';
 import {getKongVaultMetadata} from 'lib/yearn/kong';
 import {getRpcUrlLatest} from 'lib/crypto/rpc';
 import {getTokenSymbol} from 'lib/crypto/tokenMetadata';
@@ -50,7 +50,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
 
 	try {
 		const rpcUrl = getRpcUrlLatest(chainId);
-		const provider = rpcUrl ? new ethers.providers.JsonRpcProvider(rpcUrl, chainId) : null;
+		const provider = rpcUrl ? new JsonRpcProvider(rpcUrl, chainId) : null;
 		// Try to get asset address from Kong first
 		const metadata = await getKongVaultMetadata(chainId, vaultAddress);
 		let assetAddress: string | null = metadata?.assetAddress ?? null;
@@ -58,7 +58,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
 		// If Kong doesn't have the asset address, fetch it directly from the vault contract
 		if (!assetAddress && provider) {
 			try {
-				const vaultContract = new ethers.Contract(vaultAddress, VAULT_ABI, provider);
+				const vaultContract = new Contract(vaultAddress, VAULT_ABI, provider);
 				const rpcAssetAddress = await vaultContract.asset() as string;
 				assetAddress = toAddress(rpcAssetAddress);
 			} catch (rpcError) {

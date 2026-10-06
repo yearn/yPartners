@@ -1,8 +1,10 @@
-import {ethers} from 'ethers';
+import {Interface} from 'ethers';
+
+import type {Provider} from 'ethers';
 
 export const MULTICALL3_ADDRESS = '0xcA11bde05977b3631167028862bE2a173976CA11';
 
-const MULTICALL3_INTERFACE = new ethers.utils.Interface([
+const MULTICALL3_INTERFACE = new Interface([
 	'function aggregate3(tuple(address target, bool allowFailure, bytes callData)[] calls) view returns (tuple(bool success, bytes returnData)[] returnData)'
 ]);
 
@@ -22,7 +24,7 @@ export type TMulticallResult = {
  * Multicall3 is deployed at the same address on the supported EVM chains.
  */
 export async function aggregate3(
-	provider: ethers.providers.Provider,
+	provider: Provider,
 	calls: TMulticallCall[]
 ): Promise<TMulticallResult[]> {
 	if (calls.length === 0) {
@@ -31,7 +33,7 @@ export async function aggregate3(
 
 	const data = MULTICALL3_INTERFACE.encodeFunctionData('aggregate3', [calls]);
 	const response = await provider.call({to: MULTICALL3_ADDRESS, data});
-	const [results] = MULTICALL3_INTERFACE.decodeFunctionResult('aggregate3', response) as [TMulticallResult[]];
+	const [results] = MULTICALL3_INTERFACE.decodeFunctionResult('aggregate3', response) as unknown as [TMulticallResult[]];
 
 	return results.map(({success, returnData}): TMulticallResult => ({success, returnData}));
 }
