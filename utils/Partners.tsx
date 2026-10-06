@@ -83,12 +83,12 @@ const PARTNERS: TDict<TPartner> = {
 		shortName: 'inverse-ysybold',
 		// Second Inverse Finance partnership: the FiRM "Yearn ysyBOLD Market"
 		// (0xa956…F02d), whose personal collateral escrows hold ysyBOLD. This
-		// treasury (0x8F97…DfC8, Inverse-controlled) is the routing/login
+		// treasury (0x926d…9D5B, Inverse-controlled) is the routing/login
 		// identifier only; the tracked depositors (the FiRM escrows) are
 		// resolved dynamically from the Envio indexer by /api/partner-referrals
 		// (INVERSE_MARKET_VAULTS). Same name and logo as the first Inverse
 		// dashboard on purpose. Default 50/50 fee split.
-		treasury: [toAddress('0x8F97cCA30Dbe80e7a8B462F1dD1a51C32accDfC8')],
+		treasury: [toAddress('0x926dF14a23BE491164dCF93f4c468A50ef659D5B')],
 		// Partnership start = market creation day; the market had no deposits yet.
 		feeStartDate: '2026-10-08',
 		logo: <Image src={'/partner-logos/Inverse_Finance_Logo_05.svg'} alt={'Inverse Finance'} width={256} height={256} className={'text-neutral-900'} />
