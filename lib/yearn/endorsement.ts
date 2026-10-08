@@ -1,4 +1,4 @@
-import {ethers} from 'ethers';
+import {Contract, Interface, JsonRpcProvider} from 'ethers';
 import {getRpcUrlLatest} from 'lib/crypto/rpc';
 import {aggregate3} from 'lib/yearn/multicall';
 
@@ -8,7 +8,7 @@ const ENDORSEMENT_ABI = [
 	'function isEndorsed(address vault) view returns (bool)'
 ];
 
-const ENDORSEMENT_INTERFACE = new ethers.utils.Interface(ENDORSEMENT_ABI);
+const ENDORSEMENT_INTERFACE = new Interface(ENDORSEMENT_ABI);
 
 const MAX_RETRIES = 3;
 const RETRY_DELAYS = [1000, 3000, 6000];
@@ -48,15 +48,9 @@ async function tryIsVaultEndorsed(chainId: number, vaultAddress: string): Promis
 
 	for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
 		try {
-			const provider = new ethers.providers.StaticJsonRpcProvider(
-				rpcUrl,
-				{
-					chainId: chainId,
-					name: `chain-${chainId}`
-				}
-			);
+			const provider = new JsonRpcProvider(rpcUrl, chainId);
 
-			const contract = new ethers.Contract(ENDORSEMENT_CONTRACT, ENDORSEMENT_ABI, provider);
+			const contract = new Contract(ENDORSEMENT_CONTRACT, ENDORSEMENT_ABI, provider);
 
 			const timeoutPromise = new Promise<boolean>((_, reject) => {
 				setTimeout(() => reject(new Error('Endorsement check timeout')), 10000);
@@ -128,10 +122,7 @@ export async function checkVaultsEndorsement(
 				return Promise.all(chainVaults.map(({vaultAddress}) => tryIsVaultEndorsed(chainId, vaultAddress)));
 			}
 
-			const provider = new ethers.providers.StaticJsonRpcProvider(rpcUrl, {
-				chainId,
-				name: `chain-${chainId}`
-			});
+			const provider = new JsonRpcProvider(rpcUrl, chainId);
 
 			try {
 				const results = await aggregate3(

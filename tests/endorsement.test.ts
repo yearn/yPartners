@@ -1,5 +1,5 @@
 import {beforeEach, describe, expect, it, vi} from 'vitest';
-import {ethers} from 'ethers';
+import {Interface} from 'ethers';
 
 import type {TMulticallCall, TMulticallResult} from 'lib/yearn/multicall';
 
@@ -17,7 +17,7 @@ vi.mock('lib/crypto/rpc', () => ({
 
 import {checkVaultsEndorsement} from '../lib/yearn/endorsement';
 
-const ENDORSEMENT_INTERFACE = new ethers.utils.Interface([
+const ENDORSEMENT_INTERFACE = new Interface([
 	'function isEndorsed(address vault) view returns (bool)'
 ]);
 

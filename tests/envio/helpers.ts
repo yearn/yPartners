@@ -1,6 +1,6 @@
 import {existsSync, readFileSync} from 'node:fs';
 import {resolve} from 'node:path';
-import {ethers} from 'ethers';
+import {getAddress, JsonRpcProvider} from 'ethers';
 
 import {getRpcUrlLatest} from '../../lib/crypto/rpc';
 
@@ -92,7 +92,7 @@ export async function getRpcBlockNumber(chainId: number): Promise<number> {
 	if (!url) {
 		throw new Error(`No RPC URL configured for chain ${chainId}`);
 	}
-	const provider = new ethers.providers.JsonRpcProvider(url, chainId);
+	const provider = new JsonRpcProvider(url, chainId);
 	return provider.getBlockNumber();
 }
 
@@ -112,7 +112,7 @@ export function buildOwnersList(addresses: string[]): string[] {
 	for (const addr of addresses) {
 		owners.add(addr.toLowerCase());
 		try {
-			owners.add(ethers.utils.getAddress(addr));
+			owners.add(getAddress(addr));
 		} catch {
 			// Ignore malformed addresses.
 		}

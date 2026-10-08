@@ -36,7 +36,7 @@ const INVERSE_MARKET_VAULTS: Record<string, {vault: string, partner: string}> = 
 	},
 	// FiRM "Yearn ysyBOLD Market" → ysyBOLD (Yearn V3 staked-yBOLD vault, also
 	// used as collateral by the Frankencoin partner); tracked by the second
-	// Inverse dashboard (login treasury 0x8F97…DfC8). Created 2026-10; it had
+	// Inverse dashboard (login treasury 0x926d…9D5B). Created 2026-10; it had
 	// no escrows at partnership start.
 	'0xa95605313eb4544f784e699de93e9232dbfcf02d': {
 		vault: '0x23346b04a7f55b8760e5860aa5a77383d63491cd',

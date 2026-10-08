@@ -1,6 +1,9 @@
-import {ethers} from 'ethers';
+import {JsonRpcProvider} from 'ethers';
 
-export type TRpcProvider = ethers.providers.Provider;
+import type {PerformActionRequest, Provider} from 'ethers';
+
+export type TRpcProvider = Provider;
+
 
 type TChainConfig = {
 	name: string;
@@ -60,21 +63,27 @@ const CHAIN_CONFIG: Record<number, TChainConfig> = {
 	}
 };
 
-class FailoverProvider extends ethers.providers.StaticJsonRpcProvider {
-	private readonly providers: ethers.providers.StaticJsonRpcProvider[];
+class FailoverProvider extends JsonRpcProvider {
+	private readonly providers: JsonRpcProvider[];
 
 	constructor(chainId: number, urls: string[]) {
-		super(urls[0], {chainId, name: `chain-${chainId}`});
-		this.providers = urls.map((url): ethers.providers.StaticJsonRpcProvider => (
-			new ethers.providers.StaticJsonRpcProvider(url, {chainId, name: `chain-${chainId}`})
+		// staticNetwork: without it the base provider dials urls[0] with
+		// eth_chainId before the first operation, bypassing _perform failover.
+		super(urls[0], chainId, {staticNetwork: true});
+		this.providers = urls.map((url): JsonRpcProvider => (
+			new JsonRpcProvider(url, chainId, {staticNetwork: true})
 		));
 	}
 
-	public async send(method: string, params: Array<unknown>): Promise<unknown> {
+	// Ethers 6 routes every built-in operation (eth_call, block queries, ...)
+	// through _perform — overriding send(), as ethers 5 required, intercepts
+	// nothing. Try each configured RPC in order and surface the last error when
+	// all of them fail.
+	override async _perform<T = unknown>(req: PerformActionRequest): Promise<T> {
 		let lastError: unknown;
 		for (const provider of this.providers) {
 			try {
-				return await provider.send(method, params);
+				return await provider._perform(req) as T;
 			} catch (error) {
 				lastError = error;
 			}

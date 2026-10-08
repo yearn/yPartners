@@ -193,7 +193,7 @@ describe('partner referral depositor resolution', (): void => {
 			{
 				method: 'GET',
 				// Login treasury of the second Inverse dashboard.
-				query: {referrer: '0x8F97cCA30Dbe80e7a8B462F1dD1a51C32accDfC8'}
+				query: {referrer: '0x926dF14a23BE491164dCF93f4c468A50ef659D5B'}
 			} as unknown as NextApiRequest,
 			response as unknown as NextApiResponse
 		);

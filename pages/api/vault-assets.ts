@@ -1,4 +1,4 @@
-import {ethers} from 'ethers';
+import {Contract, JsonRpcProvider} from 'ethers';
 
 import type {NextApiRequest, NextApiResponse} from 'next';
 import type {TKongVaultMetadata} from 'lib/yearn/kong';
@@ -64,11 +64,11 @@ async function resolveVaultAssets(chainId: number, vaults: TAddress[]): Promise<
 	}
 
 	const rpcUrl = getRpcUrlLatest(chainId);
-	const provider = rpcUrl ? new ethers.providers.JsonRpcProvider(rpcUrl, chainId) : null;
+	const provider = rpcUrl ? new JsonRpcProvider(rpcUrl, chainId) : null;
 	const assets = await Promise.all(vaults.map(async (vaultAddress): Promise<TVaultAsset> => {
 		let assetAddress = metadataByVault.get(vaultAddress.toLowerCase())?.assetAddress ?? null;
 		if (!assetAddress && provider) {
-			const vault = new ethers.Contract(vaultAddress, VAULT_ABI, provider);
+			const vault = new Contract(vaultAddress, VAULT_ABI, provider);
 			try {
 				assetAddress = toAddress(await vault.asset() as string);
 			} catch {

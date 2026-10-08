@@ -1,5 +1,8 @@
-import {ethers} from 'ethers';
+import {JsonRpcProvider, ZeroAddress} from 'ethers';
 import {afterEach, describe, expect, it, vi} from 'vitest';
+
+import type {PerformActionRequest} from 'ethers';
+
 import {getLatestProvider} from 'lib/crypto/rpc';
 
 const originalMainnetPublic = process.env.RPC_URL_MAINNET_PUBLIC;
@@ -16,11 +19,10 @@ afterEach((): void => {
 describe('RPC provider failover', (): void => {
 	it('tries the next configured endpoint after a provider error', async (): Promise<void> => {
 		process.env.RPC_URL_MAINNET_PUBLIC = 'https://primary.example';
-		const send = vi.spyOn(ethers.providers.StaticJsonRpcProvider.prototype, 'send')
-			.mockImplementation(async function(this: ethers.providers.StaticJsonRpcProvider, method: string, params: Array<unknown>): Promise<string> {
-				void method;
-				void params;
-				if (this.connection.url === 'https://primary.example') {
+		const perform = vi.spyOn(JsonRpcProvider.prototype, '_perform')
+			.mockImplementation(async function(this: JsonRpcProvider, req: PerformActionRequest): Promise<unknown> {
+				void req;
+				if (this._getConnection().url === 'https://primary.example') {
 					throw new Error('primary endpoint unavailable');
 				}
 				return '0x0000000000000000000000000000000000000000000000000000000000000000';
@@ -28,9 +30,9 @@ describe('RPC provider failover', (): void => {
 
 		const provider = getLatestProvider(1);
 		expect(provider).not.toBeNull();
-		await expect(provider?.call({to: ethers.constants.AddressZero, data: '0x'})).resolves.toBe(
+		await expect(provider?.call({to: ZeroAddress, data: '0x'})).resolves.toBe(
 			'0x0000000000000000000000000000000000000000000000000000000000000000'
 		);
-		expect(send).toHaveBeenCalledTimes(2);
+		expect(perform).toHaveBeenCalledTimes(2);
 	});
 });
