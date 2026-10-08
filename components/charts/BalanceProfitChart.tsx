@@ -121,7 +121,9 @@ function BalanceProfitChart({snapshots, isLoading, feeStartTimestamp, windowDays
 			) : null}
 			<ResponsiveContainer width={'100%'} height={400}>
 				<ComposedChart data={chartData} margin={{top: 10, right: 8, left: 0, bottom: 0}}>
-					<CartesianGrid strokeDasharray={'3 3'} stroke={'#e5e7eb'} />
+					{/* Recharts 3: the grid must name the axes it follows, or its lines
+					    stop rendering when any axis uses a non-default id. */}
+					<CartesianGrid strokeDasharray={'3 3'} stroke={'#e5e7eb'} yAxisId={'left'} />
 					<XAxis
 						dataKey={'block'}
 						type={'number'}
@@ -167,13 +169,14 @@ function BalanceProfitChart({snapshots, isLoading, feeStartTimestamp, windowDays
 							padding: '0.75rem'
 						}}
 						labelStyle={{fontWeight: 'bold', marginBottom: '0.25rem'}}
-						formatter={(value: number, name: string) => {
+						formatter={(value, name) => {
+							const amount = formatAmount(Number(value ?? 0), 2, 2);
 							if (name === 'Shares') {
-								return [formatAmount(value, 2, 2), 'Shares'];
+								return [amount, 'Shares'];
 							}
-							return [`$${formatAmount(value, 2, 2)}`, name];
+							return [`$${amount}`, name];
 						}}
-						labelFormatter={(block: number): string => `Block: ${block}`}
+						labelFormatter={(label): string => `Block: ${String(label)}`}
 					/>
 					<Legend
 						wrapperStyle={{paddingTop: '1rem'}}
