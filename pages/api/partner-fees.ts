@@ -618,32 +618,33 @@ export async function getCurrentPricePerShare(
 }
 
 /**
- * Pre-fetch price-per-share for a set of historical blocks in a
- * concurrency-limited batch. Every value is written through the shared
- * `pricePerShareCache`, so callers that subsequently `await
- * getPricePerShareAtBlock(...)` for these blocks resolve from cache instead of
- * issuing one serial archive eth_call per block. Fetch errors are swallowed
- * here so a single failing block doesn't abort the batch; the consuming code
- * retries and surfaces the error if a value is genuinely unavailable.
+ * Pre-fetch price-per-share for a set of historical blocks in a single
+ * concurrent wave. All requests are issued at once so the underlying
+ * JsonRpcProvider coalesces them into a few batched JSON-RPC requests
+ * (ethers batches up to 100 calls per HTTP round trip); a concurrency cap
+ * here would throttle that batching into many sequential round trips, which
+ * made dashboard loads crawl on rate-limited archive RPCs. Every value is
+ * written through the shared `pricePerShareCache`, so callers that
+ * subsequently `await getPricePerShareAtBlock(...)` for these blocks resolve
+ * from cache instead of issuing one serial archive eth_call per block. Fetch
+ * errors are swallowed here so a single failing block doesn't abort the wave;
+ * the consuming code retries and surfaces the error if a value is genuinely
+ * unavailable.
  */
-async function prefetchPricePerShare(
+export async function prefetchPricePerShare(
 	provider: TRpcProvider,
 	vault: string,
 	blocks: number[],
-	concurrency = 8,
 ): Promise<void> {
-	for (let i = 0; i < blocks.length; i += concurrency) {
-		const chunk = blocks.slice(i, i + concurrency);
-		await Promise.all(
-			chunk.map(async (block): Promise<void> => {
-				try {
-					await getPricePerShareAtBlock(provider, vault, block);
-				} catch {
-					// Swallowed intentionally; consumers retry on cache miss.
-				}
-			}),
-		);
-	}
+	await Promise.all(
+		blocks.map(async (block): Promise<void> => {
+			try {
+				await getPricePerShareAtBlock(provider, vault, block);
+			} catch {
+				// Swallowed intentionally; consumers retry on cache miss.
+			}
+		}),
+	);
 }
 
 async function getVaultAssetAddress(
@@ -919,35 +920,43 @@ function calculateManagementFee(
 		/ MILLISECONDS_PER_YEAR;
 }
 
-async function getCutoffBlockForTimestamp(
+// Resolves the first block whose timestamp is >= targetTimestamp by binary
+// searching block headers. A linear average-block-time estimate is not
+// accurate enough for fee floors: drift between assumed and real block times
+// once resolved a partner's accrual start ~3 hours before the partnership
+// actually began, seeding pre-partnership profit into the fee line.
+export async function getCutoffBlockForTimestamp(
 	provider: TRpcProvider,
 	targetTimestamp: number,
-	chainId: number = 1,
 ): Promise<number | null> {
 	if (!targetTimestamp || targetTimestamp <= 0) {
 		return null; // No filter, return all history
 	}
 
-	const currentBlock = await provider.getBlockNumber();
-	const millisecondsPerBlock = getMillisecondsPerBlock(chainId);
-	const secondsAgo = Math.max(0, Math.floor(Date.now() / 1000) - targetTimestamp);
-	const millisecondsAgo = secondsAgo * 1000;
-	const blocksAgo = Math.floor(millisecondsAgo / millisecondsPerBlock);
-
-	return Math.max(0, currentBlock - blocksAgo);
-}
-
-async function getCutoffBlock(
-	provider: TRpcProvider,
-	days?: number,
-	chainId: number = 1,
-): Promise<number | null> {
-	if (!days || days <= 0) {
-		return null; // No filter, return all history
+	const head = await provider.getBlockNumber();
+	const headBlock = await provider.getBlock(head);
+	if (headBlock === null) {
+		throw new Error(`[partner-fees] Unable to read block ${head}`);
+	}
+	if (headBlock.timestamp < targetTimestamp) {
+		return head;
 	}
 
-	const targetTimestamp = Math.floor(Date.now() / 1000) - days * 86400;
-	return getCutoffBlockForTimestamp(provider, targetTimestamp, chainId);
+	let low = 0;
+	let high = head;
+	while (low < high) {
+		const mid = low + Math.floor((high - low) / 2);
+		const block = await provider.getBlock(mid);
+		if (block === null) {
+			throw new Error(`[partner-fees] Unable to read block ${mid}`);
+		}
+		if (block.timestamp >= targetTimestamp) {
+			high = mid;
+		} else {
+			low = mid + 1;
+		}
+	}
+	return low;
 }
 
 export async function calculateIncrementalProfitAndFees(
@@ -1428,6 +1437,9 @@ export default async function handler(
 		if (!latestProvider || !archiveProvider) {
 			throw new Error(`Unable to create RPC providers for chain ${chainId}`);
 		}
+		const plotCutoffTimestamp = days && days > 0
+			? Math.floor(Date.now() / 1000) - days * 86400
+			: 0;
 		const [feeConfigResult, cutoffBlockResult, kongMetadataResult] =
 			await Promise.allSettled([
 				withTimeout(
@@ -1435,7 +1447,7 @@ export default async function handler(
 					"getFeeConfig",
 				),
 				withTimeout(
-					getCutoffBlock(latestProvider, days, chainId),
+					getCutoffBlockForTimestamp(latestProvider, plotCutoffTimestamp),
 					"getCutoffBlock",
 				),
 				withTimeout(
@@ -1494,7 +1506,7 @@ export default async function handler(
 		// effective cutoff is the later (more restrictive) of the selected time
 		// window and the start date.
 		const feeStartCutoff = Number.isFinite(feeStartSeconds)
-			? await getCutoffBlockForTimestamp(latestProvider, feeStartSeconds, chainId)
+			? await getCutoffBlockForTimestamp(latestProvider, feeStartSeconds)
 			: null;
 		const effectiveFeeCutoff = getEffectiveFeeCutoff(
 			cutoffBlock,

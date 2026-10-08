@@ -1,10 +1,11 @@
 import {beforeEach, describe, expect, it, vi} from 'vitest';
 
+import type {TRpcProvider} from 'lib/crypto/rpc';
 import type {NextApiRequest, NextApiResponse} from 'next';
 
 const mocks = vi.hoisted(() => ({
 	getKongVaultMetadataForVaults: vi.fn(),
-	getRpcUrlLatest: vi.fn(),
+	getLatestProvider: vi.fn(),
 	getTokenSymbol: vi.fn()
 }));
 
@@ -12,7 +13,7 @@ vi.mock('lib/yearn/kong', () => ({
 	getKongVaultMetadataForVaults: mocks.getKongVaultMetadataForVaults
 }));
 vi.mock('lib/crypto/rpc', () => ({
-	getRpcUrlLatest: mocks.getRpcUrlLatest
+	getLatestProvider: mocks.getLatestProvider
 }));
 vi.mock('lib/crypto/tokenMetadata', () => ({
 	getTokenSymbol: mocks.getTokenSymbol
@@ -68,7 +69,7 @@ describe('batch vault metadata endpoint', (): void => {
 
 	beforeEach((): void => {
 		vi.resetAllMocks();
-		mocks.getRpcUrlLatest.mockReturnValue('https://rpc.example');
+		mocks.getLatestProvider.mockReturnValue({call: vi.fn()} as unknown as TRpcProvider);
 		mocks.getTokenSymbol.mockResolvedValue('USDC');
 		mocks.getKongVaultMetadataForVaults.mockResolvedValue(new Map([
 			[vaultA.toLowerCase(), {assetAddress: asset, decimals: 6, pricePerShare: '1000000'}],
@@ -109,5 +110,27 @@ describe('batch vault metadata endpoint', (): void => {
 		expect(response.statusCode).toBe(400);
 		expect(response.body).toEqual({error: 'vaults must be 1-100 comma-separated chainId:address pairs'});
 		expect(mocks.getKongVaultMetadataForVaults).not.toHaveBeenCalled();
+	});
+
+	it('resolves assets through the failover provider when Kong metadata is missing', async (): Promise<void> => {
+		mocks.getKongVaultMetadataForVaults.mockResolvedValue(new Map());
+		const call = vi.fn().mockResolvedValue('0x000000000000000000000000' + asset.slice(2).toLowerCase());
+		mocks.getLatestProvider.mockReturnValue({call} as unknown as TRpcProvider);
+		const fiveVaults = Array.from({length: 5}, (_, index) => `0x${'2a'.repeat(19)}${index.toString(16).padStart(2, '0')}`);
+		const response = createResponse();
+		await handler(
+			{method: 'GET', query: {vaults: fiveVaults.map((vault): string => `1:${vault}`).join(',')}} as unknown as NextApiRequest,
+			response as unknown as NextApiResponse
+		);
+
+		const body = response.body;
+		if (!body || !('vaults' in body)) {
+			throw new Error(`unexpected response body: ${JSON.stringify(body)}`);
+		}
+		expect(response.statusCode).toBe(200);
+		expect(call).toHaveBeenCalledTimes(5);
+		expect(mocks.getTokenSymbol).toHaveBeenCalledTimes(1);
+		expect(body.vaults).toHaveLength(5);
+		expect(body.vaults.every((vault) => vault.assetAddress === asset && vault.assetSymbol === 'USDC')).toBe(true);
 	});
 });
