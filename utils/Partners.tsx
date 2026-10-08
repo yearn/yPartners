@@ -65,15 +65,32 @@ const PARTNERS: TDict<TPartner> = {
 		name: 'Inverse Finance',
 		shortName: 'inverse',
 		// Inverse Finance FiRM market (0x1fD4…6916, the "Yearn reUSD-sDOLA Market"):
-		// the contract that creates personal collateral escrows holding yvCurve-
-		// reUSD-sDOLA-f shares. Used as the routing/login identifier only; the
-		// tracked depositors (the FiRM escrows) are resolved dynamically from the
-		// Envio indexer by /api/partner-referrals.
+		// used as the routing/login identifier only. Each FiRM market deploys its
+		// own collateral escrows holding its whitelisted Yearn vault (see
+		// INVERSE_MARKET_VAULTS in pages/api/partner-referrals.ts); the tracked
+		// depositors (the FiRM escrows) are resolved dynamically from the Envio
+		// indexer by /api/partner-referrals. The FiRM ysyBOLD market has its own
+		// dashboard under 'inverse-ysybold'.
 		treasury: [toAddress('0x1fD4985cdd57bDb1eD646B10B7952fCD58946916')],
 		// Partnership start = block 0x18c13fd (tx 0xb2f191…2a73a), exact to the second.
 		feeStartDate: '2026-09-11T23:13:11Z',
 		// Custom split: 35% Yearn / 65% Inverse (default is 50/50).
 		feeShare: 0.65,
+		logo: <Image src={'/partner-logos/Inverse_Finance_Logo_05.svg'} alt={'Inverse Finance'} width={256} height={256} className={'text-neutral-900'} />
+	},
+	'inverse-ysybold': {
+		name: 'Inverse Finance',
+		shortName: 'inverse-ysybold',
+		// Second Inverse Finance partnership: the FiRM "Yearn ysyBOLD Market"
+		// (0xa956…F02d), whose personal collateral escrows hold ysyBOLD. This
+		// treasury (0x8F97…DfC8, Inverse-controlled) is the routing/login
+		// identifier only; the tracked depositors (the FiRM escrows) are
+		// resolved dynamically from the Envio indexer by /api/partner-referrals
+		// (INVERSE_MARKET_VAULTS). Same name and logo as the first Inverse
+		// dashboard on purpose. Default 50/50 fee split.
+		treasury: [toAddress('0x8F97cCA30Dbe80e7a8B462F1dD1a51C32accDfC8')],
+		// Partnership start = market creation day; the market had no deposits yet.
+		feeStartDate: '2026-10-08',
 		logo: <Image src={'/partner-logos/Inverse_Finance_Logo_05.svg'} alt={'Inverse Finance'} width={256} height={256} className={'text-neutral-900'} />
 	}
 };
@@ -217,7 +234,8 @@ const LOGOS: TPartnerLogo = {
 	aihedge: <Image src={'/partners/aihedge.jpg'} alt={'AIHedge'} width={256} height={256} className={'h-3/4 w-3/4 object-contain'} />,
 	frankencoin: <LogoFrankencoin isColored={true} className={'text-neutral-900 h-3/4 w-3/4'} />,
 	alchemix: <Image src={'/partner-logos/AlchemixMark_01.svg'} alt={'Alchemix'} width={256} height={256} className={'h-3/4 w-3/4 object-contain'} />,
-	inverse: <Image src={'/partner-logos/Inverse_Finance_Logo_05.svg'} alt={'Inverse Finance'} width={256} height={256} className={'h-3/4 w-3/4 object-contain'} />
+	inverse: <Image src={'/partner-logos/Inverse_Finance_Logo_05.svg'} alt={'Inverse Finance'} width={256} height={256} className={'h-3/4 w-3/4 object-contain'} />,
+	'inverse-ysybold': <Image src={'/partner-logos/Inverse_Finance_Logo_05.svg'} alt={'Inverse Finance'} width={256} height={256} className={'h-3/4 w-3/4 object-contain'} />
 };
 
 
