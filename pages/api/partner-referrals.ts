@@ -15,12 +15,34 @@ const FRANKENCOIN_PARTNER = "frankencoin";
 // depositors are the Frankencoin V2 collateral positions, resolved dynamically below.
 const YSYBOLD_VAULT = "0x23346B04a7f55b8760E5860AA5A77383D63491cD";
 const INVERSE_PARTNER = "inverse";
-// yvCurve-reUSD-sDOLA-f (0x7c439Df9…Ba71a86) is the Yearn v2 vault used as
-// collateral for the Inverse Finance FiRM market. Like Frankencoin, the Inverse
-// partner has no static depositor list: the tracked depositors are the FiRM
-// personal collateral escrows (created via CreateEscrow by the market contract),
-// resolved dynamically below.
-const INVERSE_ESCROW_VAULT = "0x7c439Df9ADE8831180EA4D546c1E910D4Ba71a86";
+const INVERSE_YSYBOLD_PARTNER = "inverse-ysybold";
+// Inverse Finance FiRM markets and the Yearn vault each market holds as
+// collateral, plus the partner dashboard tracking that market. There is no
+// standalone escrow factory: every Market contract deploys its own per-user
+// escrows (ERC-1167 minimal proxies via CREATE2, salt = user address — see
+// Market.createEscrow/predictEscrow in InverseFinance/FiRM) and emits
+// CreateEscrow(owner, escrow), so the emitting market (Envio `factoryAddress`)
+// identifies which vault an escrow holds and which dashboard it belongs to.
+// Keys are lowercase because Envio stores addresses checksummed.
+// When Inverse lists another vault, add the market's entry here AND register
+// the market in the Envio InverseEscrowDeposits handler; escrows from unmapped
+// markets are skipped with a warning (never counted against a wrong vault).
+const INVERSE_MARKET_VAULTS: Record<string, {vault: string, partner: string}> = {
+	// FiRM "Yearn reUSD-sDOLA Market" → yvCurve-reUSD-sDOLA-f (Yearn v2 vault);
+	// tracked by the first Inverse dashboard (login = the market itself).
+	'0x1fd4985cdd57bdb1ed646b10b7952fcd58946916': {
+		vault: '0x7c439df9ade8831180ea4d546c1e910d4ba71a86',
+		partner: INVERSE_PARTNER
+	},
+	// FiRM "Yearn ysyBOLD Market" → ysyBOLD (Yearn V3 staked-yBOLD vault, also
+	// used as collateral by the Frankencoin partner); tracked by the second
+	// Inverse dashboard (login treasury 0x8F97…DfC8). Created 2026-10; it had
+	// no escrows at partnership start.
+	'0xa95605313eb4544f784e699de93e9232dbfcf02d': {
+		vault: '0x23346b04a7f55b8760e5860aa5a77383d63491cd',
+		partner: INVERSE_YSYBOLD_PARTNER
+	}
+};
 
 type TReferralDeposit = {
 	id: string;
@@ -364,27 +386,33 @@ async function getFrankencoinCollateralConfig(): Promise<TPartnerVaultConfig> {
 
 type TInverseEscrowCreated = {
 	escrow: string;
+	factoryAddress: string;
 	chainId: number;
 };
 
-// Resolve the Inverse Finance FiRM escrows holding yvCurve-reUSD-sDOLA-f as
-// collateral.
+// Resolve the Inverse Finance FiRM escrows holding a whitelisted Yearn vault
+// as collateral.
 //
 // The Envio indexer records every personal collateral escrow via
-// InverseEscrowDeposits.CreateEscrow(owner, escrow), emitted by the FiRM
-// "Yearn reUSD-sDOLA Market" (0x1fD4…6916). The market's only collateral is the
-// Yearn v2 vault 0x7c439Df9…Ba71a86 (verified via market.collateral()), so every
-// recorded escrow is an Inverse-attributed depositor of that vault; its share
-// balance (driven by Transfer events) is what /api/partner-tvl and
-// /api/partner-fees track. Same {chain → vault → depositors} shape as the
-// resolvers above. This is ground truth and needs no RPC.
-async function getInverseEscrowConfig(): Promise<TPartnerVaultConfig> {
+// InverseEscrowDeposits.CreateEscrow(owner, escrow), emitted by each FiRM
+// market (e.g. the "Yearn reUSD-sDOLA Market" 0x1fD4…6916, whose only
+// collateral is the Yearn v2 vault 0x7c439Df9…Ba71a86, verified via
+// market.collateral()). Every recorded escrow is an Inverse-attributed
+// depositor of its market's vault; the escrow's share balance (driven by
+// Transfer events) is what /api/partner-tvl and /api/partner-fees track.
+// Escrows are attributed to their vault and dashboard via the emitting market
+// (factoryAddress → INVERSE_MARKET_VAULTS), so each FiRM market's escrows land
+// only in the partner dashboard that tracks that market. Same
+// {chain → vault → depositors} shape as the resolvers above. This is ground
+// truth and needs no RPC.
+async function getInverseEscrowConfig(partner: string): Promise<TPartnerVaultConfig> {
 	const query = `
 		query GetInverseEscrows {
 			InverseEscrowCreated(
 				limit: 1000
 			) {
 				escrow
+				factoryAddress
 				chainId
 			}
 		}
@@ -395,8 +423,24 @@ async function getInverseEscrowConfig(): Promise<TPartnerVaultConfig> {
 	}>(query, {});
 
 	const config: TPartnerVaultConfig = {};
-	const vault = toAddress(INVERSE_ESCROW_VAULT);
 	for (const escrowCreated of result?.InverseEscrowCreated || []) {
+		// Attribute the escrow to the vault of the market that created it. A row
+		// from an unmapped market is skipped (and logged) rather than counted
+		// against a wrong vault: assuming a single vault would silently
+		// misattribute escrows the day a new market is indexed. A row from a
+		// market tracked by the other Inverse dashboard is skipped silently: it
+		// is mapped, just not this partner's market.
+		const market = INVERSE_MARKET_VAULTS[escrowCreated.factoryAddress?.toLowerCase() ?? ''];
+		if (!market) {
+			console.warn(
+				`[partner-referrals] Unmapped Inverse FiRM market ${escrowCreated.factoryAddress} (chain ${escrowCreated.chainId}); add it to INVERSE_MARKET_VAULTS`
+			);
+			continue;
+		}
+		if (market.partner !== partner) {
+			continue;
+		}
+		const vault = toAddress(market.vault);
 		if (!config[escrowCreated.chainId]) {
 			config[escrowCreated.chainId] = {};
 		}
@@ -450,8 +494,8 @@ export default async function handler(
 			res.status(200).json(collateralConfig);
 			return;
 		}
-		if (partnerShortName === INVERSE_PARTNER) {
-			const escrowConfig = await getInverseEscrowConfig();
+		if (partnerShortName === INVERSE_PARTNER || partnerShortName === INVERSE_YSYBOLD_PARTNER) {
+			const escrowConfig = await getInverseEscrowConfig(partnerShortName);
 			res.status(200).json(escrowConfig);
 			return;
 		}

@@ -16,3 +16,10 @@ trustPolicyExclude:
   - 'semver@6.3.1'
 patchedDependencies:
   eslint-plugin-react@7.37.5: patches/eslint-plugin-react@7.37.5.patch
+overrides:
+  # GHSA-35rv-wx7c-jr7c (memory-exhaustion DoS) — ws is pulled in by ethers v5's
+  # websocket providers. The elliptic (GHSA-848j-6mx2-7j84) and braces
+  # (GHSA-v3mw-4g3v-6v7r) advisories reference patched releases that are not
+  # published yet (elliptic >= 6.6.2, braces >= 3.0.4), so they stay until
+  # upstream ships them or ethers moves to v6.
+  ws: ^8.21.0

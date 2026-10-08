@@ -91,6 +91,8 @@ These endpoints aggregate over the vault + depositor configuration in `PARTNER_V
 | `aihedge` | AIHedge | Ethereum |
 | `frankencoin` | Frankencoin | Ethereum (dynamic ysyBOLD collateral) |
 | `alchemix` | Alchemix | Ethereum |
+| `inverse` | Inverse Finance | Ethereum (dynamic FiRM escrows, reUSD-sDOLA market) |
+| `inverse-ysybold` | Inverse Finance | Ethereum (dynamic FiRM escrows, ysyBOLD market) |
 
 ### Adding a new partner
 
