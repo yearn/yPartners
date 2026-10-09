@@ -7,8 +7,10 @@ import {
 	aggregateSnapshots,
 	calculateIncrementalProfitAndFees,
 	getCurrentPricePerShare,
+	getCutoffBlockForTimestamp,
 	getEffectiveFeeCutoff,
 	getMillisecondsPerBlock,
+	prefetchPricePerShare,
 	getPerformanceFeeBps,
 	getYDaemonFeeConfig,
 	prepareChartSnapshots
@@ -353,5 +355,84 @@ describe('partner fee accrual', (): void => {
 				'0x0000000000000000000000000000000000000006'
 			)
 		).resolves.toBe(0);
+	});
+	it('resolves the accrual floor to the exact block by timestamp search', async (): Promise<void> => {
+		// Blocks arrive every 13s while the configured average is 12s. The old
+		// linear estimate (currentBlock - secondsAgo / 12s) resolved a fee start
+		// hundreds of blocks before the actual start block and seeded
+		// pre-partnership profit into the fee line. The floor must be exact and
+		// must not scan every block header.
+		const baseTimestamp = 1_700_000_000;
+		const head = 20_000;
+		const blocksByNumber = new Map<number, {number: number; timestamp: number}>();
+		for (let number = 0; number <= head; number += 1) {
+			blocksByNumber.set(number, {number, timestamp: baseTimestamp + number * 13});
+		}
+		let getBlockCalls = 0;
+		const provider = {
+			connection: {url: 'timestamp-cutoff-regression'},
+			getBlockNumber: async (): Promise<number> => head,
+			getBlock: async (blockNumber: number): Promise<{number: number; timestamp: number} | null> => {
+				getBlockCalls += 1;
+				return blocksByNumber.get(blockNumber) ?? null;
+			}
+		} as unknown as Provider;
+
+		const startBlock = 12_000;
+		const startTimestamp = baseTimestamp + startBlock * 13;
+
+		// Exact hit: the partnership tx block lands exactly on the fee start second.
+		await expect(getCutoffBlockForTimestamp(provider, startTimestamp)).resolves.toBe(startBlock);
+		// Between blocks: the floor is the first block at or after the target.
+		await expect(getCutoffBlockForTimestamp(provider, startTimestamp + 1)).resolves.toBe(startBlock + 1);
+		// Future target: clamp to the head.
+		await expect(getCutoffBlockForTimestamp(provider, baseTimestamp + head * 13 + 60)).resolves.toBe(head);
+		// Non-positive target keeps the "no filter" behavior.
+		await expect(getCutoffBlockForTimestamp(provider, 0)).resolves.toBeNull();
+		// Binary search only: a per-block scan would take 20k header reads.
+		expect(getBlockCalls).toBeLessThan(50);
+	});
+
+	it('prefetches price-per-share in one concurrent wave and caches results', async (): Promise<void> => {
+		// The wave must put (nearly) all blocks in flight at once so the
+		// underlying JsonRpcProvider can coalesce them into batched JSON-RPC
+		// requests; a concurrency cap here throttles that into many sequential
+		// round trips and dashboard loads crawl on rate-limited archive RPCs.
+		const vault = '0x0000000000000000000000000000000000000001';
+		const blocks = Array.from({length: 24}, (_, i) => 1000 + i);
+		const poisonBlock = 500; // Always fails; must not abort the wave.
+		// Each call holds until the last block is in flight, so peak
+		// concurrency is observed deterministically without real timers.
+		const allInFlight = Promise.withResolvers<void>();
+		let inFlight = 0;
+		let peak = 0;
+		let calls = 0;
+		let launched = 0;
+		const provider = {
+			connection: {url: 'pps-prefetch-wave-regression'},
+			call: async ({blockTag}: {blockTag?: number}): Promise<string> => {
+				calls += 1;
+				if (blockTag === poisonBlock) {
+					throw new Error('poison block');
+				}
+				launched += 1;
+				inFlight += 1;
+				peak = Math.max(peak, inFlight);
+				if (launched === blocks.length) {
+					allInFlight.resolve();
+				}
+				await allInFlight.promise;
+				inFlight -= 1;
+				return '0x' + (BigInt(blockTag ?? 0) * 10n ** 18n).toString(16).padStart(64, '0');
+			}
+		} as unknown as Provider;
+
+		await prefetchPricePerShare(provider, vault, [...blocks, poisonBlock]);
+		expect(peak).toBe(blocks.length);
+
+		// Second pass resolves from the shared cache; only the failed block is
+		// retried (and fails again) without aborting the wave.
+		await prefetchPricePerShare(provider, vault, [...blocks, poisonBlock]);
+		expect(calls).toBe(blocks.length + 2);
 	});
 });

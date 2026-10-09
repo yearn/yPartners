@@ -1,10 +1,10 @@
-import {Contract, JsonRpcProvider} from 'ethers';
+import {Contract} from 'ethers';
 
 import type {NextApiRequest, NextApiResponse} from 'next';
 import type {TKongVaultMetadata} from 'lib/yearn/kong';
 import type {TAddress} from 'lib/yearn/utils/address';
 
-import {getRpcUrlLatest} from 'lib/crypto/rpc';
+import {getLatestProvider} from 'lib/crypto/rpc';
 import {getTokenSymbol} from 'lib/crypto/tokenMetadata';
 import {getKongVaultMetadataForVaults} from 'lib/yearn/kong';
 import {toAddress, ZERO_ADDRESS} from 'lib/yearn/utils/address';
@@ -63,8 +63,10 @@ async function resolveVaultAssets(chainId: number, vaults: TAddress[]): Promise<
 		console.warn(`[vault-assets] Kong metadata lookup failed for chain ${chainId}:`, error);
 	}
 
-	const rpcUrl = getRpcUrlLatest(chainId);
-	const provider = rpcUrl ? new JsonRpcProvider(rpcUrl, chainId) : null;
+	// FailoverProvider keeps concurrent asset()/token() reads within
+	// RPC_BATCH_MAX_COUNT per JSON-RPC batch; a raw provider would coalesce
+	// them into one oversized batch that free-tier RPCs reject wholesale.
+	const provider = getLatestProvider(chainId);
 	const assets = await Promise.all(vaults.map(async (vaultAddress): Promise<TVaultAsset> => {
 		let assetAddress = metadataByVault.get(vaultAddress.toLowerCase())?.assetAddress ?? null;
 		if (!assetAddress && provider) {

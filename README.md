@@ -33,6 +33,7 @@ Other scripts:
   - `RPC_URL_ARBITRUM_PUBLIC`, `RPC_URL_ARBITRUM_PRIVATE` – preferred public/latest and private/archive RPCs
   - `RPC_URL_KATANA_PUBLIC`, `RPC_URL_KATANA_PRIVATE` – preferred public/latest and private/archive RPCs
   - `RPC_URL_MAINNET`, `RPC_URL_BASE`, `RPC_URL_ARBITRUM`, `RPC_URL_KATANA` – legacy fallback RPCs if the split envs are unset
+  - `RPC_BATCH_MAX_COUNT` – optional max JSON-RPC batch size per HTTP request (default 3, safe for free-tier RPCs such as drpc; raise to match a paid archive RPC's limit)
   - Price data is fetched from DefiLlama (no API key required) to convert non-USD vault values to USD
   - `TELEGRAM_BOT`, `TELEGRAM_RECIPIENT_USERID` – required by `pages/api/telegram.ts` to deliver Team Up form submissions
   - `IP_TO_BLOCK` – optional comma-separated IPs to deny from the contact form
@@ -77,7 +78,7 @@ These endpoints aggregate over the vault + depositor configuration in `PARTNER_V
 - **Multi-chain, multi-vault support**: Each partner can have vaults across Ethereum, Base, Arbitrum, and Katana, each tracking multiple depositor addresses.
 - **Dynamic referral partners**: Partners like Ceazor and Jumper have their vault/depositor config dynamically merged with Envio ReferralDeposit events at runtime, so new depositors are picked up automatically.
 - **Vault filtering**: Vaults are checked against Yearn endorsement status and vault-type detection (to exclude strategies from the dropdown). A `VAULT_WHITELIST` allows overriding the strategy filter for specific addresses.
-- **Fee calculation**: Fees are computed by replaying deposit/withdraw/transfer events from Envio and fetching historical price-per-share from archive RPCs. Performance fees use observed vault performance; management fees use each chain's configured average block time, so dashboard totals are estimates.
+- **Fee calculation**: Fees are computed by replaying deposit/withdraw/transfer events from Envio and fetching historical price-per-share from archive RPCs. Accrual floors (partner fee start dates, chart windows) resolve to exact blocks via a block-header timestamp search; management fees use each chain's configured average block time, so dashboard totals are estimates.
 - **Time windows**: The dashboard supports 1 week, 1 month, and 3 months views (All time is currently disabled).
 
 ### Current partners

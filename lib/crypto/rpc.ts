@@ -62,6 +62,23 @@ const CHAIN_CONFIG: Record<number, TChainConfig> = {
 		]
 	}
 };
+// Free-tier RPCs cap JSON-RPC batch sizes far below ethers' default of 100
+// (drpc rejects batches over 3 with HTTP 500), which made every batched read
+// fail on the primary endpoint and crawl through the failover chain. 3 is
+// safe on every configured endpoint, and batches fired in the same drain
+// window run concurrently, so a small cap still fully pipelines large
+// prefetch waves. Set RPC_BATCH_MAX_COUNT to match a paid RPC's higher limit.
+const DEFAULT_BATCH_MAX_COUNT = 3;
+
+function getProviderOptions(): {staticNetwork: true, batchMaxCount: number} {
+	const configured = Number(process.env.RPC_BATCH_MAX_COUNT);
+	return {
+		staticNetwork: true,
+		batchMaxCount: Number.isFinite(configured) && configured >= 1
+			? Math.floor(configured)
+			: DEFAULT_BATCH_MAX_COUNT
+	};
+}
 
 class FailoverProvider extends JsonRpcProvider {
 	private readonly providers: JsonRpcProvider[];
@@ -69,9 +86,9 @@ class FailoverProvider extends JsonRpcProvider {
 	constructor(chainId: number, urls: string[]) {
 		// staticNetwork: without it the base provider dials urls[0] with
 		// eth_chainId before the first operation, bypassing _perform failover.
-		super(urls[0], chainId, {staticNetwork: true});
+		super(urls[0], chainId, getProviderOptions());
 		this.providers = urls.map((url): JsonRpcProvider => (
-			new JsonRpcProvider(url, chainId, {staticNetwork: true})
+			new JsonRpcProvider(url, chainId, getProviderOptions())
 		));
 	}
 
