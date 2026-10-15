@@ -7,6 +7,9 @@ allowBuilds:
   unrs-resolver: true
 
 minimumReleaseAge: 10080
+minimumReleaseAgeExclude:
+  - next
+  - '@next/*'
 ignoreScripts: true
 blockExoticSubdeps: true
 trustPolicy: no-downgrade
