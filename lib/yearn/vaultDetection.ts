@@ -1,4 +1,5 @@
 import {Contract, JsonRpcProvider} from 'ethers';
+import {KONG_REST_URL} from './kongRest';
 import {getRpcUrlLatest} from 'lib/crypto/rpc';
 import type {TAddress} from './utils/address';
 
@@ -43,7 +44,7 @@ async function checkOnChainVaultType(
 }
 
 /**
- * Method 5: Check Kong/yDaemon API to determine vault type
+ * Method 5: Check Kong API to determine vault type
  * Returns 'vault' for MultiStrategy/Legacy, 'strategy' for SingleStrategy
  */
 async function checkKongVaultType(
@@ -51,7 +52,7 @@ async function checkKongVaultType(
 	address: TAddress
 ): Promise<TVaultType> {
 	try {
-		const url = `https://ydaemon.yearn.fi/${chainId}/vaults/${address}`;
+		const url = `${KONG_REST_URL}/snapshot/${chainId}/${address}`;
 		const response = await fetch(url);
 
 		if (!response.ok) {
@@ -59,7 +60,7 @@ async function checkKongVaultType(
 		}
 
 		const data = await response.json();
-		const kind = data?.kind;
+		const kind = data?.meta?.kind;
 
 		if (kind === 'Single Strategy') {
 			return 'strategy';
