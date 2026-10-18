@@ -12,7 +12,7 @@ import {
 	getMillisecondsPerBlock,
 	prefetchPricePerShare,
 	getPerformanceFeeBps,
-	getYDaemonFeeConfig,
+	getKongFeeConfig,
 	prepareChartSnapshots
 } from '../pages/api/partner-fees';
 
@@ -252,17 +252,17 @@ describe('partner fee accrual', (): void => {
 		).resolves.toBe(1000);
 	});
 
-	it('converts yDaemon retired-vault fee metadata to basis points', async (): Promise<void> => {
+	it('preserves Kong retired-vault fee metadata in basis points', async (): Promise<void> => {
 		const fetchMock = vi.fn().mockResolvedValue({
 			ok: true,
 			status: 200,
 			json: async (): Promise<unknown> => ({
-				apr: {fees: {management: 0, performance: 0.1}}
+				fees: {managementFee: 0, performanceFee: 1000}
 			})
 		});
 		vi.stubGlobal('fetch', fetchMock);
 		try {
-			await expect(getYDaemonFeeConfig(
+			await expect(getKongFeeConfig(
 				42161,
 				'0x6FAF8b7fFeE3306EfcFc2BA9Fec912b4d49834C1',
 			)).resolves.toEqual({
@@ -270,7 +270,7 @@ describe('partner fee accrual', (): void => {
 				performanceFeeBps: 1000
 			});
 			expect(fetchMock).toHaveBeenCalledWith(
-				'https://ydaemon.yearn.fi/42161/vaults/0x6FAF8b7fFeE3306EfcFc2BA9Fec912b4d49834C1',
+				'https://kong.yearn.fi/api/rest/snapshot/42161/0x6FAF8b7fFeE3306EfcFc2BA9Fec912b4d49834C1',
 			);
 		} finally {
 			vi.unstubAllGlobals();
