@@ -56,7 +56,7 @@ Other scripts:
 |---|---|---|
 | `/api/fees` | Edge | Proxies DefiLlama fees summary (30-day total) for the landing page |
 | `/api/tvl` | Edge | Proxies DefiLlama protocol TVL (current total) for the landing page |
-| `/api/vault-count` | Edge | Proxies yDaemon to count active V3 vaults for the landing page |
+| `/api/vault-count` | Edge | Uses the Kong list to count visible, non-retired V3 vaults for the landing page |
 | `/api/vault-asset` | Node | Returns metadata for one vault; retained for single-vault consumers |
 | `/api/vault-assets` | Node | Returns batched vault asset metadata for `chainId:address` query pairs |
 | `/api/partner-tvl` | Node | Returns current vault balances and USD-denominated TVL for given depositor addresses |
@@ -223,3 +223,16 @@ After adding your partner, rebuild the app with `pnpm build` and the new dashboa
 - The "All time" time window button is disabled in the dashboard.
 - The "Total" vault dropdown option is hidden due to bugs in multi-vault aggregation.
 - Archive RPC calls for historical price-per-share can be slow; public fallback RPCs may not support all historical block queries.
+
+### Kong REST migration
+
+Vault names, vault/strategy detection and the RPC fee fallback use the public
+`https://kong.yearn.fi/api/rest` list/snapshot endpoints. Snapshot kind is
+`meta.kind`; fee values are already basis points. Latest RPC, then archive RPC,
+remain the preferred sources for fees. Missing snapshot fees fail explicitly
+instead of becoming zero. Historical fee and price-per-share accounting stays
+on archive RPC.
+
+New environment variables: **none**. The existing optional `KONG_GRAPHQL_URL`
+continues to configure the separate GraphQL metadata client; it does not change
+the public REST URL. This migration does not add a Price Service consumer.

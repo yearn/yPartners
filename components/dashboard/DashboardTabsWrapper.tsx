@@ -13,7 +13,7 @@ import {getTokenLogoUrl} from 'lib/crypto/tokenLogos';
 import {usePartner} from '../../contexts/usePartner';
 import type {TVaultComboData} from '../../contexts/usePartner';
 import SummaryMetrics from './SummaryMetrics';
-import {useYDaemonVault, getCleanVaultName} from 'lib/yearn/useYDaemonVault';
+import {useKongVault, getCleanVaultName} from 'lib/yearn/useKongVault';
 
 import type {MouseEvent, ReactElement} from 'react';
 
@@ -114,12 +114,12 @@ function DashboardTabsContent({onWindowChange}: {onWindowChange: (value: number)
 	const selectedAssetSymbol = getComboAssetSymbol(selectedCombo) || 'Vault';
 	const selectedChainLabel = selectedCombo ? (NETWORK_LABELS[selectedCombo.chainId] || 'Chain') : '';
 
-	// Fetch vault name from yDaemon API
-	const {vault: yDaemonVaultData} = useYDaemonVault(
+	// Fetch vault name from Kong API
+	const {vault: kongVaultData} = useKongVault(
 		selectedCombo?.chainId,
 		selectedCombo?.vaultAddress
 	);
-	const vaultDisplayName = yDaemonVaultData ? getCleanVaultName(yDaemonVaultData.name) : null;
+	const vaultDisplayName = kongVaultData ? getCleanVaultName(kongVaultData.name) : null;
 
 	function handleWindowChange(e: MouseEvent<HTMLButtonElement>): void {
 		const {name, value} = e.currentTarget;

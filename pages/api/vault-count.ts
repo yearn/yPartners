@@ -1,4 +1,7 @@
-const VAULTS_ENDPOINT = 'https://ydaemon.yearn.fi/vaults/v3?hideAlways=true&strategiesDetails=withDetails&strategiesCondition=inQueue&chainIDs=1,8453,42161,747474';
+import {KONG_REST_URL} from 'lib/yearn/kongRest';
+
+const VAULTS_ENDPOINT = `${KONG_REST_URL}/list/vaults?origin=yearn`;
+const SUPPORTED_CHAINS = new Set([1, 8453, 42161, 747474]);
 
 export const config = {
 	runtime: 'edge'
@@ -18,7 +21,13 @@ export default async function handler(): Promise<Response> {
 		}
 
 		const data = await response.json();
-		const count = Array.isArray(data) ? data.filter((vault): boolean => Boolean(vault?.address)).length : 0;
+		if (!Array.isArray(data)) {
+			throw new Error('Kong returned an invalid vault list');
+		}
+		const count = data.filter((vault): boolean => Boolean(
+			vault?.address && vault.v3 === true && SUPPORTED_CHAINS.has(vault.chainId)
+			&& !vault.isHidden && !vault.isRetired
+		)).length;
 
 		return new Response(JSON.stringify({vaults_count: count}), {
 			status: 200,

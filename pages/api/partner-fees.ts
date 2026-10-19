@@ -3,6 +3,7 @@ import type { Provider } from "ethers";
 import { getTokenPriceUsdWithDebug } from "lib/crypto/defillama";
 import {getArchiveProvider, getLatestProvider, getRpcUrlArchive, getRpcUrlLatest} from 'lib/crypto/rpc';
 import { getTokenSymbol } from "lib/crypto/tokenMetadata";
+import {KONG_REST_URL} from 'lib/yearn/kongRest';
 import { getKongVaultMetadata } from "lib/yearn/kong";
 import { getPartnerFeeShare } from "lib/yearn/partnerFeeShare";
 import { toAddress } from "lib/yearn/utils/address";
@@ -125,43 +126,35 @@ const DEFAULT_DECIMALS = 18;
 const DEFAULT_PERFORMANCE_FEE_BPS = 0;
 const REQUEST_TIMEOUT_MS = 12_000;
 
-const YDAEMON_BASE_URI = "https://ydaemon.yearn.fi";
-
-type TYDaemonFeeResponse = {
-	apr?: {
-		fees?: {
-			management?: number;
-			performance?: number;
-		};
+type TKongFeeResponse = {
+	fees?: {
+		managementFee?: number;
+		performanceFee?: number;
 	};
 };
 
 function toFeeBps(value: number | undefined): number | null {
-	return typeof value === "number" && Number.isFinite(value) && value >= 0
-		? Math.round(value * 10000)
+	// Kong returns basis points already; multiplying by 10,000 overstates fees.
+	return typeof value === "number" && Number.isInteger(value) && value >= 0 && value <= 10000
+		? value
 		: null;
 }
 
-export async function getYDaemonFeeConfig(
+export async function getKongFeeConfig(
 	chainId: number,
 	vault: string,
 ): Promise<TFeeConfig> {
-	const response = await fetch(
-		`${YDAEMON_BASE_URI}/${chainId}/vaults/${vault}`,
-	);
+	const response = await fetch(`${KONG_REST_URL}/snapshot/${chainId}/${vault}`);
 	if (!response.ok) {
-		throw new Error(`yDaemon returned HTTP ${response.status}`);
+		throw new Error(`Kong returned HTTP ${response.status}`);
 	}
-	const payload = await response.json() as TYDaemonFeeResponse;
-	const managementFeeBps = toFeeBps(payload.apr?.fees?.management);
-	const performanceFeeBps = toFeeBps(payload.apr?.fees?.performance);
-	if (managementFeeBps === null && performanceFeeBps === null) {
-		throw new Error("yDaemon response does not include vault fee metadata");
+	const payload = await response.json() as TKongFeeResponse;
+	const managementFeeBps = toFeeBps(payload.fees?.managementFee);
+	const performanceFeeBps = toFeeBps(payload.fees?.performanceFee);
+	if (managementFeeBps === null || performanceFeeBps === null) {
+		throw new Error("Kong response does not include complete vault fee metadata");
 	}
-	return {
-		managementFeeBps: managementFeeBps ?? 0,
-		performanceFeeBps: performanceFeeBps ?? 0,
-	};
+	return {managementFeeBps, performanceFeeBps};
 }
 const pricePerShareCache: Map<string, bigint> = new Map();
 
@@ -1467,25 +1460,25 @@ export default async function handler(
 					"getFeeConfig.archive",
 				);
 			} catch (archiveError) {
-				// Retired vaults can keep valid yDaemon metadata after their
+				// Retired vaults can keep valid Kong metadata after their
 				// accountant no longer exposes the live fee selectors.
 				try {
 					feeConfig = await withTimeout(
-						getYDaemonFeeConfig(chainId, vaultAddress),
-						"getFeeConfig.yDaemon",
+						getKongFeeConfig(chainId, vaultAddress),
+						"getFeeConfig.kong",
 					);
-				} catch (yDaemonError) {
+				} catch (kongError) {
 					const archiveMessage =
 						archiveError instanceof Error
 							? archiveError.message
 							: String(archiveError);
-					const yDaemonMessage =
-						yDaemonError instanceof Error
-							? yDaemonError.message
-							: String(yDaemonError);
+					const kongMessage =
+						kongError instanceof Error
+							? kongError.message
+							: String(kongError);
 					throw new Error(
-						`Unable to read fee configuration from RPC or yDaemon: ${archiveMessage}; ${yDaemonMessage}`,
-						{cause: yDaemonError},
+						`Unable to read fee configuration from RPC or Kong: ${archiveMessage}; ${kongMessage}`,
+						{cause: kongError},
 					);
 				}
 			}
