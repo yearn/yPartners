@@ -13,7 +13,7 @@ module.exports = ({
 			hostname: 'rawcdn.githack.com'
 		}, {
 			protocol: 'https',
-			hostname: 'token-assets-one.vercel.app'
+			hostname: 'assets.yearn.fi'
 		}]
 	},
 	env: {

@@ -6,7 +6,7 @@ Marketing site and analytics dashboard for Yearn's partner program. The landing 
 
 - Live site: https://partners.yearn.fi
 - Tech: Next.js 16 + TypeScript, TailwindCSS, SWR, Recharts, Framer Motion, Headless UI
-- Token/chain icons: loaded from `https://token-assets-one.vercel.app` (see `lib/crypto/tokenLogos.ts` and `next.config.js`)
+- Token/chain icons: loaded from `https://assets.yearn.fi` (see `lib/crypto/tokenLogos.ts` and `next.config.js`)
 - Supported chains: Ethereum (1), Base (8453), Arbitrum (42161), Katana (747474)
 
 ## Quick start

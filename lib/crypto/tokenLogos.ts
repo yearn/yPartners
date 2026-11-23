@@ -1,4 +1,4 @@
-const TOKEN_ASSETS_BASE_URL = 'https://token-assets-one.vercel.app/api';
+const TOKEN_ASSETS_BASE_URL = 'https://assets.yearn.fi/api';
 
 function getChainLogoUrl(chainId: number): string {
 	return `${TOKEN_ASSETS_BASE_URL}/chains/${chainId}/logo-32.png?fallback=true`;
