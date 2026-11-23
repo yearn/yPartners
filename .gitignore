@@ -13,7 +13,6 @@ node_modules
 /out
 /build
 /.turbo
-/.vercel
 
 # Log files
 *.log
@@ -58,3 +57,6 @@ storybook-static
 *.sw?
 
 config.yaml
+# OpenNext
+/.open-next
+/.wrangler

@@ -1,23 +1,15 @@
+import type {NextApiRequest, NextApiResponse} from 'next';
 import {KONG_REST_URL} from 'lib/yearn/kongRest';
 
 const VAULTS_ENDPOINT = `${KONG_REST_URL}/list/vaults?origin=yearn`;
 const SUPPORTED_CHAINS = new Set([1, 8453, 42161, 747474]);
 
-export const config = {
-	runtime: 'edge'
-};
-
-export default async function handler(): Promise<Response> {
+export default async function handler(_req: NextApiRequest, res: NextApiResponse): Promise<void> {
 	try {
 		const response = await fetch(VAULTS_ENDPOINT);
 		if (!response.ok) {
-			return new Response(JSON.stringify({error: 'Failed to fetch vaults'}), {
-				status: 502,
-				headers: {
-					'Content-Type': 'application/json',
-					'Cache-Control': 'no-store'
-				}
-			});
+			res.setHeader('Cache-Control', 'no-store');
+			return res.status(502).json({error: 'Failed to fetch vaults'});
 		}
 
 		const data = await response.json();
@@ -29,22 +21,11 @@ export default async function handler(): Promise<Response> {
 			&& !vault.isHidden && !vault.isRetired
 		)).length;
 
-		return new Response(JSON.stringify({vaults_count: count}), {
-			status: 200,
-			headers: {
-				'Content-Type': 'application/json',
-				// Cache at the edge for 1 day; serve stale while revalidating.
-				'Cache-Control': 'public, s-maxage=86400, stale-while-revalidate=86400'
-			}
-		});
+		res.setHeader('Cache-Control', 'public, s-maxage=86400, stale-while-revalidate=86400');
+		return res.status(200).json({vaults_count: count});
 	} catch (error) {
 		console.error('[vault-count] Error:', error);
-		return new Response(JSON.stringify({error: 'Unexpected error'}), {
-			status: 500,
-			headers: {
-				'Content-Type': 'application/json',
-				'Cache-Control': 'no-store'
-			}
-		});
+		res.setHeader('Cache-Control', 'no-store');
+		return res.status(500).json({error: 'Unexpected error'});
 	}
 }

@@ -12,14 +12,14 @@ Marketing site and analytics dashboard for Yearn's partner program. The landing 
 ## Quick start
 
 1. Copy environment defaults: `cp .env.example .env`
-2. Install dependencies (pnpm recommended because the lockfile is present): `pnpm install`
-3. Run the dev server: `pnpm dev` then open http://localhost:3000
+2. Install dependencies with `bun install`
+3. Run the dev server: `bun dev` then open http://localhost:3000
 4. Use address 0x93A62dA5a14C80f265DAbC077fCEE437B1a0Efde for login testing
 
 Other scripts:
-- `pnpm lint` – run ESLint
-- `pnpm lintfix` – run ESLint with auto-fix
-- `pnpm start` – start the built app
+- `bun lint` – run ESLint
+- `bun lintfix` – run ESLint with auto-fix
+- `bun start` – start the built app
 
 ## Configuration
 
@@ -194,7 +194,7 @@ Each partner's static `PARTNER_VAULT_CONFIG` (if any) is merged at runtime with 
 
 The Frankencoin partner is a special case: instead of a static depositor list or referral events, its tracked "depositors" are the Frankencoin V2 **collateral positions** that hold ysyBOLD (`0x23346B04a7f55b8760E5860AA5A77383D63491cD`, Staked yBOLD) as ZCHF collateral. `/api/partner-referrals` detects the Frankencoin partner (via `SHAREABLE_ADDRESSES`) and queries the Envio indexer's `FrankencoinYsyBoldAccount` ledger (`isPosition = true`) to resolve those position addresses dynamically, returning them against the ysyBOLD vault. The standard `/api/partner-tvl` and `/api/partner-fees` endpoints then compute the balance, profit, and fees on that ysyBOLD collateral using the same Envio endpoint. No `PARTNER_VAULT_CONFIG` entry is required for Frankencoin — positions are discovered automatically as they are opened.
 
-After adding your partner, rebuild the app with `pnpm build` and the new dashboard will be available at:
+After adding your partner, rebuild the app with `bun run build` and the new dashboard will be available at:
 - `/dashboard/0xYourPartnerTreasuryAddress` (using treasury address)
 - Or via the login modal using the treasury address
 

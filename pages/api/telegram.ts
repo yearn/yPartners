@@ -5,13 +5,13 @@ import type {NextApiRequest, NextApiResponse} from 'next';
 const RATE_LIMIT_WINDOW_S = 30 * 60; // 30 minutes
 const RATE_LIMIT_MAX = 2; // max submissions per window
 
-const redis = process.env.REDIS_URL ? new Redis(process.env.REDIS_URL) : null;
-
 const isRateLimited = async (ip: string): Promise<boolean> => {
-	if (!ip || !redis) {
+	if (!ip || !process.env.REDIS_URL) {
 		return false;
 	}
 
+	// Workers can't reuse a socket across requests, so connect per request.
+	const redis = new Redis(process.env.REDIS_URL);
 	try {
 		const key = `ratelimit:telegram:${ip}`;
 		const count = await redis.incr(key);
@@ -23,6 +23,8 @@ const isRateLimited = async (ip: string): Promise<boolean> => {
 		return count > RATE_LIMIT_MAX;
 	} catch {
 		return false;
+	} finally {
+		redis.disconnect();
 	}
 };
 
